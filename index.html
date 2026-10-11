@@ -6,7 +6,7 @@
 <title>Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Michroma&family=Rajdhani:wght@500;700&family=Cinzel:wght@400;700&family=Special+Elite&family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Michroma&family=Rajdhani:wght@500;700&family=Cinzel:wght@400;700&family=Special+Elite&family=Fredoka:wght@500;700&family=VT323&family=Patrick+Hand&family=Lobster&display=swap" rel="stylesheet">
 <style>
   /* ---------- Modern skin (default) ---------- */
   :root {
@@ -1333,6 +1333,1038 @@
   }
   .bee-sub { margin-top: 4px; font-family: "Fredoka", sans-serif; font-weight: 500; font-size: 13px; color: #ffc20e; letter-spacing: 0.02em; }
 
+  /* =====================================================================
+     MORE SKINS — each category holds 12 skins at most
+     ===================================================================== */
+
+  /* Shared header row for the newer skins: hidden until its skin is on */
+  .top {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin: -4px 4px 14px;
+  }
+  /* Easter-egg overlay that sits on top of the screen */
+  .screen.egg { position: relative; }
+  .egg-fx { position: absolute; inset: 0; pointer-events: none; z-index: 3; display: grid; place-items: center; }
+
+  /* ---------- Graphing skin: school graphing calculator, slate and LCD ---------- */
+  body[data-skin="graphing"] {
+    --bg: linear-gradient(180deg, #dfe3e8 0%, #c3c9d1 100%);
+    --body: linear-gradient(180deg, #3d434c 0%, #2b3037 100%);
+    --screen: #b7c2a0;
+    --text: #1d2416;
+    --muted: #4b5639;
+    --key: #23262b;
+    --key-text: #f2f2f2;
+    --key-hover: #30343a;
+    --fn: #3a6ab0;
+    --op: #5b6472;
+    --op-text: #ffffff;
+    --op-active: #b7c2a0;
+    --op-active-text: #1d2416;
+    --key-radius: 8px 8px 12px 12px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.08);
+    --body-radius: 18px 18px 30px 30px;
+    --shadow: 0 22px 50px rgba(20, 25, 35, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+  body[data-skin="graphing"] .graphing-top { display: flex; }
+  body[data-skin="graphing"] .screen {
+    border-radius: 6px;
+    background:
+      linear-gradient(rgba(0, 0, 0, 0.045) 1px, transparent 1px) 0 0 / 4px 4px,
+      linear-gradient(90deg, rgba(0, 0, 0, 0.045) 1px, transparent 1px) 0 0 / 4px 4px,
+      #b7c2a0;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35), 0 0 0 6px #1b1e22;
+  }
+  body[data-skin="graphing"] .display, body[data-skin="graphing"] .history { font-family: "VT323", "Courier New", monospace; }
+  body[data-skin="graphing"] .display { font-weight: 400; }
+  body[data-skin="graphing"] .fn { color: #ffffff; font-size: 18px; }
+  body[data-skin="graphing"] .op[data-action="equals"] { background: #3a6ab0; }
+  .graphing-name { color: #e8ecf1; font-size: 14px; font-weight: 800; letter-spacing: 0.08em; font-style: italic; }
+  .graphing-name b { color: #6fa3e8; font-style: normal; margin-left: 4px; }
+  .graphing-wave { width: 56px; height: 20px; margin-left: auto; }
+
+  /* ---------- Solar Pocket skin: 1980s pocket calculator with a solar strip ---------- */
+  body[data-skin="solar"] {
+    --bg: linear-gradient(160deg, #c9b79c 0%, #a58f70 100%);
+    --body: linear-gradient(180deg, #2f2a26 0%, #1e1b18 100%);
+    --screen: #a8ad98;
+    --text: #1b1d16;
+    --muted: #535847;
+    --key: #121212;
+    --key-text: #f1f1f1;
+    --key-hover: #1d1d1d;
+    --fn: #5b544b;
+    --op: #b8692f;
+    --op-text: #ffffff;
+    --op-active: #f1f1f1;
+    --op-active-text: #b8692f;
+    --key-radius: 5px;
+    --key-shadow: 0 3px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    --body-radius: 10px;
+    --shadow: 0 22px 50px rgba(50, 35, 15, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  body[data-skin="solar"] .solar-top { display: flex; }
+  body[data-skin="solar"] .screen { border-radius: 3px; box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.4), 0 0 0 5px #0f0e0d, 0 0 0 6px #4a443d; }
+  body[data-skin="solar"] .display { font-family: "VT323", "Courier New", monospace; font-weight: 400; letter-spacing: 0.06em; }
+  body[data-skin="solar"] .keys button { font-size: 20px; font-weight: 600; }
+  body[data-skin="solar"] .keys button:active,
+  body[data-skin="solar"] .keys button.pressed { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.6); }
+  .solar-cells {
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    background: #0d0c0b;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1px #4a443d;
+  }
+  .solar-cells i {
+    width: 20px;
+    height: 16px;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, transparent 45%),
+      repeating-linear-gradient(90deg, #2c1f3a 0 4px, #3a2a4c 4px 5px);
+  }
+  .solar-name { margin-left: auto; color: #d8cfc0; font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-align: right; line-height: 1.4; }
+  .solar-name b { color: #e08a4f; }
+
+  /* ---------- Desk Adder skin: beige printing calculator with paper tape ---------- */
+  body[data-skin="deskadder"] {
+    --bg: linear-gradient(180deg, #8c7b66 0%, #6a5b49 100%);
+    --body: linear-gradient(180deg, #ece5d3 0%, #d9d0ba 100%);
+    --screen: #fffdf6;
+    --text: #1f1c18;
+    --muted: #b3261e;
+    --key: #f6f1e4;
+    --key-text: #2a2621;
+    --key-hover: #fffaf0;
+    --fn: #b9b099;
+    --op: #6b4f3a;
+    --op-text: #f6f1e4;
+    --op-active: #f6f1e4;
+    --op-active-text: #6b4f3a;
+    --key-radius: 6px;
+    --key-shadow: 0 4px 0 #a99f88, 0 5px 6px rgba(0, 0, 0, 0.18);
+    --body-radius: 12px 12px 18px 18px;
+    --shadow: 0 25px 55px rgba(30, 20, 10, 0.45), inset 0 -6px 0 rgba(0, 0, 0, 0.08);
+  }
+  body[data-skin="deskadder"] .deskadder-top { display: flex; }
+  /* The screen is the paper tape, with a torn bottom edge */
+  body[data-skin="deskadder"] .screen {
+    border-radius: 2px;
+    margin: 0 14px 22px;
+    padding-bottom: 22px;
+    background:
+      repeating-linear-gradient(180deg, transparent 0 23px, rgba(80, 120, 170, 0.16) 23px 24px),
+      #fffdf6;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+    -webkit-mask: linear-gradient(#000 0 0) top / 100% calc(100% - 6px) no-repeat, conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 12px 6px repeat-x;
+    mask: linear-gradient(#000 0 0) top / 100% calc(100% - 6px) no-repeat, conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 12px 6px repeat-x;
+  }
+  body[data-skin="deskadder"] .display, body[data-skin="deskadder"] .history { font-family: "Special Elite", "Courier New", monospace; }
+  body[data-skin="deskadder"] .display { font-weight: 400; }
+  body[data-skin="deskadder"] .keys button:active,
+  body[data-skin="deskadder"] .keys button.pressed { transform: translateY(3px); box-shadow: 0 1px 0 #a99f88; }
+  body[data-skin="deskadder"] .op[data-action="equals"] { background: #b3261e; }
+  .deskadder-roll {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, #6b4f3a 0 4px, #e9e2cf 5px 9px, #fffdf6 10px 12px, #e9e2cf 13px 15px, #fffdf6 16px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  .deskadder-name { color: #3d342a; font-size: 15px; font-weight: 800; letter-spacing: 0.14em; line-height: 1.2; }
+  .deskadder-name small { display: block; color: #8a7d68; font-size: 9px; letter-spacing: 0.24em; font-weight: 700; }
+  .deskadder-lamp { margin-left: auto; width: 10px; height: 10px; border-radius: 50%; background: #e8352b; box-shadow: 0 0 8px #e8352b; }
+
+  /* ---------- Terminal skin: green phosphor on a black CRT ---------- */
+  body[data-skin="terminal"] {
+    --bg: radial-gradient(ellipse at 50% 40%, #0b1a0e 0%, #020402 75%);
+    --body: #050805;
+    --screen: #020602;
+    --text: #39ff6a;
+    --muted: #1f9a42;
+    --key: #050805;
+    --key-text: #39ff6a;
+    --key-hover: #0b1a0e;
+    --fn: #050805;
+    --op: #0f3a1a;
+    --op-text: #39ff6a;
+    --op-active: #39ff6a;
+    --op-active-text: #020602;
+    --key-radius: 2px;
+    --key-shadow: inset 0 0 0 1px rgba(57, 255, 106, 0.45);
+    --body-radius: 6px;
+    --shadow: 0 0 0 1px rgba(57, 255, 106, 0.4), 0 0 40px rgba(57, 255, 106, 0.18), 0 25px 60px rgba(0, 0, 0, 0.8);
+    font-family: "VT323", "Courier New", monospace;
+  }
+  body[data-skin="terminal"] .terminal-top { display: flex; }
+  body[data-skin="terminal"] .screen {
+    position: relative;
+    border-radius: 14px / 22px;
+    box-shadow: inset 0 0 0 1px rgba(57, 255, 106, 0.35), inset 0 0 30px rgba(57, 255, 106, 0.12);
+  }
+  body[data-skin="terminal"] .screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0 1px, transparent 1px 3px);
+  }
+  body[data-skin="terminal"] .display, body[data-skin="terminal"] .history { text-shadow: 0 0 6px rgba(57, 255, 106, 0.8); }
+  body[data-skin="terminal"] .display { font-weight: 400; }
+  body[data-skin="terminal"] .display::before { content: "> "; color: var(--muted); }
+  body[data-skin="terminal"] .keys button { font-family: "VT323", "Courier New", monospace; font-size: 28px; text-shadow: 0 0 5px rgba(57, 255, 106, 0.8); }
+  body[data-skin="terminal"] .keys button:hover { box-shadow: inset 0 0 0 1px #39ff6a, 0 0 10px rgba(57, 255, 106, 0.4); }
+  .terminal-prompt { font-size: 20px; color: #39ff6a; text-shadow: 0 0 6px rgba(57, 255, 106, 0.8); }
+  .terminal-prompt b { font-weight: 400; color: #8affa8; }
+  .terminal-cursor { display: inline-block; width: 10px; height: 18px; margin-left: 4px; vertical-align: -3px; background: #39ff6a; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .terminal-egg {
+    font-family: "VT323", "Courier New", monospace;
+    font-size: 30px;
+    color: #39ff6a;
+    background: #020602;
+    padding: 4px 10px;
+    text-shadow: 0 0 10px #39ff6a;
+    box-shadow: inset 0 0 0 2px #39ff6a;
+    animation: access 2.4s steps(1) forwards;
+  }
+  @keyframes access {
+    0% { opacity: 1; } 10% { opacity: 0; } 20% { opacity: 1; } 30% { opacity: 0; } 40%, 100% { opacity: 1; }
+  }
+
+  /* ---------- Blueprint skin: white lines on drafting blue ---------- */
+  body[data-skin="blueprint"] {
+    --bg:
+      linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px) 0 0 / 20px 20px,
+      linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px) 0 0 / 20px 20px,
+      linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px) 0 0 / 100px 100px,
+      linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px) 0 0 / 100px 100px,
+      #1b4d8c;
+    --body: #1f5aa3;
+    --screen: #174a87;
+    --text: #ffffff;
+    --muted: #b9d4f5;
+    --key: transparent;
+    --key-text: #ffffff;
+    --key-hover: rgba(255, 255, 255, 0.1);
+    --fn: transparent;
+    --op: rgba(255, 255, 255, 0.16);
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #1f5aa3;
+    --key-radius: 0;
+    --key-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.85);
+    --body-radius: 0;
+    --shadow: 0 0 0 2px #ffffff, 0 0 0 6px #1f5aa3, 0 0 0 7px rgba(255, 255, 255, 0.6), 0 25px 50px rgba(0, 20, 50, 0.5);
+    font-family: "Courier New", monospace;
+  }
+  body[data-skin="blueprint"] .blueprint-top { display: flex; }
+  body[data-skin="blueprint"] .screen { border-radius: 0; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.85); background: transparent; }
+  body[data-skin="blueprint"] .display { font-weight: 400; }
+  body[data-skin="blueprint"] .keys button { font-family: "Courier New", monospace; font-weight: 700; }
+  body[data-skin="blueprint"] .fn { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.85); background-image: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.12) 0 2px, transparent 2px 7px); }
+  body[data-skin="blueprint"] .keys button:hover { background-color: rgba(255, 255, 255, 0.1); }
+  .blueprint-compass { width: 30px; height: 34px; flex-shrink: 0; }
+  .blueprint-title {
+    margin-left: auto;
+    display: grid;
+    grid-template-columns: auto auto;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: #ffffff;
+    border: 1.5px solid #ffffff;
+  }
+  .blueprint-title span { padding: 3px 6px; border: 0.75px solid rgba(255, 255, 255, 0.85); }
+  .blueprint-title span:first-child { grid-column: 1 / -1; font-size: 12px; font-weight: 700; letter-spacing: 0.2em; }
+
+  /* ---------- Sketchbook skin: pencil doodle on lined paper ---------- */
+  body[data-skin="sketchbook"] {
+    --bg:
+      linear-gradient(90deg, transparent 0 46px, rgba(230, 80, 80, 0.55) 46px 48px, transparent 48px),
+      repeating-linear-gradient(180deg, #fdfcf7 0 27px, #a9c6e8 27px 28px);
+    --body: #fffefa;
+    --screen: #fffefa;
+    --text: #2b2b2b;
+    --muted: #6d6d6d;
+    --key: #fffefa;
+    --key-text: #2b2b2b;
+    --key-hover: #f3f1e8;
+    --fn: #ecebe4;
+    --op: #ffe66d;
+    --op-text: #2b2b2b;
+    --op-active: #2b2b2b;
+    --op-active-text: #ffe66d;
+    --key-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    --key-shadow: inset 0 0 0 2px #2b2b2b, 2px 3px 0 #2b2b2b;
+    --body-radius: 15px 255px 15px 225px / 225px 15px 255px 15px;
+    --shadow: inset 0 0 0 2.5px #2b2b2b, 5px 6px 0 #2b2b2b;
+    font-family: "Patrick Hand", "Comic Sans MS", cursive;
+  }
+  body[data-skin="sketchbook"] .sketchbook-top { display: flex; }
+  body[data-skin="sketchbook"] .calc { transform: rotate(-0.6deg); }
+  body[data-skin="sketchbook"] .screen { border-radius: 225px 15px 255px 15px / 15px 255px 15px 225px; box-shadow: inset 0 0 0 2px #2b2b2b; }
+  body[data-skin="sketchbook"] .display { font-weight: 400; }
+  body[data-skin="sketchbook"] .keys button { font-family: "Patrick Hand", "Comic Sans MS", cursive; font-size: 28px; }
+  body[data-skin="sketchbook"] .fn { background-image: repeating-linear-gradient(-45deg, rgba(43, 43, 43, 0.14) 0 1px, transparent 1px 6px); }
+  body[data-skin="sketchbook"] .keys button:active,
+  body[data-skin="sketchbook"] .keys button.pressed { transform: translate(2px, 3px); box-shadow: inset 0 0 0 2px #2b2b2b; }
+  .sketchbook-name { font-family: "Patrick Hand", cursive; font-size: 26px; color: #2b2b2b; transform: rotate(-3deg); }
+  .sketchbook-name span { background: linear-gradient(transparent 55%, rgba(255, 230, 109, 0.9) 55% 90%, transparent 90%); padding: 0 4px; }
+  .sketchbook-pencil { width: 70px; height: 14px; margin-left: auto; transform: rotate(-8deg); }
+
+  /* ---------- Frosted Glass skin: see-through glass over colour blobs ---------- */
+  body[data-skin="glass"] {
+    --bg:
+      radial-gradient(circle at 20% 25%, #ff7eb3 0 18%, transparent 38%),
+      radial-gradient(circle at 80% 30%, #7afcff 0 14%, transparent 34%),
+      radial-gradient(circle at 60% 85%, #feff9c 0 12%, transparent 32%),
+      radial-gradient(circle at 15% 85%, #9d7bff 0 16%, transparent 36%),
+      linear-gradient(135deg, #5b4bdb 0%, #c84fc4 100%);
+    --body: rgba(255, 255, 255, 0.16);
+    --screen: rgba(255, 255, 255, 0.12);
+    --text: #ffffff;
+    --muted: rgba(255, 255, 255, 0.72);
+    --key: rgba(255, 255, 255, 0.16);
+    --key-text: #ffffff;
+    --key-hover: rgba(255, 255, 255, 0.26);
+    --fn: rgba(255, 255, 255, 0.28);
+    --op: rgba(255, 255, 255, 0.85);
+    --op-text: #7a3fcf;
+    --op-active: rgba(255, 255, 255, 0.2);
+    --op-active-text: #ffffff;
+    --key-radius: 999px;
+    --key-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+    --body-radius: 32px;
+    --shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 25px 60px rgba(40, 10, 80, 0.35);
+  }
+  body[data-skin="glass"] .glass-top { display: flex; }
+  body[data-skin="glass"] .calc { -webkit-backdrop-filter: blur(22px) saturate(1.4); backdrop-filter: blur(22px) saturate(1.4); }
+  body[data-skin="glass"] .screen { border-radius: 24px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4); }
+  body[data-skin="glass"] .zero { border-radius: 999px; }
+  .glass-shine { width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffffff 0 12%, rgba(255, 255, 255, 0.35) 30%, rgba(255, 255, 255, 0.08) 70%); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6); }
+  .glass-name { color: #ffffff; font-size: 16px; font-weight: 300; letter-spacing: 0.3em; text-shadow: 0 1px 8px rgba(80, 20, 120, 0.4); }
+
+  /* ---------- Chalkboard skin: chalk on green slate in a wooden frame ---------- */
+  body[data-skin="chalkboard"] {
+    --bg: linear-gradient(180deg, #d9c7a7 0%, #bfa47c 100%);
+    --body:
+      radial-gradient(ellipse 60% 30% at 30% 20%, rgba(255, 255, 255, 0.06), transparent 70%),
+      radial-gradient(ellipse 50% 25% at 75% 70%, rgba(255, 255, 255, 0.05), transparent 70%),
+      #2f4a3a;
+    --screen: transparent;
+    --text: #f4f1e8;
+    --muted: #b8c9b8;
+    --key: transparent;
+    --key-text: #f4f1e8;
+    --key-hover: rgba(255, 255, 255, 0.07);
+    --fn: rgba(255, 255, 255, 0.05);
+    --op: transparent;
+    --op-text: #ffe680;
+    --op-active: rgba(255, 230, 128, 0.18);
+    --op-active-text: #ffe680;
+    --key-radius: 40% 60% 50% 50% / 50% 45% 55% 50%;
+    --key-shadow: inset 0 0 0 2px rgba(244, 241, 232, 0.55);
+    --body-radius: 4px;
+    --shadow: 0 0 0 12px #8a5a32, 0 0 0 13px #5e3b1f, inset 0 0 30px rgba(0, 0, 0, 0.4), 0 30px 60px rgba(60, 35, 10, 0.5);
+    font-family: "Patrick Hand", "Comic Sans MS", cursive;
+  }
+  body[data-skin="chalkboard"] .chalkboard-top { display: flex; }
+  body[data-skin="chalkboard"] .wrap { gap: 28px; }
+  body[data-skin="chalkboard"] .screen { border-bottom: 2px dashed rgba(244, 241, 232, 0.4); border-radius: 0; }
+  body[data-skin="chalkboard"] .display, body[data-skin="chalkboard"] .keys button { text-shadow: 0 0 2px rgba(255, 255, 255, 0.6); filter: url(#chalk); }
+  body[data-skin="chalkboard"] .display { font-weight: 400; }
+  body[data-skin="chalkboard"] .keys button { font-family: "Patrick Hand", "Comic Sans MS", cursive; font-size: 30px; }
+  body[data-skin="chalkboard"] .op { box-shadow: inset 0 0 0 2px rgba(255, 230, 128, 0.6); }
+  .chalkboard-name { font-family: "Patrick Hand", cursive; font-size: 24px; color: #f4f1e8; filter: url(#chalk); }
+  .chalkboard-name u { text-decoration-color: rgba(244, 241, 232, 0.6); text-underline-offset: 5px; }
+  .chalkboard-tray { margin-left: auto; display: flex; gap: 6px; align-items: flex-end; }
+  .chalkboard-tray i { display: block; width: 26px; height: 7px; border-radius: 3px; background: #f4f1e8; }
+  .chalkboard-tray i:nth-child(2) { width: 18px; background: #ffd0d6; }
+  .chalkboard-tray b { display: block; width: 30px; height: 12px; border-radius: 2px; background: linear-gradient(180deg, #7a7a7a 0 40%, #3a2b1d 40%); }
+
+  /* ---------- Synthwave skin: neon sunset over a grid ---------- */
+  body[data-skin="synthwave"] {
+    --bg:
+      linear-gradient(180deg, transparent 0 60%, rgba(255, 60, 172, 0.5) 60% 60.4%, transparent 60.4%),
+      repeating-linear-gradient(90deg, transparent 0 46px, rgba(255, 60, 172, 0.35) 46px 48px) 0 0 / 100% 100%,
+      linear-gradient(180deg, #120428 0%, #3b0a5c 35%, #b8326f 58%, #120428 60%, #0a0218 100%);
+    --body: linear-gradient(180deg, #1d0838 0%, #120424 100%);
+    --screen: #0a0218;
+    --text: #ff9de2;
+    --muted: #2de2e6;
+    --key: #24104a;
+    --key-text: #e8dcff;
+    --key-hover: #301660;
+    --fn: #3a1866;
+    --op: linear-gradient(180deg, #ffb347 0%, #ff3cac 100%);
+    --op-text: #1a0530;
+    --op-active: #0a0218;
+    --op-active-text: #ff9de2;
+    --key-radius: 10px;
+    --key-shadow: inset 0 0 0 1px rgba(45, 226, 230, 0.35);
+    --body-radius: 16px;
+    --shadow: 0 0 0 1px #ff3cac, 0 0 34px rgba(255, 60, 172, 0.45), 0 25px 60px rgba(0, 0, 0, 0.6);
+  }
+  body[data-skin="synthwave"] .synthwave-top { display: flex; }
+  body[data-skin="synthwave"] .screen { border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(45, 226, 230, 0.5), inset 0 -20px 30px rgba(255, 60, 172, 0.12); }
+  body[data-skin="synthwave"] .display { font-family: "Michroma", sans-serif; font-size: 38px; text-shadow: 0 0 10px rgba(255, 60, 172, 0.8); }
+  body[data-skin="synthwave"] .keys button { font-family: "Michroma", sans-serif; font-size: 18px; }
+  body[data-skin="synthwave"] .keys button:hover { box-shadow: inset 0 0 0 1px #2de2e6, 0 0 10px rgba(45, 226, 230, 0.5); }
+  body[data-skin="synthwave"] .op { box-shadow: 0 0 14px rgba(255, 60, 172, 0.5); }
+  body[data-skin="synthwave"] .op.active { box-shadow: inset 0 0 0 2px #ff3cac; }
+  .synthwave-sun { width: 40px; height: 26px; flex-shrink: 0; }
+  .synthwave-name {
+    font-family: "Michroma", sans-serif;
+    font-size: 17px;
+    font-style: italic;
+    letter-spacing: 0.12em;
+    background: linear-gradient(180deg, #ffffff 0%, #9fe8ff 45%, #3a1866 50%, #ff9de2 55%, #ffffff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 6px rgba(255, 60, 172, 0.7));
+  }
+
+  /* ---------- Super 16 skin: 16-bit console grey with four coloured face buttons ---------- */
+  body[data-skin="super16"] {
+    --bg: linear-gradient(180deg, #e9e8ee 0%, #cfcdd8 100%);
+    --body: linear-gradient(180deg, #dcdbe0 0%, #c4c3cb 100%);
+    --screen: #22212a;
+    --text: #f2f1f7;
+    --muted: #9a97b5;
+    --key: #ecebf0;
+    --key-text: #3a3850;
+    --key-hover: #f6f5fa;
+    --fn: #5b596b;
+    --op: #6a5aa8;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #3a3850;
+    --key-radius: 12px;
+    --key-shadow: 0 3px 0 #a6a4b4, inset 0 1px 0 #ffffff;
+    --body-radius: 22px;
+    --shadow: 0 22px 50px rgba(60, 55, 90, 0.3), inset 0 -5px 0 rgba(0, 0, 0, 0.08);
+  }
+  body[data-skin="super16"] .super16-top { display: flex; }
+  body[data-skin="super16"] .screen { border-radius: 10px; box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.7), 0 0 0 4px #a6a4b4; }
+  body[data-skin="super16"] .fn { color: #ffffff; font-size: 16px; font-weight: 700; border-radius: 999px; box-shadow: 0 3px 0 #3a3850; }
+  body[data-skin="super16"] .op { border-radius: 50%; width: 60px; height: 60px; justify-self: center; font-weight: 800; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3); }
+  body[data-skin="super16"] [data-op="/"] { background: #2e9d4f; }
+  body[data-skin="super16"] [data-op="*"] { background: #2d5fc7; }
+  body[data-skin="super16"] [data-op="-"] { background: #f2c21b; color: #3a2a00; }
+  body[data-skin="super16"] [data-op="+"] { background: #d8262e; }
+  body[data-skin="super16"] [data-action="equals"] { background: #6a5aa8; }
+  body[data-skin="super16"] .op.active { box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #3a3850; }
+  body[data-skin="super16"] .keys button:active,
+  body[data-skin="super16"] .keys button.pressed { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); }
+  .super16-dots { display: grid; grid-template-columns: repeat(3, 9px); grid-template-rows: repeat(3, 9px); flex-shrink: 0; }
+  .super16-dots i { border-radius: 50%; }
+  .super16-dots i:nth-child(1) { grid-area: 1 / 2; background: #2d5fc7; }
+  .super16-dots i:nth-child(2) { grid-area: 2 / 1; background: #2e9d4f; }
+  .super16-dots i:nth-child(3) { grid-area: 2 / 3; background: #d8262e; }
+  .super16-dots i:nth-child(4) { grid-area: 3 / 2; background: #f2c21b; }
+  .super16-name { color: #3a3850; font-size: 17px; font-weight: 900; font-style: italic; letter-spacing: 0.06em; }
+  .super16-name b { color: #6a5aa8; font-size: 11px; margin-left: 6px; letter-spacing: 0.2em; }
+  .super16-ridges { margin-left: auto; width: 40px; height: 14px; background: repeating-linear-gradient(90deg, #a6a4b4 0 3px, transparent 3px 6px); border-radius: 2px; }
+  .super16-egg {
+    font-family: "Press Start 2P", monospace;
+    font-size: 15px;
+    line-height: 1.8;
+    text-align: center;
+    color: #f2c21b;
+    background: #22212a;
+    padding: 6px 10px;
+    animation: oneup 2.6s ease forwards;
+  }
+  .super16-egg b { display: block; color: #ffffff; font-size: 10px; font-weight: 400; }
+  @keyframes oneup { 0% { transform: translateY(20px); opacity: 0; } 15%, 85% { transform: none; opacity: 1; } 100% { transform: translateY(-14px); opacity: 0; } }
+
+  /* ---------- Turbo 16 skin: glossy black 16-bit console with red trim ---------- */
+  body[data-skin="turbo16"] {
+    --bg: linear-gradient(180deg, #1a1a1d 0%, #050506 100%);
+    --body: linear-gradient(180deg, #232326 0%, #0d0d0f 100%);
+    --screen: #050506;
+    --text: #f2f2f2;
+    --muted: #e3202a;
+    --key: #1c1c1f;
+    --key-text: #d9d9d9;
+    --key-hover: #27272b;
+    --fn: #2e2e33;
+    --op: #121214;
+    --op-text: #f2f2f2;
+    --op-active: #e3202a;
+    --op-active-text: #ffffff;
+    --key-radius: 8px;
+    --key-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 3px 0 #000000;
+    --body-radius: 14px;
+    --shadow: 0 0 0 1px #3a3a3f, inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 25px 60px rgba(0, 0, 0, 0.8);
+  }
+  body[data-skin="turbo16"] .turbo16-top { display: flex; }
+  body[data-skin="turbo16"] .screen { border-radius: 8px; box-shadow: inset 0 0 0 1px #3a3a3f, inset 0 -3px 0 #e3202a; }
+  body[data-skin="turbo16"] .display { font-weight: 600; font-style: italic; }
+  body[data-skin="turbo16"] .op { border-radius: 50%; width: 60px; height: 60px; justify-self: center; font-weight: 700; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.15), 0 0 0 2px #3a3a3f, 0 3px 0 #000000; }
+  body[data-skin="turbo16"] .op.active { box-shadow: 0 0 0 2px #ff5a60, 0 0 14px rgba(227, 32, 42, 0.6); }
+  body[data-skin="turbo16"] [data-action="equals"] { background: #e3202a; }
+  .turbo16-name {
+    font-family: "Michroma", sans-serif;
+    font-size: 20px;
+    font-style: italic;
+    letter-spacing: 0.08em;
+    background: linear-gradient(180deg, #ffffff 0%, #bfc5cc 48%, #6b737c 52%, #e9edf1 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .turbo16-bits { margin-left: auto; display: flex; align-items: center; gap: 6px; color: #ffffff; font-size: 13px; font-weight: 900; font-style: italic; letter-spacing: 0.1em; }
+  .turbo16-bits::before { content: ""; width: 34px; height: 12px; background: repeating-linear-gradient(180deg, #e3202a 0 2px, transparent 2px 4px); }
+
+  /* ---------- Pocket Brick skin: grey handheld with a pea-green dot-matrix screen ---------- */
+  body[data-skin="pocketbrick"] {
+    --bg: linear-gradient(180deg, #9aa0a8 0%, #6f757e 100%);
+    --body: linear-gradient(180deg, #cdc9bd 0%, #bdb9ad 100%);
+    --screen: #8bac0f;
+    --text: #0f380f;
+    --muted: #306230;
+    --key: #3a3a44;
+    --key-text: #e9e6dc;
+    --key-hover: #454550;
+    --fn: #8f8b82;
+    --op: #9a2257;
+    --op-text: #ffffff;
+    --op-active: #8bac0f;
+    --op-active-text: #0f380f;
+    --key-radius: 6px;
+    --key-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+    --body-radius: 12px 12px 64px 12px;
+    --shadow: 0 22px 50px rgba(30, 30, 40, 0.4), inset 0 -4px 0 rgba(0, 0, 0, 0.08);
+  }
+  body[data-skin="pocketbrick"] .pocketbrick-top { display: flex; }
+  body[data-skin="pocketbrick"] .calc { padding-bottom: 30px; }
+  body[data-skin="pocketbrick"] .screen {
+    border-radius: 4px;
+    box-shadow: 0 0 0 16px #5d5d6b, 0 0 0 17px #4a4a56;
+    margin: 16px 16px 34px;
+    background:
+      linear-gradient(rgba(15, 56, 15, 0.06) 1px, transparent 1px) 0 0 / 3px 3px,
+      linear-gradient(90deg, rgba(15, 56, 15, 0.06) 1px, transparent 1px) 0 0 / 3px 3px,
+      #8bac0f;
+  }
+  body[data-skin="pocketbrick"] .display, body[data-skin="pocketbrick"] .history { font-family: "Press Start 2P", monospace; }
+  body[data-skin="pocketbrick"] .history { font-size: 9px; margin-bottom: 8px; }
+  body[data-skin="pocketbrick"] .display { line-height: 1.3; }
+  body[data-skin="pocketbrick"] .keys button { font-family: "Press Start 2P", monospace; font-size: 15px; }
+  body[data-skin="pocketbrick"] .op { border-radius: 50%; width: 56px; height: 56px; justify-self: center; }
+  body[data-skin="pocketbrick"] .fn { color: #2b2b30; border-radius: 999px; height: 30px; align-self: center; transform: rotate(-22deg); font-size: 11px; }
+  body[data-skin="pocketbrick"] .fn:active, body[data-skin="pocketbrick"] .fn.pressed { transform: rotate(-22deg) translateY(2px); }
+  body[data-skin="pocketbrick"] .op.active { box-shadow: inset 0 0 0 3px #0f380f; }
+  body[data-skin="pocketbrick"] .keys button:active,
+  body[data-skin="pocketbrick"] .keys button.pressed { box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35); }
+  .pocketbrick-led { width: 8px; height: 8px; border-radius: 50%; background: #e3242b; box-shadow: 0 0 6px #ff3b3b; }
+  .pocketbrick-name { color: #2b2f7a; font-size: 18px; font-weight: 900; font-style: italic; letter-spacing: 0.02em; }
+  .pocketbrick-sub { margin-left: auto; color: #6b6876; font-size: 8px; font-weight: 700; letter-spacing: 0.18em; text-align: right; line-height: 1.5; }
+  .pocketbrick-sub b { color: #9a2257; }
+
+  /* ---------- Atomic Purple skin: see-through purple handheld ---------- */
+  body[data-skin="atomicpurple"] {
+    --bg: linear-gradient(180deg, #e9e0f7 0%, #c9b6ea 100%);
+    --body:
+      linear-gradient(90deg, transparent 0 20%, rgba(210, 180, 90, 0.22) 20% 21%, transparent 21% 70%, rgba(210, 180, 90, 0.18) 70% 71%, transparent 71%),
+      linear-gradient(180deg, transparent 0 55%, rgba(210, 180, 90, 0.2) 55% 55.6%, transparent 55.6%),
+      linear-gradient(160deg, rgba(120, 70, 190, 0.78) 0%, rgba(80, 40, 150, 0.88) 100%);
+    --screen: #1c1530;
+    --text: #e6dcff;
+    --muted: #a58fe0;
+    --key: rgba(120, 80, 200, 0.55);
+    --key-text: #ffffff;
+    --key-hover: rgba(140, 100, 220, 0.65);
+    --fn: rgba(60, 30, 110, 0.7);
+    --op: rgba(60, 25, 110, 0.85);
+    --op-text: #ffffff;
+    --op-active: #e6dcff;
+    --op-active-text: #3c1b6e;
+    --key-radius: 10px;
+    --key-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.15), 0 3px 0 rgba(40, 15, 80, 0.5);
+    --body-radius: 16px 16px 50px 16px;
+    --shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.25), 0 22px 50px rgba(70, 30, 130, 0.4);
+  }
+  body[data-skin="atomicpurple"] .atomicpurple-top { display: flex; }
+  body[data-skin="atomicpurple"] .screen { border-radius: 8px; box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6), 0 0 0 10px rgba(30, 20, 50, 0.85); margin: 10px 10px 28px; }
+  body[data-skin="atomicpurple"] .op { border-radius: 50%; width: 58px; height: 58px; justify-self: center; }
+  body[data-skin="atomicpurple"] .op.active { box-shadow: inset 0 0 0 3px #a58fe0; }
+  .atomicpurple-chip { width: 26px; height: 20px; flex-shrink: 0; border-radius: 2px; background: #1a1a1a; box-shadow: -4px 3px 0 -2px #c8a640, -4px 9px 0 -2px #c8a640, -4px 15px 0 -2px #c8a640, 4px 3px 0 -2px #c8a640, 4px 9px 0 -2px #c8a640, 4px 15px 0 -2px #c8a640; }
+  .atomicpurple-name { color: #ffffff; font-size: 16px; font-weight: 900; letter-spacing: 0.24em; text-shadow: 0 1px 0 rgba(40, 15, 80, 0.6); }
+  .atomicpurple-colors { margin-left: auto; display: flex; gap: 0; font-size: 12px; font-weight: 900; letter-spacing: 0.04em; }
+  .atomicpurple-colors span:nth-child(1) { color: #ff5a6e; }
+  .atomicpurple-colors span:nth-child(2) { color: #ffd84a; }
+  .atomicpurple-colors span:nth-child(3) { color: #6ee36e; }
+  .atomicpurple-colors span:nth-child(4) { color: #5ab8ff; }
+  .atomicpurple-colors span:nth-child(5) { color: #ff9ae0; }
+
+  /* ---------- Purple Cube skin: indigo cube console with a big green button ---------- */
+  body[data-skin="purplecube"] {
+    --bg: radial-gradient(circle at 50% 30%, #6a5fb8 0%, #2c2560 100%);
+    --body: linear-gradient(180deg, #554a9e 0%, #3e3480 100%);
+    --screen: #16122e;
+    --text: #ecebff;
+    --muted: #a59de0;
+    --key: #2e2766;
+    --key-text: #ecebff;
+    --key-hover: #383078;
+    --fn: #8d8d96;
+    --op: #b8b8c2;
+    --op-text: #2e2766;
+    --op-active: #ecebff;
+    --op-active-text: #2e2766;
+    --key-radius: 14px;
+    --key-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 3px 0 #1d1845;
+    --body-radius: 26px;
+    --shadow: 0 0 0 4px #2e2766, 0 25px 55px rgba(10, 5, 40, 0.55), inset 0 2px 0 rgba(255, 255, 255, 0.15);
+  }
+  body[data-skin="purplecube"] .purplecube-top { display: flex; }
+  body[data-skin="purplecube"] .screen { border-radius: 14px; box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6); }
+  body[data-skin="purplecube"] .fn { color: #2e2766; font-weight: 700; }
+  body[data-skin="purplecube"] .op { border-radius: 50% / 60%; font-weight: 800; }
+  body[data-skin="purplecube"] [data-op="-"] { background: #d8263a; color: #ffffff; border-radius: 50%; }
+  body[data-skin="purplecube"] [data-op="+"] { background: #f4c81e; color: #3a2a00; border-radius: 50%; }
+  body[data-skin="purplecube"] [data-action="equals"] { background: #1fa64a; color: #ffffff; border-radius: 50%; width: 70px; height: 70px; justify-self: center; align-self: center; font-size: 30px; }
+  body[data-skin="purplecube"] .op.active { box-shadow: 0 0 0 3px #ecebff; }
+  .purplecube-logo { width: 32px; height: 32px; flex-shrink: 0; }
+  .purplecube-name { color: #ecebff; font-size: 18px; font-weight: 300; letter-spacing: 0.3em; }
+  .purplecube-name b { font-weight: 800; }
+  .purplecube-handle { margin-left: auto; width: 42px; height: 12px; border-radius: 6px 6px 2px 2px; border: 3px solid #2e2766; border-bottom: none; }
+
+  /* ---------- Swirl Console skin: white console with an orange swirl ---------- */
+  body[data-skin="swirlconsole"] {
+    --bg: linear-gradient(180deg, #f3f3f1 0%, #d9d9d6 100%);
+    --body: linear-gradient(180deg, #fbfbf9 0%, #e9e9e6 100%);
+    --screen: #1d1f22;
+    --text: #f5f5f5;
+    --muted: #f26722;
+    --key: #f3f3f1;
+    --key-text: #4a4a4a;
+    --key-hover: #ffffff;
+    --fn: #c9c9c5;
+    --op: #f26722;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #f26722;
+    --key-radius: 999px;
+    --key-shadow: 0 2px 0 #c9c9c5, inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+    --body-radius: 18px;
+    --shadow: 0 22px 50px rgba(60, 60, 60, 0.22), inset 0 -4px 0 rgba(0, 0, 0, 0.05);
+  }
+  body[data-skin="swirlconsole"] .swirlconsole-top { display: flex; }
+  body[data-skin="swirlconsole"] .screen { border-radius: 12px; box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6), 0 0 0 4px #e9e9e6, 0 0 0 5px #c9c9c5; }
+  body[data-skin="swirlconsole"] .display { font-weight: 300; }
+  body[data-skin="swirlconsole"] .op { border-radius: 50%; width: 58px; height: 58px; justify-self: center; font-weight: 700; }
+  body[data-skin="swirlconsole"] [data-op="/"] { background: #ffc423; color: #4a3800; }
+  body[data-skin="swirlconsole"] [data-op="*"] { background: #2fb34a; }
+  body[data-skin="swirlconsole"] [data-op="-"] { background: #2a6fd6; }
+  body[data-skin="swirlconsole"] [data-op="+"] { background: #e3242b; }
+  body[data-skin="swirlconsole"] [data-action="equals"] { background: #f26722; }
+  body[data-skin="swirlconsole"] .op.active { box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #4a4a4a; }
+  .swirlconsole-swirl { width: 30px; height: 30px; flex-shrink: 0; }
+  .swirlconsole-name { color: #4a4a4a; font-size: 18px; font-weight: 300; letter-spacing: 0.08em; }
+  .swirlconsole-lamp { margin-left: auto; width: 26px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #f26722 50%, #2fb34a 50%); opacity: 0.85; }
+
+  /* ---------- Motion White skin: glossy white console with a blue glow ---------- */
+  body[data-skin="motionwhite"] {
+    --bg: radial-gradient(circle at 50% 35%, #ffffff 0%, #e4e7ea 70%);
+    --body: linear-gradient(180deg, #ffffff 0%, #f0f2f4 100%);
+    --screen: #f7f9fa;
+    --text: #6b7075;
+    --muted: #34beed;
+    --key: #ffffff;
+    --key-text: #7a7f85;
+    --key-hover: #f5fbfe;
+    --fn: #eef1f3;
+    --op: #ffffff;
+    --op-text: #34beed;
+    --op-active: #34beed;
+    --op-active-text: #ffffff;
+    --key-radius: 16px;
+    --key-shadow: 0 0 0 1px #dfe3e7, 0 3px 6px rgba(0, 0, 0, 0.06);
+    --body-radius: 26px;
+    --shadow: 0 0 0 1px #e1e5e9, 0 25px 55px rgba(80, 100, 120, 0.18);
+    font-family: "Fredoka", "Arial Rounded MT Bold", sans-serif;
+  }
+  body[data-skin="motionwhite"] .motionwhite-top { display: flex; }
+  body[data-skin="motionwhite"] .screen { border-radius: 18px; box-shadow: inset 0 0 0 1px #dfe3e7, inset 0 -3px 0 rgba(52, 190, 237, 0.4); }
+  body[data-skin="motionwhite"] .display { font-weight: 500; }
+  body[data-skin="motionwhite"] .keys button { font-family: "Fredoka", "Arial Rounded MT Bold", sans-serif; font-weight: 500; }
+  body[data-skin="motionwhite"] .keys button:hover { box-shadow: 0 0 0 2px #34beed, 0 0 14px rgba(52, 190, 237, 0.45); }
+  body[data-skin="motionwhite"] .op { box-shadow: 0 0 0 2px #34beed; }
+  .motionwhite-slot { width: 46px; height: 6px; flex-shrink: 0; border-radius: 3px; background: #34beed; box-shadow: 0 0 10px #34beed; animation: slot-glow 2.6s ease-in-out infinite; }
+  @keyframes slot-glow { 50% { opacity: 0.35; box-shadow: 0 0 3px #34beed; } }
+  .motionwhite-name { color: #8a9096; font-size: 22px; font-weight: 500; letter-spacing: 0.02em; }
+  .motionwhite-remote { margin-left: auto; width: 12px; height: 34px; border-radius: 6px; background: #ffffff; box-shadow: 0 0 0 1px #dfe3e7, 0 2px 4px rgba(0, 0, 0, 0.08); position: relative; }
+  .motionwhite-remote::before { content: ""; position: absolute; left: 3px; top: 5px; width: 6px; height: 6px; border-radius: 1px; background: #d6dadd; }
+
+  /* ---------- Wood Panel skin: woodgrain and black ribs, chrome switches ---------- */
+  body[data-skin="woodpanel"] {
+    --bg: linear-gradient(180deg, #2a2420 0%, #14110f 100%);
+    --body:
+      repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0 3px, rgba(255, 255, 255, 0.04) 3px 6px) 0 120px / 100% 100% no-repeat,
+      linear-gradient(180deg, transparent 0 112px, #141414 112px),
+      repeating-linear-gradient(92deg, rgba(60, 30, 10, 0.35) 0 3px, transparent 3px 9px, rgba(40, 20, 5, 0.25) 9px 11px, transparent 11px 22px),
+      linear-gradient(180deg, #8a5a2e 0%, #6e4422 100%);
+    --screen: #0a0a0a;
+    --text: #ff8a2a;
+    --muted: #c9682a;
+    --key: #1e1e1e;
+    --key-text: #d6d6d6;
+    --key-hover: #2a2a2a;
+    --fn: linear-gradient(180deg, #e2e2e2 0%, #9a9a9a 50%, #cfcfcf 100%);
+    --op: linear-gradient(180deg, #f0f0f0 0%, #a9a9a9 50%, #dcdcdc 100%);
+    --op-text: #1a1a1a;
+    --op-active: #ff8a2a;
+    --op-active-text: #1a1a1a;
+    --key-radius: 4px;
+    --key-shadow: inset 0 0 0 1px #333333, 0 3px 0 #000000;
+    --body-radius: 6px;
+    --shadow: 0 0 0 2px #0d0d0d, 0 25px 60px rgba(0, 0, 0, 0.75);
+  }
+  body[data-skin="woodpanel"] .woodpanel-top { display: flex; }
+  body[data-skin="woodpanel"] .screen { border-radius: 4px; box-shadow: inset 0 0 0 2px #2a2a2a, inset 0 0 20px rgba(255, 138, 42, 0.1); }
+  body[data-skin="woodpanel"] .display { font-family: "Press Start 2P", monospace; font-size: 22px !important; line-height: 1.6; text-shadow: 0 0 6px rgba(255, 138, 42, 0.6); }
+  body[data-skin="woodpanel"] .history { font-family: "Press Start 2P", monospace; font-size: 9px; }
+  body[data-skin="woodpanel"] .fn { color: #1a1a1a; font-size: 15px; font-weight: 800; }
+  body[data-skin="woodpanel"] .op, body[data-skin="woodpanel"] .fn { box-shadow: inset 0 1px 0 #ffffff, 0 3px 0 #000000; }
+  body[data-skin="woodpanel"] .op.active { background: #ff8a2a; box-shadow: inset 0 0 0 2px #1a1a1a; }
+  .woodpanel-stripes { width: 30px; height: 30px; flex-shrink: 0; border-radius: 3px; background: linear-gradient(180deg, #e3352b 0 25%, #f27a1e 25% 50%, #f6c21b 50% 75%, #2e9d4f 75%); box-shadow: inset 0 0 0 2px #1a1a1a; }
+  .woodpanel-name { color: #f3e3c3; font-size: 11px; font-weight: 800; letter-spacing: 0.3em; line-height: 1.5; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6); }
+  .woodpanel-switches { margin-left: auto; display: flex; gap: 6px; }
+  .woodpanel-switches i { width: 8px; height: 22px; border-radius: 2px; background: linear-gradient(90deg, #8f8f8f, #f2f2f2, #8f8f8f); box-shadow: 0 2px 0 #000000; }
+
+  /* ---------- Trident 64 skin: charcoal 64-bit console with yellow C-buttons ---------- */
+  body[data-skin="trident64"] {
+    --bg: linear-gradient(180deg, #3c3c42 0%, #1c1c20 100%);
+    --body: linear-gradient(180deg, #38383d 0%, #26262a 100%);
+    --screen: #0e0e10;
+    --text: #f2f2f2;
+    --muted: #9a9aa2;
+    --key: #48484e;
+    --key-text: #eaeaea;
+    --key-hover: #55555c;
+    --fn: #26262a;
+    --op: #f5c400;
+    --op-text: #2a2200;
+    --op-active: #2a2200;
+    --op-active-text: #f5c400;
+    --key-radius: 10px;
+    --key-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 3px 0 #141416;
+    --body-radius: 20px 20px 40px 40px;
+    --shadow: 0 0 0 1px #4c4c52, 0 25px 55px rgba(0, 0, 0, 0.6);
+  }
+  body[data-skin="trident64"] .trident64-top { display: flex; }
+  body[data-skin="trident64"] .screen { border-radius: 10px; box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.8), 0 0 0 3px #1c1c20; }
+  body[data-skin="trident64"] .fn { color: #d8263a; font-weight: 800; }
+  body[data-skin="trident64"] .op { border-radius: 50%; width: 52px; height: 52px; justify-self: center; align-self: center; font-weight: 800; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5); }
+  body[data-skin="trident64"] [data-op="-"] { background: #1b9e4a; color: #ffffff; width: 60px; height: 60px; }
+  body[data-skin="trident64"] [data-op="+"] { background: #2a59c4; color: #ffffff; width: 60px; height: 60px; }
+  body[data-skin="trident64"] [data-action="equals"] { background: #d8263a; color: #ffffff; }
+  body[data-skin="trident64"] .op.active { box-shadow: 0 0 0 3px #ffffff; }
+  .trident64-logo { display: flex; font-family: "Michroma", sans-serif; font-size: 26px; font-weight: 400; line-height: 1; }
+  .trident64-logo span:nth-child(1) { color: #2a59c4; text-shadow: 2px 2px 0 #d8263a; }
+  .trident64-logo span:nth-child(2) { color: #1b9e4a; text-shadow: 2px 2px 0 #f5c400; }
+  .trident64-name { color: #c9c9cf; font-size: 10px; font-weight: 700; letter-spacing: 0.3em; }
+  .trident64-pad { width: 44px; height: 26px; margin-left: auto; }
+
+  /* ---------- Classic Cola skin: red can, white ribbon, fizzy screen ---------- */
+  body[data-skin="classiccola"] {
+    --bg:
+      radial-gradient(circle, rgba(255, 255, 255, 0.18) 0 2px, transparent 2.5px) 0 0 / 38px 38px,
+      linear-gradient(180deg, #e41e2b 0%, #b5121c 100%);
+    --body: linear-gradient(90deg, #b5121c 0%, #f0303c 30%, #e41e2b 55%, #a8101a 100%);
+    --screen: #2a0e08;
+    --text: #fff6ec;
+    --muted: #e0a98a;
+    --key: #ffffff;
+    --key-text: #c3101c;
+    --key-hover: #fff1f1;
+    --fn: #f6d5d5;
+    --op: #2a0e08;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #2a0e08;
+    --key-radius: 14px;
+    --key-shadow: 0 3px 0 rgba(90, 0, 5, 0.45);
+    --body-radius: 22px;
+    --shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.85), 0 25px 55px rgba(90, 0, 5, 0.45);
+  }
+  body[data-skin="classiccola"] .classiccola-top { display: flex; }
+  body[data-skin="classiccola"] .screen {
+    position: relative;
+    border-radius: 12px;
+    background:
+      radial-gradient(circle, rgba(255, 220, 180, 0.35) 0 1.5px, transparent 2px) 6px 10px / 23px 19px,
+      radial-gradient(circle, rgba(255, 220, 180, 0.25) 0 1px, transparent 1.5px) 0 0 / 17px 13px,
+      linear-gradient(180deg, #4a1a0c 0%, #2a0e08 100%);
+    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6), 0 0 0 3px #ffffff;
+  }
+  body[data-skin="classiccola"] .display { font-weight: 600; }
+  body[data-skin="classiccola"] .fn { color: #8a0a12; font-weight: 700; }
+  body[data-skin="classiccola"] .op.active { box-shadow: inset 0 0 0 3px #2a0e08; }
+  .classiccola-top { flex-direction: column; gap: 0; }
+  .classiccola-name { font-family: "Lobster", Georgia, serif; font-size: 34px; color: #ffffff; line-height: 1; text-shadow: 0 2px 0 rgba(90, 0, 5, 0.4); }
+  .classiccola-wave { width: 100%; height: 14px; display: block; margin-top: 2px; }
+  .classiccola-egg { position: absolute; inset: 0; overflow: hidden; }
+  .classiccola-egg i {
+    position: absolute;
+    bottom: -12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 240, 220, 0.85);
+    animation: fizz 1.8s ease-in forwards;
+  }
+  @keyframes fizz { to { transform: translateY(-140px) translateX(var(--dx, 0)); opacity: 0; } }
+  .classiccola-egg b { position: absolute; inset: 0; display: grid; place-items: center; font-family: "Lobster", Georgia, serif; font-weight: 400; font-size: 30px; color: #ffffff; animation: cola-est 2.6s ease forwards; }
+  @keyframes cola-est { 0% { opacity: 0; transform: scale(0.8); } 20%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+
+  /* ---------- Big Burger skin: ketchup red and mustard yellow ---------- */
+  body[data-skin="bigburger"] {
+    --bg:
+      repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.06) 0 14px, transparent 14px 28px),
+      #da291c;
+    --body: linear-gradient(180deg, #e3352a 0%, #c41f14 100%);
+    --screen: #fff8e6;
+    --text: #27251f;
+    --muted: #da291c;
+    --key: #ffc72c;
+    --key-text: #27251f;
+    --key-hover: #ffd459;
+    --fn: #fff3d0;
+    --op: #27251f;
+    --op-text: #ffc72c;
+    --op-active: #ffc72c;
+    --op-active-text: #27251f;
+    --key-radius: 16px;
+    --key-shadow: 0 4px 0 #b3800a;
+    --body-radius: 28px;
+    --shadow: 0 0 0 5px #ffc72c, 0 25px 55px rgba(100, 20, 5, 0.45);
+    font-family: "Fredoka", "Arial Rounded MT Bold", sans-serif;
+  }
+  body[data-skin="bigburger"] .bigburger-top { display: flex; }
+  body[data-skin="bigburger"] .screen { border-radius: 18px; box-shadow: inset 0 3px 8px rgba(100, 40, 0, 0.18); }
+  body[data-skin="bigburger"] .display { font-weight: 700; }
+  body[data-skin="bigburger"] .keys button { font-family: "Fredoka", "Arial Rounded MT Bold", sans-serif; font-weight: 700; }
+  body[data-skin="bigburger"] .fn { color: #da291c; box-shadow: 0 4px 0 #d9c59a; }
+  body[data-skin="bigburger"] .op { box-shadow: 0 4px 0 #000000; }
+  body[data-skin="bigburger"] .op.active { box-shadow: inset 0 0 0 3px #27251f; }
+  body[data-skin="bigburger"] .keys button:active,
+  body[data-skin="bigburger"] .keys button.pressed { transform: translateY(3px); box-shadow: 0 1px 0 #b3800a; }
+  .bigburger-icon { width: 42px; height: 36px; flex-shrink: 0; }
+  .bigburger-text { display: flex; flex-direction: column; line-height: 1.05; }
+  .bigburger-name { font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 26px; color: #ffc72c; letter-spacing: 0.02em; text-shadow: 0 2px 0 #8a1208; }
+  .bigburger-sub { font-family: "Fredoka", sans-serif; font-weight: 500; font-size: 13px; color: #ffffff; }
+
+  /* ---------- Green Café skin: coffee-house green, cream and a round badge ---------- */
+  body[data-skin="greencafe"] {
+    --bg: linear-gradient(180deg, #f2ede3 0%, #e3dccd 100%);
+    --body: linear-gradient(180deg, #00704a 0%, #005a3b 100%);
+    --screen: #f6f2e8;
+    --text: #1e3932;
+    --muted: #6b8f80;
+    --key: #ffffff;
+    --key-text: #1e3932;
+    --key-hover: #f2f7f4;
+    --fn: #d4e9e2;
+    --op: #1e3932;
+    --op-text: #ffffff;
+    --op-active: #f6f2e8;
+    --op-active-text: #1e3932;
+    --key-radius: 999px;
+    --key-shadow: 0 2px 0 rgba(0, 40, 25, 0.4);
+    --body-radius: 24px;
+    --shadow: 0 25px 55px rgba(30, 57, 50, 0.4);
+  }
+  body[data-skin="greencafe"] .greencafe-top { display: flex; }
+  body[data-skin="greencafe"] .screen { border-radius: 16px; box-shadow: inset 0 2px 6px rgba(30, 57, 50, 0.18); }
+  body[data-skin="greencafe"] .display { font-weight: 600; letter-spacing: -0.01em; }
+  body[data-skin="greencafe"] .fn { color: #00704a; font-weight: 700; }
+  body[data-skin="greencafe"] .op[data-action="equals"] { background: #cba258; color: #1e3932; }
+  body[data-skin="greencafe"] .zero { border-radius: 999px; }
+  .greencafe-badge { width: 40px; height: 40px; flex-shrink: 0; }
+  .greencafe-text { display: flex; flex-direction: column; line-height: 1.1; }
+  .greencafe-name { color: #ffffff; font-size: 18px; font-weight: 800; letter-spacing: 0.18em; }
+  .greencafe-sub { color: #cba258; font-size: 10px; font-weight: 700; letter-spacing: 0.3em; }
+  .greencafe-cup { margin-left: auto; width: 24px; height: 30px; }
+
+  /* ---------- Rooster Sauce skin: chili-red bottle with a green cap ---------- */
+  body[data-skin="roostersauce"] {
+    --bg: linear-gradient(180deg, #fff6e8 0%, #f3e3c7 100%);
+    --body:
+      linear-gradient(180deg, #2e8b3e 0 64px, #1f6b2e 64px 70px, transparent 70px),
+      linear-gradient(90deg, #a8170a 0%, #e0301a 35%, #d42612 60%, #9a1408 100%);
+    --screen: rgba(255, 255, 255, 0.92);
+    --text: #b31b0a;
+    --muted: #2e8b3e;
+    --key: rgba(255, 255, 255, 0.92);
+    --key-text: #b31b0a;
+    --key-hover: #ffffff;
+    --fn: #2e8b3e;
+    --op: #1f6b2e;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #1f6b2e;
+    --key-radius: 10px;
+    --key-shadow: 0 3px 0 rgba(80, 5, 0, 0.45);
+    --body-radius: 30px 30px 18px 18px;
+    --shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25), 0 25px 55px rgba(120, 30, 10, 0.4);
+  }
+  body[data-skin="roostersauce"] .roostersauce-top { display: flex; }
+  body[data-skin="roostersauce"] .screen { border-radius: 10px; box-shadow: inset 0 0 0 2px #2e8b3e; }
+  body[data-skin="roostersauce"] .display { font-weight: 800; }
+  body[data-skin="roostersauce"] .fn { color: #ffffff; font-weight: 700; }
+  body[data-skin="roostersauce"] .op.active { box-shadow: inset 0 0 0 3px #1f6b2e; }
+  .roostersauce-rooster { width: 40px; height: 40px; flex-shrink: 0; }
+  .roostersauce-text { display: flex; flex-direction: column; line-height: 1.05; }
+  .roostersauce-name { color: #ffffff; font-size: 19px; font-weight: 900; letter-spacing: 0.06em; }
+  .roostersauce-sub { color: #ffe08a; font-size: 10px; font-weight: 700; letter-spacing: 0.25em; }
+
+  /* ---------- Boba Tea skin: milk tea, taro and tapioca pearls ---------- */
+  body[data-skin="bobatea"] {
+    --bg: linear-gradient(180deg, #f9dfe8 0%, #e6d3f2 100%);
+    --body: linear-gradient(180deg, #f1dfc6 0%, #e4c79f 100%);
+    --screen: #fffaf2;
+    --text: #5b3a24;
+    --muted: #b58a6a;
+    --key: #fffaf2;
+    --key-text: #5b3a24;
+    --key-hover: #ffffff;
+    --fn: #c9b3e6;
+    --op: #6b3e26;
+    --op-text: #fff2e2;
+    --op-active: #fffaf2;
+    --op-active-text: #6b3e26;
+    --key-radius: 50%;
+    --key-shadow: 0 3px 0 rgba(107, 62, 38, 0.3);
+    --body-radius: 24px 24px 40px 40px;
+    --shadow: inset 0 -60px 40px -30px rgba(60, 30, 15, 0.25), 0 25px 55px rgba(120, 70, 90, 0.3);
+    font-family: "Fredoka", "Arial Rounded MT Bold", sans-serif;
+  }
+  body[data-skin="bobatea"] .bobatea-top { display: flex; }
+  body[data-skin="bobatea"] .screen {
+    border-radius: 18px;
+    background:
+      radial-gradient(circle at 30% 30%, #6b4a3a 0 2px, #2b1810 4px 8px, transparent 8.5px) 0 100% / 22px 18px repeat-x,
+      radial-gradient(circle at 30% 30%, #6b4a3a 0 2px, #2b1810 4px 8px, transparent 8.5px) 11px 100% / 22px 30px repeat-x,
+      #fffaf2;
+    padding-bottom: 30px;
+  }
+  body[data-skin="bobatea"] .display { font-weight: 600; }
+  body[data-skin="bobatea"] .keys button { font-family: "Fredoka", "Arial Rounded MT Bold", sans-serif; font-weight: 600; }
+  body[data-skin="bobatea"] .zero { border-radius: 999px; }
+  body[data-skin="bobatea"] .fn { color: #4b2f6b; }
+  body[data-skin="bobatea"] .op.active { box-shadow: inset 0 0 0 3px #6b3e26; }
+  .bobatea-cup { width: 34px; height: 46px; flex-shrink: 0; }
+  .bobatea-name { font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 28px; color: #6b3e26; }
+  .bobatea-sub { margin-left: auto; font-size: 11px; font-weight: 600; color: #8a5fc0; text-align: right; line-height: 1.3; }
+
+  /* ---------- Maze Muncher skin: arcade maze, power pellets and a hungry yellow hero ---------- */
+  body[data-skin="mazemuncher"] {
+    --bg: #000000;
+    --body: #000000;
+    --screen: #000000;
+    --text: #ffd800;
+    --muted: #ffb8ff;
+    --key: #000000;
+    --key-text: #ffb897;
+    --key-hover: #0a0a3a;
+    --fn: #000000;
+    --op: #ffd800;
+    --op-text: #000000;
+    --op-active: #000000;
+    --op-active-text: #ffd800;
+    --key-radius: 10px;
+    --key-shadow: inset 0 0 0 2px #2121de, inset 0 0 0 5px #000000, inset 0 0 0 6px #2121de;
+    --body-radius: 16px;
+    --shadow: 0 0 0 3px #2121de, 0 0 0 6px #000000, 0 0 0 8px #2121de, 0 25px 60px rgba(33, 33, 222, 0.3);
+  }
+  body[data-skin="mazemuncher"] .mazemuncher-top { display: flex; }
+  body[data-skin="mazemuncher"] .screen { position: relative; border-radius: 10px; box-shadow: inset 0 0 0 2px #2121de, inset 0 0 0 5px #000000, inset 0 0 0 6px #2121de; }
+  body[data-skin="mazemuncher"] .display, body[data-skin="mazemuncher"] .history { font-family: "Press Start 2P", monospace; }
+  body[data-skin="mazemuncher"] .history { font-size: 9px; margin-bottom: 8px; color: #ffb8ff; }
+  body[data-skin="mazemuncher"] .display { line-height: 1.3; }
+  body[data-skin="mazemuncher"] .keys button { font-family: "Press Start 2P", monospace; font-size: 16px; }
+  body[data-skin="mazemuncher"] .fn { color: #00ffff; }
+  body[data-skin="mazemuncher"] .op { border-radius: 50%; width: 52px; height: 52px; justify-self: center; align-self: center; box-shadow: 0 0 12px rgba(255, 216, 0, 0.6); }
+  body[data-skin="mazemuncher"] .op.active { box-shadow: inset 0 0 0 3px #ffd800; }
+  .mazemuncher-top { position: relative; height: 30px; overflow: hidden; margin: -2px 4px 14px; }
+  .mazemuncher-dots { position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; background: radial-gradient(circle, #ffb897 0 2px, transparent 2.5px) 0 0 / 18px 4px repeat-x; }
+  .mazemuncher-hero { position: absolute; top: 3px; width: 24px; height: 24px; animation: munch-run 6s linear infinite; }
+  .mazemuncher-hero i { position: absolute; inset: 0; border-radius: 50%; background: #ffd800; animation: chomp 0.25s linear infinite alternate; }
+  .mazemuncher-ghost { position: absolute; top: 3px; width: 22px; height: 24px; border-radius: 11px 11px 0 0; background: #ff0000; animation: munch-run 6s linear infinite; animation-delay: -0.55s; -webkit-mask: radial-gradient(circle at 25% 100%, #0000 3px, #000 3.5px) 0 0 / 50% 100%; }
+  .mazemuncher-ghost::before, .mazemuncher-ghost::after { content: ""; position: absolute; top: 7px; width: 7px; height: 8px; border-radius: 50%; background: #ffffff; box-shadow: inset -2px 0 0 0 #2121de; }
+  .mazemuncher-ghost::before { left: 3px; }
+  .mazemuncher-ghost::after { left: 12px; }
+  @keyframes chomp {
+    from { clip-path: polygon(50% 50%, 100% 0, 100% 0, 0 0, 0 100%, 100% 100%, 100% 100%); }
+    to { clip-path: polygon(50% 50%, 100% 45%, 100% 0, 0 0, 0 100%, 100% 100%, 100% 55%); }
+  }
+  @keyframes munch-run { from { left: -60px; } to { left: calc(100% + 30px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .mazemuncher-hero, .mazemuncher-ghost, .mazemuncher-hero i { animation: none; }
+    .mazemuncher-hero { left: 40%; }
+    .mazemuncher-ghost { left: 20%; }
+  }
+  /* Easter egg: level 256, the famous broken half-screen */
+  .mazemuncher-egg { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; }
+  .mazemuncher-egg span { display: grid; place-items: center; font-family: "Press Start 2P", monospace; font-size: 12px; line-height: 1.8; text-align: center; color: #ffd800; background: #000000; }
+  .mazemuncher-egg i {
+    background:
+      repeating-linear-gradient(90deg, #2121de 0 6px, #ffb897 6px 9px, #000 9px 13px, #ff0000 13px 15px, #00ffff 15px 19px),
+      repeating-linear-gradient(0deg, transparent 0 5px, rgba(0, 0, 0, 0.7) 5px 9px, transparent 9px 14px);
+    background-blend-mode: difference;
+    animation: kill-screen 0.2s steps(2) infinite;
+  }
+  @keyframes kill-screen { 50% { filter: hue-rotate(140deg); } }
+
+  /* ---------- Pixel Craft skin: grass, dirt and stone in chunky pixels ---------- */
+  body[data-skin="pixelcraft"] {
+    --bg:
+      linear-gradient(180deg, #7ab8ff 0%, #a9d2ff 60%, #6aa84f 60% 63%, #8a5a34 63%),
+      #7ab8ff;
+    --body:
+      repeating-conic-gradient(#866043 0 25%, #79553a 0 50%) 0 0 / 16px 16px,
+      #866043;
+    --screen: rgba(0, 0, 0, 0.62);
+    --text: #ffffff;
+    --muted: #bdbdbd;
+    --key: #8b8b8b;
+    --key-text: #ffffff;
+    --key-hover: #a2a8d6;
+    --fn: #6f6f6f;
+    --op: #5b8c3a;
+    --op-text: #ffffff;
+    --op-active: #3a3a3a;
+    --op-active-text: #ffff55;
+    --key-radius: 0;
+    --key-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.35), inset 3px 3px 0 rgba(255, 255, 255, 0.35), 0 0 0 2px #000000;
+    --body-radius: 0;
+    --shadow: 0 0 0 3px #000000, inset 0 10px 0 #6aa84f, inset 0 14px 0 #4e8a35, 0 25px 50px rgba(0, 0, 0, 0.45);
+  }
+  body[data-skin="pixelcraft"] .pixelcraft-top { display: flex; }
+  body[data-skin="pixelcraft"] .calc { padding-top: 26px; }
+  body[data-skin="pixelcraft"] .screen { border-radius: 0; box-shadow: 0 0 0 2px #000000; }
+  body[data-skin="pixelcraft"] .display, body[data-skin="pixelcraft"] .history,
+  body[data-skin="pixelcraft"] .keys button { font-family: "Press Start 2P", monospace; text-shadow: 2px 2px 0 #3f3f3f; }
+  body[data-skin="pixelcraft"] .history { font-size: 9px; margin-bottom: 8px; }
+  body[data-skin="pixelcraft"] .display { line-height: 1.3; }
+  body[data-skin="pixelcraft"] .keys button { font-size: 16px; }
+  body[data-skin="pixelcraft"] .op { text-shadow: 2px 2px 0 #2a4a1a; }
+  body[data-skin="pixelcraft"] .op.active { box-shadow: inset 0 0 0 3px #ffff55, 0 0 0 2px #000000; }
+  body[data-skin="pixelcraft"] .keys button:hover { color: #ffffa0; }
+  .pixelcraft-block { width: 36px; height: 38px; flex-shrink: 0; image-rendering: pixelated; }
+  .pixelcraft-name { font-family: "Press Start 2P", monospace; font-size: 16px; color: #c6c6c6; line-height: 1.3; text-shadow: 2px 2px 0 #3f3f3f, -1px -1px 0 #ffffff; }
+  .pixelcraft-hearts { margin-left: auto; display: flex; gap: 2px; }
+  .pixelcraft-hearts i { width: 11px; height: 10px; background: #e3242b; clip-path: polygon(0 20%, 20% 0, 40% 0, 50% 20%, 60% 0, 80% 0, 100% 20%, 100% 50%, 50% 100%, 0 50%); box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.5); }
+
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -1863,6 +2895,201 @@
           <span class="purple-sub">Eat More</span>
         </div>
       </div>
+      <!-- Classic -->
+      <div class="top graphing-top" aria-hidden="true">
+        <div class="graphing-name">GRAPHING<b>PLUS</b></div>
+        <svg class="graphing-wave" viewBox="0 0 56 20">
+          <path d="M0 10 H56 M28 0 V20" stroke="#5b6472" stroke-width="1" />
+          <path d="M0 10 C7 -2 14 -2 21 10 S35 22 42 10 S52 0 56 6" fill="none" stroke="#6fa3e8" stroke-width="2" />
+        </svg>
+      </div>
+      <div class="top solar-top" aria-hidden="true">
+        <div class="solar-cells"><i></i><i></i><i></i><i></i></div>
+        <div class="solar-name"><b>SOLAR</b> POWER<br>8 DIGIT</div>
+      </div>
+      <div class="top deskadder-top" aria-hidden="true">
+        <div class="deskadder-roll"></div>
+        <div class="deskadder-name">DESK ADDER<small>PRINTING CALCULATOR</small></div>
+        <div class="deskadder-lamp"></div>
+      </div>
+      <div class="top terminal-top" aria-hidden="true">
+        <div class="terminal-prompt">user@calc:<b>~</b>$<span class="terminal-cursor"></span></div>
+      </div>
+      <div class="top blueprint-top" aria-hidden="true">
+        <svg class="blueprint-compass" viewBox="0 0 30 34" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="15" cy="4" r="2.5" />
+          <path d="M14 6 L5 32 M16 6 L25 32 M8 22 Q15 26 22 22" />
+        </svg>
+        <div class="blueprint-title"><span>BLUEPRINT</span><span>SCALE 1:1</span><span>SHEET 1/1</span></div>
+      </div>
+      <div class="top sketchbook-top" aria-hidden="true">
+        <div class="sketchbook-name"><span>my calculator</span></div>
+        <svg class="sketchbook-pencil" viewBox="0 0 70 14">
+          <path d="M4 7 L12 2 H58 V12 H12 Z" fill="#ffd34d" stroke="#2b2b2b" stroke-width="1.5" stroke-linejoin="round" />
+          <path d="M4 7 L12 2 V12 Z" fill="#f2d2a9" stroke="#2b2b2b" stroke-width="1.5" stroke-linejoin="round" />
+          <path d="M4 7 L7 5.2 V8.8 Z" fill="#2b2b2b" />
+          <rect x="58" y="2" width="10" height="10" rx="2" fill="#ff9aa2" stroke="#2b2b2b" stroke-width="1.5" />
+        </svg>
+      </div>
+      <div class="top glass-top" aria-hidden="true">
+        <div class="glass-shine"></div>
+        <div class="glass-name">FROSTED</div>
+      </div>
+      <div class="top chalkboard-top" aria-hidden="true">
+        <svg width="0" height="0" style="position:absolute">
+          <filter id="chalk"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n" /><feDisplacementMap in="SourceGraphic" in2="n" scale="2" /></filter>
+        </svg>
+        <div class="chalkboard-name"><u>Today's sums</u></div>
+        <div class="chalkboard-tray"><i></i><i></i><b></b></div>
+      </div>
+      <div class="top synthwave-top" aria-hidden="true">
+        <svg class="synthwave-sun" viewBox="0 0 40 26">
+          <defs>
+            <linearGradient id="sunGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffe259" />
+              <stop offset="1" stop-color="#ff3cac" />
+            </linearGradient>
+          </defs>
+          <path d="M2 26 A18 18 0 0 1 38 26 Z" fill="url(#sunGrad)" />
+          <path d="M0 15 H40 M0 19 H40 M0 22.5 H40" stroke="#1d0838" stroke-width="1.6" />
+        </svg>
+        <div class="synthwave-name">SYNTHWAVE</div>
+      </div>
+      <!-- Consoles -->
+      <div class="top super16-top" aria-hidden="true">
+        <div class="super16-dots"><i></i><i></i><i></i><i></i></div>
+        <div class="super16-name">SUPER<b>16-BIT</b></div>
+        <div class="super16-ridges"></div>
+      </div>
+      <div class="top turbo16-top" aria-hidden="true">
+        <div class="turbo16-name">TURBO</div>
+        <div class="turbo16-bits">16-BIT</div>
+      </div>
+      <div class="top pocketbrick-top" aria-hidden="true">
+        <div class="pocketbrick-led"></div>
+        <div class="pocketbrick-name">POCKET BRICK</div>
+        <div class="pocketbrick-sub"><b>DOT MATRIX</b><br>WITH STEREO SOUND</div>
+      </div>
+      <div class="top atomicpurple-top" aria-hidden="true">
+        <div class="atomicpurple-chip"></div>
+        <div class="atomicpurple-name">ATOMIC</div>
+        <div class="atomicpurple-colors"><span>C</span><span>O</span><span>L</span><span>O</span><span>R</span></div>
+      </div>
+      <div class="top purplecube-top" aria-hidden="true">
+        <svg class="purplecube-logo" viewBox="0 0 32 32" fill="none" stroke="#ecebff" stroke-width="2.4" stroke-linejoin="round">
+          <path d="M16 3 L28 9.5 V22.5 L16 29 L4 22.5 V9.5 Z" />
+          <path d="M16 16 L28 9.5 M16 16 L4 9.5 M16 16 V29" opacity="0.55" />
+          <path d="M10 12.5 L16 9.2 L22 12.5 L16 15.8 Z" fill="#ecebff" stroke="none" opacity="0.8" />
+        </svg>
+        <div class="purplecube-name"><b>CUBE</b></div>
+        <div class="purplecube-handle"></div>
+      </div>
+      <div class="top swirlconsole-top" aria-hidden="true">
+        <svg class="swirlconsole-swirl" viewBox="0 0 30 30">
+          <path d="M15 15 m0 -2 a2 2 0 1 1 -2 2 a4 4 0 0 1 4 -4 a6 6 0 0 1 6 6 a8 8 0 0 1 -8 8 a10 10 0 0 1 -10 -10 a12 12 0 0 1 12 -12"
+                fill="none" stroke="#f26722" stroke-width="2.6" stroke-linecap="round" />
+        </svg>
+        <div class="swirlconsole-name">swirl</div>
+        <div class="swirlconsole-lamp"></div>
+      </div>
+      <div class="top motionwhite-top" aria-hidden="true">
+        <div class="motionwhite-slot"></div>
+        <div class="motionwhite-name">motion</div>
+        <div class="motionwhite-remote"></div>
+      </div>
+      <div class="top woodpanel-top" aria-hidden="true">
+        <div class="woodpanel-stripes"></div>
+        <div class="woodpanel-name">VIDEO GAME<br>SYSTEM</div>
+        <div class="woodpanel-switches"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="top trident64-top" aria-hidden="true">
+        <div class="trident64-logo"><span>6</span><span>4</span></div>
+        <div class="trident64-name">TRIDENT</div>
+        <svg class="trident64-pad" viewBox="0 0 44 26">
+          <path d="M6 4 H38 Q43 4 42 10 L39 22 Q38 25 35 22 L30 14 H26 L22 25 L18 14 H14 L9 22 Q6 25 5 22 L2 10 Q1 4 6 4 Z" fill="#48484e" stroke="#1c1c20" stroke-width="1" />
+          <circle cx="33" cy="9" r="2" fill="#f5c400" /><circle cx="29" cy="9" r="1.6" fill="#2a59c4" /><circle cx="11" cy="9" r="2.4" fill="#26262a" />
+        </svg>
+      </div>
+      <!-- Food & Drink -->
+      <div class="top classiccola-top" aria-hidden="true">
+        <div class="classiccola-name">Classic Cola</div>
+        <svg class="classiccola-wave" viewBox="0 0 300 14" preserveAspectRatio="none">
+          <path d="M0 9 C60 -2 110 16 170 7 S260 2 300 6 L300 10 C260 6 220 14 170 11 S60 4 0 13 Z" fill="#ffffff" />
+        </svg>
+      </div>
+      <div class="top bigburger-top" aria-hidden="true">
+        <svg class="bigburger-icon" viewBox="0 0 42 36">
+          <path d="M4 15 Q4 2 21 2 Q38 2 38 15 Z" fill="#f2a43a" stroke="#27251f" stroke-width="1.5" />
+          <path d="M12 7 l1 1 M20 5 l1 1 M28 7 l1 1 M16 11 l1 1 M25 11 l1 1" stroke="#fff3d0" stroke-width="1.6" stroke-linecap="round" />
+          <path d="M2 17 Q8 21 14 17 T26 17 T40 17 L40 19 L2 19 Z" fill="#3fae2a" />
+          <rect x="3" y="19" width="36" height="6" rx="3" fill="#6b3a1f" stroke="#27251f" stroke-width="1.5" />
+          <path d="M3 25.5 H39 L36 28 L33 25.5" fill="#ffc72c" />
+          <path d="M4 27 H38 Q38 34 21 34 Q4 34 4 27 Z" fill="#f2a43a" stroke="#27251f" stroke-width="1.5" />
+        </svg>
+        <div class="bigburger-text">
+          <span class="bigburger-name">BIG BURGER</span>
+          <span class="bigburger-sub">Fries with that?</span>
+        </div>
+      </div>
+      <div class="top greencafe-top" aria-hidden="true">
+        <svg class="greencafe-badge" viewBox="0 0 40 40">
+          <circle cx="20" cy="20" r="19" fill="#ffffff" />
+          <circle cx="20" cy="20" r="16" fill="#00704a" />
+          <circle cx="20" cy="20" r="10.5" fill="#ffffff" />
+          <path d="M20 13.5 L21.7 18.2 H26.6 L22.6 21.1 L24.1 25.8 L20 22.9 L15.9 25.8 L17.4 21.1 L13.4 18.2 H18.3 Z" fill="#00704a" />
+        </svg>
+        <div class="greencafe-text">
+          <span class="greencafe-name">GREEN CAFÉ</span>
+          <span class="greencafe-sub">COFFEE · TEA</span>
+        </div>
+        <svg class="greencafe-cup" viewBox="0 0 24 30">
+          <path d="M5 2 H19 L20 6 H4 Z" fill="#ffffff" />
+          <path d="M4 7 H20 L18 28 H6 Z" fill="#f6f2e8" />
+          <rect x="4.9" y="13" width="14.2" height="7" fill="#cba258" />
+        </svg>
+      </div>
+      <div class="top roostersauce-top" aria-hidden="true">
+        <svg class="roostersauce-rooster" viewBox="0 0 40 40">
+          <circle cx="20" cy="20" r="19" fill="#ffffff" />
+          <path d="M12 30 Q8 20 15 15 Q15 9 20 9 Q24 9 24 13 L28 12 L25 16 Q30 22 26 30 Z" fill="#d42612" />
+          <path d="M18 9 Q17 5 19 6 Q20 3 22 6 Q24 4 24 8 Z" fill="#d42612" />
+          <path d="M26 30 Q34 26 32 16 Q30 22 26 22" fill="#2e8b3e" />
+          <circle cx="21" cy="12.5" r="1.2" fill="#ffffff" />
+          <path d="M14 33 H27" stroke="#2e8b3e" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <div class="roostersauce-text">
+          <span class="roostersauce-name">ROOSTER SAUCE</span>
+          <span class="roostersauce-sub">HOT CHILI</span>
+        </div>
+      </div>
+      <div class="top bobatea-top" aria-hidden="true">
+        <svg class="bobatea-cup" viewBox="0 0 34 46">
+          <rect x="18" y="0" width="5" height="18" rx="1" fill="#ff7eb3" transform="rotate(12 20 9)" />
+          <path d="M5 12 H29 L26 44 H8 Z" fill="#e4c79f" stroke="#6b3e26" stroke-width="1.5" stroke-linejoin="round" />
+          <path d="M3 10 H31 V13 H3 Z" fill="#c9b3e6" stroke="#6b3e26" stroke-width="1.5" />
+          <g fill="#2b1810"><circle cx="12" cy="40" r="2.6" /><circle cx="17.5" cy="40.5" r="2.6" /><circle cx="22.5" cy="39.5" r="2.6" /><circle cx="14.5" cy="35.5" r="2.6" /><circle cx="20" cy="35.5" r="2.6" /></g>
+        </svg>
+        <div class="bobatea-name">Boba Tea</div>
+        <div class="bobatea-sub">less ice<br>extra pearls</div>
+      </div>
+      <!-- Games -->
+      <div class="top mazemuncher-top" aria-hidden="true">
+        <div class="mazemuncher-dots"></div>
+        <div class="mazemuncher-hero"><i></i></div>
+        <div class="mazemuncher-ghost"></div>
+      </div>
+      <div class="top pixelcraft-top" aria-hidden="true">
+        <svg class="pixelcraft-block" viewBox="0 0 18 19" shape-rendering="crispEdges">
+          <path d="M9 0 L18 4.5 L9 9 L0 4.5 Z" fill="#6aa84f" />
+          <path d="M0 4.5 L9 9 V19 L0 14.5 Z" fill="#79553a" />
+          <path d="M18 4.5 L9 9 V19 L18 14.5 Z" fill="#5e422c" />
+          <path d="M0 4.5 L9 9 V11 L0 6.5 Z" fill="#4e8a35" />
+          <path d="M18 4.5 L9 9 V11 L18 6.5 Z" fill="#3f702b" />
+          <path d="M2 8 h1 v1 h-1 Z M5 11 h1 v1 h-1 Z M3 13 h1 v1 h-1 Z M12 12 h1 v1 h-1 Z M15 9 h1 v1 h-1 Z M14 14 h1 v1 h-1 Z" fill="#9a7350" />
+        </svg>
+        <div class="pixelcraft-name">PIXEL<br>CRAFT</div>
+        <div class="pixelcraft-hearts"><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
       <div class="screen">
         <div class="history" id="history"></div>
         <div class="display" id="display" aria-live="polite">0</div>
@@ -1982,9 +3209,9 @@
       displayEl.textContent = died ? 'YOU DIED' : text;
       displayEl.removeAttribute('aria-label');
       // Shrink the font for long numbers so they fit.
-      // The pixel font in the Monster Dex skin is extra wide, so it gets a smaller size.
+      // The pixel font in the Monster Dex (and other pixel) skins is extra wide, so it gets a smaller size.
       const len = text.length;
-      const sizes = document.body.dataset.skin === 'monsterdex' ? [13, 17, 22] : [28, 36, 48];
+      const sizes = PIXEL_FONT_SKINS.includes(document.body.dataset.skin) ? [13, 17, 22] : [28, 36, 48];
       displayEl.style.fontSize = (len > 14 ? sizes[0] : len > 10 ? sizes[1] : sizes[2]) + 'px';
     }
 
@@ -2002,10 +3229,14 @@
     if (document.body.dataset.skin === 'ringworld' && state.current === '419' && lastShown !== '419') {
       dropshipDrop();
     }
+    // More number easter eggs: skin → the number that sets it off
+    const egg = NUMBER_EGGS[document.body.dataset.skin];
+    if (egg && state.current === egg.at && lastShown !== egg.at) showEgg(egg.html(), egg.ms);
     lastShown = state.current;
   }
 
   let lastShown = null;
+  const PIXEL_FONT_SKINS = ['monsterdex', 'pocketbrick', 'mazemuncher', 'pixelcraft'];
 
   function dropshipDrop() {
     const screen = document.querySelector('.screen');
@@ -2032,6 +3263,34 @@
       screen.classList.remove('fx');
     }, 4100);
   }
+
+  // Show a little surprise on top of the screen for a moment.
+  function showEgg(html, ms) {
+    const screen = document.querySelector('.screen');
+    if (screen.querySelector('.egg-fx')) return;
+    const fx = document.createElement('div');
+    fx.className = 'egg-fx';
+    fx.setAttribute('aria-hidden', 'true');
+    fx.innerHTML = html;
+    screen.appendChild(fx);
+    screen.classList.add('egg', 'fx');
+    setTimeout(() => {
+      fx.remove();
+      screen.classList.remove('egg', 'fx');
+    }, ms);
+  }
+
+  const NUMBER_EGGS = {
+    // Terminal: type 1337 and you're in.
+    terminal: { at: '1337', ms: 2600, html: () => '<div class="terminal-egg">ACCESS GRANTED_</div>' },
+    // Classic Cola: 1886, the year the first cola was poured, makes it fizz.
+    classiccola: { at: '1886', ms: 2700, html: () => '<div class="classiccola-egg">' +
+      Array.from({ length: 18 }, (_, i) =>
+        `<i style="left:${4 + Math.random() * 92}%;animation-delay:${(Math.random() * 0.9).toFixed(2)}s;--dx:${Math.round(Math.random() * 30 - 15)}px;transform:scale(${(0.5 + Math.random()).toFixed(2)})"></i>`
+      ).join('') + '<b>Since 1886</b></div>' },
+    // Maze Muncher: level 256 breaks the right half of the screen.
+    mazemuncher: { at: '256', ms: 3000, html: () => '<div class="mazemuncher-egg"><span>LEVEL<br>256</span><i></i></div>' },
+  };
 
   function inputDigit(d) {
     if (state.current === 'Error') clearAll();
@@ -2141,15 +3400,34 @@
 
   // ---------- Skins ----------
   // To add a skin: add its CSS block above, then one line here.
+  // Keep each category at 12 skins or fewer.
   // body / screen / dots are just the colours for its little preview.
   const CATEGORIES = ['Classic', 'Consoles', 'Food & Drink', 'Games'];
   const SKINS = [
     { id: 'modern',        cat: 'Classic',      name: 'Modern',        body: '#ffffff', screen: '#e8eaee', dots: ['#e4e6eb', '#e4e6eb', '#ff9f0a', '#ff9f0a'] },
     { id: 'retro',         cat: 'Classic',      name: 'Retro',         body: '#26221f', screen: '#2a0806', dots: ['#e9e2d0', '#7d756b', '#c8642a', '#ff2a14'] },
     { id: 'cyberpunk',     cat: 'Classic',      name: 'Cyberpunk',     body: '#0d0717', screen: '#030108', dots: ['#00f0ff', '#140b24', '#ff2bd6', '#ff2bd6'] },
+    { id: 'graphing',      cat: 'Classic',      name: 'Graphing',      body: '#3d434c', screen: '#b7c2a0', dots: ['#23262b', '#3a6ab0', '#5b6472', '#3a6ab0'] },
+    { id: 'solar',         cat: 'Classic',      name: 'Solar Pocket',  body: '#2f2a26', screen: '#a8ad98', dots: ['#121212', '#5b544b', '#b8692f', '#b8692f'] },
+    { id: 'deskadder',     cat: 'Classic',      name: 'Desk Adder',    body: '#ece5d3', screen: '#fffdf6', dots: ['#f6f1e4', '#b9b099', '#6b4f3a', '#b3261e'] },
+    { id: 'terminal',      cat: 'Classic',      name: 'Terminal',      body: '#050805', screen: '#0f3a1a', dots: ['#0b1a0e', '#0b1a0e', '#39ff6a', '#39ff6a'] },
+    { id: 'blueprint',     cat: 'Classic',      name: 'Blueprint',     body: '#1f5aa3', screen: '#174a87', dots: ['#ffffff', '#3a72b8', '#ffffff', '#3a72b8'] },
+    { id: 'sketchbook',    cat: 'Classic',      name: 'Sketchbook',    body: '#fffefa', screen: '#ecebe4', dots: ['#2b2b2b', '#fffefa', '#ffe66d', '#2b2b2b'] },
+    { id: 'glass',         cat: 'Classic',      name: 'Frosted Glass', body: '#c84fc4', screen: '#e7b6ef', dots: ['#e08fe0', '#e08fe0', '#ffffff', '#ffffff'] },
+    { id: 'chalkboard',    cat: 'Classic',      name: 'Chalkboard',    body: '#2f4a3a', screen: '#8a5a32', dots: ['#f4f1e8', '#3e5c4a', '#ffe680', '#ffe680'] },
+    { id: 'synthwave',     cat: 'Classic',      name: 'Synthwave',     body: '#1d0838', screen: '#0a0218', dots: ['#24104a', '#2de2e6', '#ff3cac', '#ffb347'] },
     { id: 'greyconsole',   cat: 'Consoles',     name: 'Grey Console',  body: '#cfcfcb', screen: '#1c1c1e', dots: ['#3ec4a5', '#ff5a5f', '#7fa9ea', '#f08dc6'] },
     { id: 'greenmachine',  cat: 'Consoles',     name: 'Green Machine', body: '#141414', screen: '#107c10', dots: ['#5dc21e', '#e81123', '#1f8fff', '#ffb900'] },
     { id: 'eightbit',      cat: 'Consoles',     name: '8-Bit Console', body: '#d4d4d0', screen: '#111111', dots: ['#2b2b2b', '#8e8e8e', '#c8102e', '#c8102e'] },
+    { id: 'super16',       cat: 'Consoles',     name: 'Super 16',      body: '#dcdbe0', screen: '#22212a', dots: ['#2e9d4f', '#2d5fc7', '#f2c21b', '#d8262e'] },
+    { id: 'turbo16',       cat: 'Consoles',     name: 'Turbo 16',      body: '#1c1c1f', screen: '#050506', dots: ['#2e2e33', '#121214', '#e3202a', '#e3202a'] },
+    { id: 'pocketbrick',   cat: 'Consoles',     name: 'Pocket Brick',  body: '#c9c5b9', screen: '#8bac0f', dots: ['#3a3a44', '#8f8b82', '#9a2257', '#9a2257'] },
+    { id: 'atomicpurple',  cat: 'Consoles',     name: 'Atomic Purple', body: '#6a3ab0', screen: '#1c1530', dots: ['#8a5ad0', '#3c1e6e', '#c8a640', '#c8a640'] },
+    { id: 'purplecube',    cat: 'Consoles',     name: 'Purple Cube',   body: '#4a3f8c', screen: '#16122e', dots: ['#b8b8c2', '#d8263a', '#f4c81e', '#1fa64a'] },
+    { id: 'swirlconsole',  cat: 'Consoles',     name: 'Swirl Console', body: '#f4f4f2', screen: '#1d1f22', dots: ['#ffc423', '#2fb34a', '#2a6fd6', '#f26722'] },
+    { id: 'motionwhite',   cat: 'Consoles',     name: 'Motion White',  body: '#ffffff', screen: '#e8f7fd', dots: ['#eef1f3', '#ffffff', '#34beed', '#34beed'] },
+    { id: 'woodpanel',     cat: 'Consoles',     name: 'Wood Panel',    body: '#7a4e28', screen: '#141414', dots: ['#1e1e1e', '#1e1e1e', '#cfcfcf', '#ff8a2a'] },
+    { id: 'trident64',     cat: 'Consoles',     name: 'Trident 64',    body: '#38383d', screen: '#0e0e10', dots: ['#f5c400', '#1b9e4a', '#2a59c4', '#d8263a'] },
     { id: 'bluelager',     cat: 'Food & Drink', name: 'Blue Lager',    body: '#1f5fcc', screen: '#0b1f4d', dots: ['#ffffff', '#c3ccd8', '#ffffff', '#9aa6b6'] },
     { id: 'silverpeak',    cat: 'Food & Drink', name: 'Silver Peak',   body: '#d9dde1', screen: '#2f7de1', dots: ['#13294b', '#fdfdfd', '#c8102e', '#c8102e'] },
     { id: 'neoncitrus',    cat: 'Food & Drink', name: 'Neon Citrus',   body: '#3fae2a', screen: '#050805', dots: ['#111111', '#ffffff', '#e4002b', '#c4ff0e'] },
@@ -2157,6 +3435,11 @@
     { id: 'midnightberry', cat: 'Food & Drink', name: 'Midnight Berry', body: '#2e1a78', screen: '#07041a', dots: ['#1d1350', '#7fe9ff', '#8a2be2', '#00b8ff'] },
     { id: 'purpletaco',    cat: 'Food & Drink', name: 'Purple Taco',   body: '#702082', screen: '#ffffff', dots: ['#ffffff', '#2b0b3d', '#e31c79', '#ffc72c'] },
     { id: 'happybee',      cat: 'Food & Drink', name: 'Happy Bee',     body: '#e2231a', screen: '#fffaf0', dots: ['#ffffff', '#a3121a', '#ffc20e', '#ffc20e'] },
+    { id: 'classiccola',   cat: 'Food & Drink', name: 'Classic Cola',  body: '#e41e2b', screen: '#2a0e08', dots: ['#ffffff', '#ffffff', '#2a0e08', '#2a0e08'] },
+    { id: 'bigburger',     cat: 'Food & Drink', name: 'Big Burger',    body: '#da291c', screen: '#fff8e6', dots: ['#ffc72c', '#ffc72c', '#27251f', '#27251f'] },
+    { id: 'greencafe',     cat: 'Food & Drink', name: 'Green Café',    body: '#00704a', screen: '#f6f2e8', dots: ['#ffffff', '#d4e9e2', '#1e3932', '#cba258'] },
+    { id: 'roostersauce',  cat: 'Food & Drink', name: 'Rooster Sauce', body: '#d42612', screen: '#2e8b3e', dots: ['#ffffff', '#2e8b3e', '#1f6b2e', '#1f6b2e'] },
+    { id: 'bobatea',       cat: 'Food & Drink', name: 'Boba Tea',      body: '#e4c79f', screen: '#fffaf2', dots: ['#fffaf2', '#c9b3e6', '#6b3e26', '#2b1810'] },
     { id: 'monsterdex',    cat: 'Games',        name: 'Monster Dex',   body: '#dc1a32', screen: '#9bbc0f', dots: ['#2f7fd1', '#2f7fd1', '#ffcb05', '#4dad5b'] },
     { id: 'ringworld',     cat: 'Games',        name: 'Ring World',    body: '#1f2832', screen: '#5ab8ff', dots: ['#1a242f', '#2a3947', '#3a9ae6', '#3a9ae6'] },
     { id: 'ringworld2',    cat: 'Games',        name: 'Ring World II', body: '#7d8892', screen: '#07121c', dots: ['#262e36', '#48535e', '#6cc0ff', '#6cc0ff'] },
@@ -2167,6 +3450,8 @@
     { id: 'foggy2',        cat: 'Games',        name: 'Foggy Town 2',  body: '#4a3c31', screen: '#9aa3a0', dots: ['#2f2b27', '#4b4038', '#6a2b1b', '#6a2b1b'] },
     { id: 'foggy3',        cat: 'Games',        name: 'Foggy Town 3',  body: '#3a100c', screen: '#120302', dots: ['#2b0e0a', '#4d1c13', '#8c1b10', '#b0200f'] },
     { id: 'foggy4',        cat: 'Games',        name: 'Foggy Town 4',  body: '#553b26', screen: '#10130f', dots: ['#2c2a20', '#474331', '#5b1f15', '#a8894a'] },
+    { id: 'mazemuncher',   cat: 'Games',        name: 'Maze Muncher',  body: '#000000', screen: '#2121de', dots: ['#000000', '#2121de', '#ffd800', '#ffd800'] },
+    { id: 'pixelcraft',    cat: 'Games',        name: 'Pixel Craft',   body: '#866043', screen: '#6aa84f', dots: ['#8b8b8b', '#6f6f6f', '#5b8c3a', '#5b8c3a'] },
   ];
 
   const skinMenu = document.getElementById('skinMenu');
@@ -2318,6 +3603,18 @@
     '.': '[data-action="decimal"]', ',': '[data-action="decimal"]', '%': '[data-action="percent"]',
     'Escape': '[data-action="clear"]', 'Delete': '[data-action="clear"]',
   };
+
+  // Super 16 easter egg: ↑ ↑ ↓ ↓ ← → ← → B A on the keyboard
+  const SECRET_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  let codeStep = 0;
+  document.addEventListener('keydown', e => {
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    codeStep = key === SECRET_CODE[codeStep] ? codeStep + 1 : key === SECRET_CODE[0] ? 1 : 0;
+    if (codeStep === SECRET_CODE.length) {
+      codeStep = 0;
+      if (document.body.dataset.skin === 'super16') showEgg('<div class="super16-egg">1UP ×30<b>CHEAT ACTIVATED</b></div>', 2700);
+    }
+  });
 
   document.addEventListener('keydown', e => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;

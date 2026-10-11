@@ -116,6 +116,42 @@ Type **419** and watch the screen.
 <img src="docs/eggs/ring-419.png" width="220" alt="Ring World skin with a dropship flying across the screen">
 </details>
 
+<details>
+<summary><b>4. Terminal</b>: hacker speak</summary>
+<br>
+
+Type **1337** (it spells "LEET").
+
+<img src="docs/eggs/terminal-1337.png" width="220" alt="Terminal skin showing ACCESS GRANTED">
+</details>
+
+<details>
+<summary><b>5. Classic Cola</b>: a famous year</summary>
+<br>
+
+Type **1886**, the year the first cola was poured.
+
+<img src="docs/eggs/cola-1886.png" width="220" alt="Classic Cola skin fizzing with bubbles">
+</details>
+
+<details>
+<summary><b>6. Maze Muncher</b>: the level nobody can finish</summary>
+<br>
+
+Type **256**.
+
+<img src="docs/eggs/maze-256.png" width="220" alt="Maze Muncher skin with a broken half screen">
+</details>
+
+<details>
+<summary><b>7. Super 16</b>: the most famous cheat code</summary>
+<br>
+
+On a keyboard, press **↑ ↑ ↓ ↓ ← → ← → B A**.
+
+<img src="docs/eggs/super16-code.png" width="220" alt="Super 16 skin showing 1UP x30">
+</details>
+
 ---
 
 [← Back to the calculator](README.md)
