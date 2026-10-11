@@ -1,0 +1,2342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Michroma&family=Rajdhani:wght@500;700&family=Cinzel:wght@400;700&family=Special+Elite&family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Modern skin (default) ---------- */
+  :root {
+    --bg: #eef0f4;
+    --body: #ffffff;
+    --screen: #f6f7f9;
+    --text: #1c1f26;
+    --muted: #7a808c;
+    --key: #f1f2f5;
+    --key-text: #1c1f26;
+    --key-hover: #e4e6eb;
+    --fn: #dfe2e8;
+    --op: #ff9f0a;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #ff9f0a;
+    --key-radius: 16px;
+    --key-shadow: none;
+    --body-radius: 28px;
+    --shadow: 0 20px 50px rgba(20, 25, 40, 0.15);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1115;
+      --body: #1a1d23;
+      --screen: #13151a;
+      --text: #f2f3f5;
+      --muted: #8a909c;
+      --key: #2a2e36;
+      --key-text: #f2f3f5;
+      --key-hover: #353a44;
+      --fn: #3b404b;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  /* ---------- Retro skin: 1970s red LED calculator ---------- */
+  body[data-skin="retro"] {
+    --bg: #3a2e24;
+    --body: linear-gradient(180deg, #2c2926 0%, #1d1b19 100%);
+    --screen: #0c0303;
+    --text: #e9e2d0;
+    --muted: #b8ae98;
+    --key: #e9e2d0;
+    --key-text: #2a2521;
+    --key-hover: #f3eddf;
+    --fn: #7d756b;
+    --op: #c8642a;
+    --op-text: #fff6ea;
+    --op-active: #e08a4f;
+    --op-active-text: #fff6ea;
+    --key-radius: 6px;
+    --key-shadow: 0 4px 0 rgba(0, 0, 0, 0.45);
+    --body-radius: 14px;
+    --shadow: 0 25px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    --seg-on: #ff2a14;
+    --seg-glow: rgba(255, 40, 20, 0.75);
+  }
+
+  /* ---------- Cyberpunk skin: neon on black ---------- */
+  body[data-skin="cyberpunk"] {
+    --bg:
+      linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px) 0 0 / 32px 32px,
+      linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px) 0 0 / 32px 32px,
+      radial-gradient(circle at 15% 10%, rgba(255, 0, 170, 0.25), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(0, 240, 255, 0.2), transparent 45%),
+      #07030d;
+    --body: #0d0717;
+    --screen: #030108;
+    --text: #00f0ff;
+    --muted: #ff2bd6;
+    --key: #140b24;
+    --key-text: #00f0ff;
+    --key-hover: #1f1236;
+    --fn: #1a0f2e;
+    --op: #ff2bd6;
+    --op-text: #0d0717;
+    --op-active: #0d0717;
+    --op-active-text: #ff2bd6;
+    --key-radius: 4px;
+    --key-shadow: inset 0 0 0 1px rgba(0, 240, 255, 0.45);
+    --body-radius: 6px;
+    --shadow: 0 0 0 1px #ff2bd6, 0 0 30px rgba(255, 43, 214, 0.45), 0 0 80px rgba(0, 240, 255, 0.15);
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  body[data-skin="cyberpunk"] .screen {
+    position: relative;
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 1px rgba(0, 240, 255, 0.5), inset 0 0 24px rgba(0, 240, 255, 0.12);
+  }
+  /* Scanlines over the screen */
+  body[data-skin="cyberpunk"] .screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0 1px, transparent 1px 3px);
+  }
+  body[data-skin="cyberpunk"] .display {
+    font-weight: 500;
+    text-shadow: 0 0 6px rgba(0, 240, 255, 0.9), 0 0 18px rgba(0, 240, 255, 0.5);
+    animation: glitch 5s infinite;
+  }
+  body[data-skin="cyberpunk"] .history { text-shadow: 0 0 6px rgba(255, 43, 214, 0.8); }
+  body[data-skin="cyberpunk"] .keys button { text-shadow: 0 0 6px currentColor; }
+  body[data-skin="cyberpunk"] .keys button:hover { box-shadow: inset 0 0 0 1px #00f0ff, 0 0 12px rgba(0, 240, 255, 0.5); }
+  body[data-skin="cyberpunk"] .fn { color: #ff2bd6; box-shadow: inset 0 0 0 1px rgba(255, 43, 214, 0.5); }
+  body[data-skin="cyberpunk"] .op { text-shadow: none; box-shadow: 0 0 14px rgba(255, 43, 214, 0.55); }
+  body[data-skin="cyberpunk"] .op.active { box-shadow: inset 0 0 0 1px #ff2bd6, 0 0 14px rgba(255, 43, 214, 0.55); text-shadow: 0 0 6px #ff2bd6; }
+  body[data-skin="cyberpunk"] .tag { display: flex; }
+  @keyframes glitch {
+    0%, 92%, 100% { transform: none; }
+    93% { transform: translateX(-3px); text-shadow: 3px 0 #ff2bd6, -3px 0 #00f0ff; }
+    95% { transform: translateX(2px);  text-shadow: -2px 0 #ff2bd6, 2px 0 #00f0ff; }
+    97% { transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body[data-skin="cyberpunk"] .display { animation: none; }
+  }
+  .tag {
+    display: none;
+    justify-content: space-between;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin: -4px 2px 12px;
+    text-shadow: 0 0 6px rgba(255, 43, 214, 0.8);
+  }
+  .tag span:last-child { color: var(--text); text-shadow: 0 0 6px rgba(0, 240, 255, 0.8); }
+
+  /* ---------- Monster Dex skin: classic red monster dex ---------- */
+  body[data-skin="monsterdex"] {
+    --bg: radial-gradient(circle at 50% 30%, #fff6d6, #f3d977 70%);
+    --body: linear-gradient(180deg, #e3203b 0%, #c8102e 100%);
+    --screen: #9bbc0f;
+    --text: #0f380f;
+    --muted: #306230;
+    --key: #2f7fd1;
+    --key-text: #ffffff;
+    --key-hover: #3d8fe0;
+    --fn: #2b2b2b;
+    --op: #ffcb05;
+    --op-text: #2a2a2a;
+    --op-active: #fff3b0;
+    --op-active-text: #2a2a2a;
+    --key-radius: 8px;
+    --key-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+    --body-radius: 18px 18px 18px 30px;
+    --shadow: inset -8px 0 0 rgba(0, 0, 0, 0.18), inset 0 -6px 0 rgba(0, 0, 0, 0.15), 0 22px 45px rgba(120, 20, 20, 0.35);
+  }
+  body[data-skin="monsterdex"] .dex-top { display: flex; }
+  /* Grey bezel around the green screen, with the two little red dots and speaker */
+  body[data-skin="monsterdex"] .screen {
+    position: relative;
+    border-radius: 4px;
+    padding: 12px 14px;
+    min-height: 92px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35), 0 0 0 12px #dedede, 0 0 0 14px #2b2b2b;
+    margin: 14px 14px 30px;
+    background-image: repeating-linear-gradient(0deg, rgba(15, 56, 15, 0.06) 0 1px, transparent 1px 3px);
+  }
+  body[data-skin="monsterdex"] .screen::before {
+    content: "";
+    position: absolute;
+    top: -9px;
+    left: calc(50% - 14px);
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #c8102e;
+    box-shadow: 14px 0 0 #c8102e;
+  }
+  body[data-skin="monsterdex"] .screen::after {
+    content: "";
+    position: absolute;
+    bottom: -11px;
+    right: 6px;
+    width: 26px; height: 8px;
+    background: repeating-linear-gradient(0deg, #2b2b2b 0 2px, transparent 2px 4px);
+  }
+  body[data-skin="monsterdex"] .display,
+  body[data-skin="monsterdex"] .history {
+    font-family: "Press Start 2P", "Courier New", monospace;
+    font-weight: 400;
+  }
+  body[data-skin="monsterdex"] .history { font-size: 9px; min-height: 16px; margin-bottom: 8px; }
+  body[data-skin="monsterdex"] .display { line-height: 1.3; }
+  body[data-skin="monsterdex"] .keys button { font-family: "Press Start 2P", "Courier New", monospace; font-size: 16px; }
+  body[data-skin="monsterdex"] .keys button:active,
+  body[data-skin="monsterdex"] .keys button.pressed { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35); }
+  body[data-skin="monsterdex"] .fn { color: #ffffff; }
+  body[data-skin="monsterdex"] .op[data-action="equals"] { background: #4dad5b; color: #ffffff; }
+
+  .dex-top {
+    display: none;
+    align-items: flex-start;
+    gap: 12px;
+    margin: -4px 0 6px;
+    padding-bottom: 14px;
+    border-bottom: 3px solid rgba(0, 0, 0, 0.25);
+  }
+  .dex-lens {
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: radial-gradient(circle at 35% 30%, #ffffff 0 12%, #8fd3ff 16%, #2a9df4 45%, #0b5fa8 100%);
+    box-shadow: 0 0 0 5px #ffffff, 0 0 0 7px #2b2b2b, 0 4px 8px 7px rgba(0, 0, 0, 0.2);
+    margin: 7px 6px 0 7px;
+    animation: dex-glow 2.4s ease-in-out infinite;
+  }
+  .dex-lights { display: flex; gap: 7px; margin-top: 4px; }
+  .dex-lights span {
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.25), 0 0 0 2px #2b2b2b;
+  }
+  .dex-lights span:nth-child(1) { background: #ff3b3b; }
+  .dex-lights span:nth-child(2) { background: #ffcb05; }
+  .dex-lights span:nth-child(3) { background: #4dad5b; }
+  .dex-label {
+    margin-left: auto;
+    align-self: flex-end;
+    font-family: "Press Start 2P", "Courier New", monospace;
+    font-size: 10px;
+    color: #ffffff;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+  }
+  @keyframes dex-glow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.25); }
+  }
+  @media (prefers-reduced-motion: reduce) { .dex-lens { animation: none; } }
+
+  /* ---------- Grey Console skin: original grey console ---------- */
+  body[data-skin="greyconsole"] {
+    --bg: radial-gradient(circle at 50% 25%, #2a3a7a, #0b1030 70%);
+    --body: linear-gradient(180deg, #d6d6d2 0%, #bcbcb7 100%);
+    --screen: #1c1c1e;
+    --text: #f2f2f2;
+    --muted: #9a9aa0;
+    --key: #5b5b60;
+    --key-text: #ececec;
+    --key-hover: #68686e;
+    --fn: #8d8d92;
+    --op: #3c3c40;
+    --op-text: #ececec;
+    --op-active: #3c3c40;
+    --op-active-text: #ececec;
+    --key-radius: 10px;
+    --key-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+    --body-radius: 22px;
+    --shadow: 0 25px 60px rgba(0, 0, 0, 0.55), inset 0 2px 0 rgba(255, 255, 255, 0.5);
+  }
+  body[data-skin="greyconsole"] .grey-top { display: flex; }
+  body[data-skin="greyconsole"] .screen { border-radius: 8px; box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.8), 0 0 0 3px #a6a6a2; }
+  body[data-skin="greyconsole"] .display { font-weight: 400; }
+  /* The four face-button colours: triangle, cross, square, circle */
+  body[data-skin="greyconsole"] .op { border-radius: 999px; font-size: 28px; font-weight: 700; }
+  body[data-skin="greyconsole"] [data-op="/"] { color: #3ec4a5; }
+  body[data-skin="greyconsole"] [data-op="*"] { color: #7fa9ea; }
+  body[data-skin="greyconsole"] [data-op="-"] { color: #f08dc6; }
+  body[data-skin="greyconsole"] [data-op="+"] { color: #ff5a5f; }
+  body[data-skin="greyconsole"] .op.active { box-shadow: inset 0 0 0 3px currentColor; }
+  body[data-skin="greyconsole"] .keys button:active,
+  body[data-skin="greyconsole"] .keys button.pressed { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); }
+  .grey-top {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    margin: -4px 4px 14px;
+  }
+  .grey-shapes { display: flex; gap: 10px; font-size: 18px; font-weight: 700; }
+  .grey-shapes span:nth-child(1) { color: #3ec4a5; }
+  .grey-shapes span:nth-child(2) { color: #ff5a5f; }
+  .grey-shapes span:nth-child(3) { color: #7fa9ea; }
+  .grey-shapes span:nth-child(4) { color: #f08dc6; }
+  .grey-name { color: #55555a; font-size: 13px; font-weight: 700; letter-spacing: 0.35em; }
+
+  /* ---------- Green Machine skin: matte black with console green ---------- */
+  body[data-skin="greenmachine"] {
+    --bg: radial-gradient(circle at 50% 15%, #1d4d1d, #050505 65%);
+    --body: linear-gradient(180deg, #1a1a1a 0%, #0e0e0e 100%);
+    --screen: #050505;
+    --text: #ffffff;
+    --muted: #7fd67f;
+    --key: #232323;
+    --key-text: #f2f2f2;
+    --key-hover: #2e2e2e;
+    --fn: #3a3a3a;
+    --op: #1a1a1a;
+    --op-text: #f2f2f2;
+    --op-active: #1a1a1a;
+    --op-active-text: #f2f2f2;
+    --key-radius: 12px;
+    --key-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 4px rgba(0, 0, 0, 0.6);
+    --body-radius: 20px;
+    --shadow: 0 0 0 1px #2a2a2a, 0 0 45px rgba(16, 124, 16, 0.35), 0 25px 60px rgba(0, 0, 0, 0.7);
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  body[data-skin="greenmachine"] .green-top { display: flex; }
+  body[data-skin="greenmachine"] .screen { border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(16, 124, 16, 0.6), inset 0 -3px 0 #107c10; }
+  body[data-skin="greenmachine"] .display { font-weight: 300; }
+  body[data-skin="greenmachine"] .keys button:hover { box-shadow: inset 0 0 0 2px #107c10; }
+  /* A B X Y colours on the operator keys */
+  body[data-skin="greenmachine"] .op { border-radius: 999px; font-weight: 700; box-shadow: inset 0 0 0 2px #2c2c2c; }
+  body[data-skin="greenmachine"] [data-op="/"] { color: #ffb900; }
+  body[data-skin="greenmachine"] [data-op="*"] { color: #1f8fff; }
+  body[data-skin="greenmachine"] [data-op="-"] { color: #e81123; }
+  body[data-skin="greenmachine"] [data-op="+"] { color: #5dc21e; }
+  body[data-skin="greenmachine"] .op.active { box-shadow: inset 0 0 0 3px currentColor, 0 0 12px currentColor; }
+  body[data-skin="greenmachine"] .op[data-action="equals"] { background: #107c10; color: #ffffff; }
+  body[data-skin="greenmachine"] .op[data-action="equals"]:hover { background: #138a13; }
+  .green-top {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin: -4px 4px 14px;
+  }
+  .green-orb {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffffff 0 10%, #9be89b 25%, #107c10 70%);
+    box-shadow: 0 0 12px rgba(16, 200, 16, 0.8), 0 0 0 2px #0a0a0a, 0 0 0 3px #2c2c2c;
+    animation: green-pulse 3s ease-in-out infinite;
+  }
+  .green-name { color: #ffffff; font-size: 14px; font-weight: 700; letter-spacing: 0.4em; }
+  .green-vents { margin-left: auto; width: 48px; height: 10px; background: radial-gradient(circle, #3a3a3a 1.5px, transparent 2px) 0 0 / 6px 5px; }
+  @keyframes green-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(16, 200, 16, 0.6), 0 0 0 2px #0a0a0a, 0 0 0 3px #2c2c2c; }
+    50% { box-shadow: 0 0 18px rgba(16, 220, 16, 1), 0 0 0 2px #0a0a0a, 0 0 0 3px #2c2c2c; }
+  }
+  @media (prefers-reduced-motion: reduce) { .green-orb { animation: none; } }
+
+  /* ---------- 8-Bit Console skin: classic 8-bit grey, black and red ---------- */
+  body[data-skin="eightbit"] {
+    --bg: #e9e6df;
+    --body: linear-gradient(180deg, #dcdcd8 0%, #c9c9c5 100%);
+    --screen: #111111;
+    --text: #f5f5f5;
+    --muted: #8a8a8a;
+    --key: #2b2b2b;
+    --key-text: #f0f0f0;
+    --key-hover: #383838;
+    --fn: #8e8e8e;
+    --op: #c8102e;
+    --op-text: #ffffff;
+    --op-active: #ff3a55;
+    --op-active-text: #ffffff;
+    --key-radius: 6px;
+    --key-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+    --body-radius: 8px;
+    --shadow: 0 20px 45px rgba(0, 0, 0, 0.25), inset 0 -5px 0 rgba(0, 0, 0, 0.12);
+    font-family: "Helvetica Neue", Arial, sans-serif;
+  }
+  body[data-skin="eightbit"] .eightbit-top { display: flex; }
+  body[data-skin="eightbit"] .screen { border-radius: 4px; box-shadow: 0 0 0 6px #2b2b2b; margin-top: 6px; }
+  body[data-skin="eightbit"] .display { font-weight: 500; }
+  /* Red round A/B-style operators, grey Select/Start-style function keys */
+  body[data-skin="eightbit"] .op { border-radius: 999px; font-weight: 700; }
+  body[data-skin="eightbit"] .fn { color: #1e1e1e; font-size: 16px; font-weight: 700; border-radius: 999px; }
+  body[data-skin="eightbit"] .op.active { box-shadow: inset 0 0 0 3px #ffffff; }
+  body[data-skin="eightbit"] .keys button:active,
+  body[data-skin="eightbit"] .keys button.pressed { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35); }
+  .eightbit-top {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    margin: -4px 0 14px;
+    padding: 8px 12px;
+    background: #2b2b2b;
+    border-radius: 4px;
+  }
+  .eightbit-name {
+    color: #e4000f;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+  .eightbit-sub { color: #bdbdbd; font-size: 9px; font-weight: 700; letter-spacing: 0.15em; text-align: right; line-height: 1.4; }
+
+  /* ---------- Blue Lager skin: royal blue can, white and silver ---------- */
+  body[data-skin="bluelager"] {
+    --bg:
+      radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.12) 0 3px, transparent 4px) 0 0 / 60px 60px,
+      radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.08) 0 2px, transparent 3px) 0 0 / 45px 45px,
+      linear-gradient(180deg, #0046ad 0%, #001b5e 100%);
+    --body: linear-gradient(90deg, #06307a 0%, #1f5fcc 30%, #4a86ea 45%, #1f5fcc 60%, #06307a 100%);
+    --screen: #0b1f4d;
+    --text: #ffffff;
+    --muted: #9cb8e8;
+    --key: #ffffff;
+    --key-text: #0046ad;
+    --key-hover: #eaf1ff;
+    --fn: linear-gradient(180deg, #e6ebf2, #b7c1ce);
+    --op: linear-gradient(180deg, #f4f6f9 0%, #c3ccd8 50%, #9aa6b6 100%);
+    --op-text: #0b1f4d;
+    --op-active: #0b1f4d;
+    --op-active-text: #ffffff;
+    --key-radius: 10px;
+    --key-shadow: 0 3px 0 rgba(0, 15, 60, 0.45);
+    --body-radius: 16px;
+    --shadow: 0 25px 60px rgba(0, 10, 40, 0.6), inset 0 0 0 3px #c3ccd8, inset 0 0 0 5px #06307a;
+    font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  }
+  body[data-skin="bluelager"] .lager-top { display: flex; }
+  body[data-skin="bluelager"] .screen { border-radius: 8px; box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6), 0 0 0 3px #c3ccd8; }
+  body[data-skin="bluelager"] .display { font-weight: 900; }
+  body[data-skin="bluelager"] .fn { color: #0b1f4d; }
+  body[data-skin="bluelager"] .op.active { box-shadow: inset 0 0 0 3px #c3ccd8; }
+  body[data-skin="bluelager"] .keys button:active,
+  body[data-skin="bluelager"] .keys button.pressed { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 15, 60, 0.45); }
+  .lager-top {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin: -4px 4px 14px;
+  }
+  /* Silver bottle cap */
+  .lager-cap {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background:
+      radial-gradient(circle, #0046ad 0 38%, transparent 40%),
+      repeating-conic-gradient(#e9edf2 0 10deg, #9aa6b6 10deg 20deg);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+  .lager-name {
+    color: #ffffff;
+    font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-shadow: 2px 2px 0 #0b1f4d, -1px -1px 0 #0b1f4d, 1px -1px 0 #0b1f4d, -1px 1px 0 #0b1f4d;
+  }
+  .lager-sub { margin-left: auto; color: #c3ccd8; font-size: 9px; letter-spacing: 0.2em; text-align: right; line-height: 1.4; }
+
+  /* ---------- Silver Peak skin: silver can, red script, cold-activated mountains ---------- */
+  body[data-skin="silverpeak"] {
+    --bg:
+      radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.7) 0 2px, transparent 3px) 0 0 / 38px 38px,
+      radial-gradient(circle at 60% 70%, rgba(255, 255, 255, 0.5) 0 1.5px, transparent 2.5px) 0 0 / 27px 27px,
+      linear-gradient(180deg, #e3edf6 0%, #a9bfd4 100%);
+    --body: linear-gradient(90deg, #8f959c 0%, #d9dde1 25%, #f5f6f7 42%, #c5cad0 60%, #8f959c 100%);
+    --screen: #eaf3fb;
+    --text: #13294b;
+    --muted: #5a7394;
+    --key: #fdfdfd;
+    --key-text: #13294b;
+    --key-hover: #eef3f8;
+    --fn: #13294b;
+    --op: #c8102e;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #c8102e;
+    --key-radius: 10px;
+    --key-shadow: 0 3px 0 rgba(20, 30, 50, 0.3);
+    --body-radius: 16px;
+    --shadow: 0 25px 55px rgba(30, 50, 80, 0.35), inset 0 0 0 2px rgba(255, 255, 255, 0.6);
+    font-family: "Helvetica Neue", Arial, sans-serif;
+  }
+  body[data-skin="silverpeak"] .peak-top { display: flex; }
+  body[data-skin="silverpeak"] .screen {
+    border-radius: 8px;
+    box-shadow: inset 0 2px 8px rgba(19, 41, 75, 0.25), 0 0 0 3px #13294b;
+    background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.8), transparent 40%);
+  }
+  body[data-skin="silverpeak"] .display { font-weight: 500; }
+  body[data-skin="silverpeak"] .fn { color: #ffffff; }
+  body[data-skin="silverpeak"] .op[data-action="equals"] { background: #2f7de1; }
+  body[data-skin="silverpeak"] .op.active { box-shadow: inset 0 0 0 3px #c8102e; }
+  body[data-skin="silverpeak"] .keys button:active,
+  body[data-skin="silverpeak"] .keys button.pressed { transform: translateY(2px); box-shadow: 0 1px 0 rgba(20, 30, 50, 0.3); }
+  .peak-top {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin: -6px 0 12px;
+  }
+  .peak-mountains { width: 100%; height: 42px; display: block; }
+  .peak-mountains .peak { fill: #2f7de1; transition: fill 0.4s; }
+  .peak-top:hover .peak-mountains .peak { fill: #0b58c9; }
+  .peak-name {
+    margin-top: -4px;
+    color: #c8102e;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 24px;
+  }
+  .peak-sub { color: #13294b; font-size: 9px; font-weight: 700; letter-spacing: 0.25em; }
+
+  /* ---------- Neon Citrus skin: neon green can, black and red ---------- */
+  body[data-skin="neoncitrus"] {
+    --bg:
+      radial-gradient(circle, rgba(196, 255, 14, 0.18) 0 2px, transparent 3px) 0 0 / 40px 40px,
+      radial-gradient(circle at 50% 20%, #1b6b16, #031a05 70%);
+    --body: linear-gradient(90deg, #17661a 0%, #3fae2a 28%, #8fe83a 45%, #3fae2a 62%, #17661a 100%);
+    --screen: #050805;
+    --text: #c4ff0e;
+    --muted: #6fbf3a;
+    --key: #111111;
+    --key-text: #ffffff;
+    --key-hover: #222222;
+    --fn: #ffffff;
+    --op: #e4002b;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #e4002b;
+    --key-radius: 8px;
+    --key-shadow: 0 3px 0 rgba(0, 0, 0, 0.5);
+    --body-radius: 14px;
+    --shadow: 0 0 40px rgba(143, 232, 58, 0.35), 0 25px 60px rgba(0, 0, 0, 0.6), inset 0 0 0 3px #0c3d0e;
+    font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  }
+  body[data-skin="neoncitrus"] .citrus-top { display: flex; }
+  body[data-skin="neoncitrus"] .screen { border-radius: 6px; box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.8), 0 0 0 3px #111; }
+  body[data-skin="neoncitrus"] .display { font-weight: 900; text-shadow: 0 0 10px rgba(196, 255, 14, 0.6); }
+  body[data-skin="neoncitrus"] .fn { color: #111111; }
+  body[data-skin="neoncitrus"] .op[data-action="equals"] { background: #c4ff0e; color: #111111; }
+  body[data-skin="neoncitrus"] .op.active { box-shadow: inset 0 0 0 3px #e4002b; }
+  body[data-skin="neoncitrus"] .keys button:active,
+  body[data-skin="neoncitrus"] .keys button.pressed { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.5); }
+  .citrus-top {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    margin: -4px 4px 14px;
+  }
+  .citrus-name {
+    font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+    font-size: 28px;
+    font-style: italic;
+    font-weight: 900;
+    color: #111111;
+    letter-spacing: -0.02em;
+    text-shadow: 2px 2px 0 #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 4px 4px 0 #e4002b;
+  }
+  .citrus-sub { color: #111111; font-size: 10px; font-weight: 900; letter-spacing: 0.15em; font-style: italic; }
+  .citrus-sub b { color: #e4002b; }
+
+  /* ---------- Tropical Teal skin: tropical teal ---------- */
+  body[data-skin="tropicalteal"] {
+    --bg:
+      radial-gradient(circle, rgba(255, 255, 255, 0.35) 0 2px, transparent 3px) 0 0 / 36px 36px,
+      linear-gradient(180deg, #6ff0e8 0%, #00a3b0 55%, #006d80 100%);
+    --body: linear-gradient(90deg, #007c8a 0%, #17bfc0 28%, #7ff3ea 45%, #17bfc0 62%, #007c8a 100%);
+    --screen: #013b4d;
+    --text: #aefcf5;
+    --muted: #5fd3d0;
+    --key: #ffffff;
+    --key-text: #00707c;
+    --key-hover: #e8fdfb;
+    --fn: #013b4d;
+    --op: #015b73;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #015b73;
+    --key-radius: 12px;
+    --key-shadow: 0 3px 0 rgba(0, 60, 75, 0.45);
+    --body-radius: 18px;
+    --shadow: 0 25px 55px rgba(0, 60, 75, 0.5), inset 0 0 0 3px rgba(255, 255, 255, 0.35);
+    font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  }
+  body[data-skin="tropicalteal"] .teal-top { display: flex; }
+  body[data-skin="tropicalteal"] .screen { border-radius: 10px; box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6), 0 0 0 3px #ffffff; }
+  body[data-skin="tropicalteal"] .display { font-weight: 900; text-shadow: 0 0 10px rgba(127, 243, 234, 0.6); }
+  body[data-skin="tropicalteal"] .fn { color: #ffffff; }
+  body[data-skin="tropicalteal"] .op[data-action="equals"] { background: #c4ff0e; color: #013b4d; }
+  body[data-skin="tropicalteal"] .op.active { box-shadow: inset 0 0 0 3px #015b73; }
+  body[data-skin="tropicalteal"] .keys button:active,
+  body[data-skin="tropicalteal"] .keys button.pressed { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 60, 75, 0.45); }
+  .teal-top {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin: -6px 0 10px;
+  }
+  .teal-brand { color: #013b4d; font-size: 11px; font-weight: 900; letter-spacing: 0.3em; }
+  .teal-name {
+    color: #ffffff;
+    font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+    font-size: 26px;
+    font-style: italic;
+    font-weight: 900;
+    text-shadow: 2px 2px 0 #015b73, 4px 4px 0 rgba(1, 59, 77, 0.4);
+  }
+  .teal-waves { width: 100%; height: 14px; display: block; margin-top: 2px; }
+
+  /* ---------- Midnight Berry skin: midnight purple with electric blue ---------- */
+  body[data-skin="midnightberry"] {
+    --bg:
+      radial-gradient(circle, rgba(255, 255, 255, 0.8) 0 1px, transparent 1.5px) 0 0 / 53px 53px,
+      radial-gradient(circle, rgba(200, 160, 255, 0.6) 0 1px, transparent 1.5px) 20px 30px / 71px 71px,
+      linear-gradient(180deg, #0a0626 0%, #1c0f4a 100%);
+    --body: linear-gradient(90deg, #140c3a 0%, #2e1a78 30%, #4a2aa8 45%, #2e1a78 60%, #140c3a 100%);
+    --screen: #07041a;
+    --text: #7fe9ff;
+    --muted: #c78bff;
+    --key: #1d1350;
+    --key-text: #e9e1ff;
+    --key-hover: #28196a;
+    --fn: #3a2690;
+    --op: linear-gradient(135deg, #8a2be2 0%, #00b8ff 100%);
+    --op-text: #ffffff;
+    --op-active: #07041a;
+    --op-active-text: #7fe9ff;
+    --key-radius: 12px;
+    --key-shadow: inset 0 0 0 1px rgba(199, 139, 255, 0.25), 0 3px 0 rgba(0, 0, 0, 0.5);
+    --body-radius: 18px;
+    --shadow: 0 0 40px rgba(138, 43, 226, 0.45), 0 25px 60px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(127, 233, 255, 0.35);
+    font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  }
+  body[data-skin="midnightberry"] .midnight-top { display: flex; }
+  body[data-skin="midnightberry"] .screen { border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(127, 233, 255, 0.4), inset 0 0 20px rgba(138, 43, 226, 0.35); }
+  body[data-skin="midnightberry"] .display { font-weight: 900; text-shadow: 0 0 8px rgba(127, 233, 255, 0.8), 0 0 20px rgba(138, 43, 226, 0.6); }
+  body[data-skin="midnightberry"] .fn { color: #ffffff; }
+  body[data-skin="midnightberry"] .op { box-shadow: 0 0 14px rgba(138, 43, 226, 0.5); }
+  body[data-skin="midnightberry"] .op.active { box-shadow: inset 0 0 0 2px #7fe9ff, 0 0 14px rgba(127, 233, 255, 0.5); }
+  .midnight-top {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin: -4px 4px 14px;
+  }
+  /* Crescent moon */
+  .midnight-moon {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: inset -8px 3px 0 0 #e9e1ff;
+    filter: drop-shadow(0 0 6px rgba(199, 139, 255, 0.9));
+    transform: rotate(-20deg);
+  }
+  .midnight-text { display: flex; flex-direction: column; line-height: 1.1; }
+  .midnight-brand { color: #c78bff; font-size: 10px; font-weight: 900; letter-spacing: 0.3em; }
+  .midnight-name {
+    font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 900;
+    background: linear-gradient(90deg, #c78bff, #7fe9ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ---------- Purple Taco skin: purple, magenta and bell ---------- */
+  body[data-skin="purpletaco"] {
+    --bg: linear-gradient(135deg, #7b2a9e 0%, #4a1466 100%);
+    --body: linear-gradient(180deg, #702082 0%, #561566 100%);
+    --screen: #ffffff;
+    --text: #561566;
+    --muted: #a36bb8;
+    --key: #ffffff;
+    --key-text: #561566;
+    --key-hover: #f5ecf9;
+    --fn: #2b0b3d;
+    --op: #e31c79;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #e31c79;
+    --key-radius: 12px;
+    --key-shadow: 0 3px 0 rgba(30, 5, 45, 0.45);
+    --body-radius: 22px;
+    --shadow: 0 25px 60px rgba(30, 5, 45, 0.6), inset 0 0 0 3px rgba(255, 255, 255, 0.15);
+    font-family: "Helvetica Neue", Arial, sans-serif;
+  }
+  body[data-skin="purpletaco"] .purple-top { display: flex; }
+  body[data-skin="purpletaco"] .screen { border-radius: 12px; box-shadow: inset 0 2px 6px rgba(86, 21, 102, 0.25); }
+  body[data-skin="purpletaco"] .display { font-weight: 800; }
+  body[data-skin="purpletaco"] .keys button { font-weight: 700; }
+  body[data-skin="purpletaco"] .fn { color: #ffffff; }
+  body[data-skin="purpletaco"] .op[data-action="equals"] { background: #ffc72c; color: #2b0b3d; }
+  body[data-skin="purpletaco"] .op.active { box-shadow: inset 0 0 0 3px #e31c79; }
+  body[data-skin="purpletaco"] .keys button:active,
+  body[data-skin="purpletaco"] .keys button.pressed { transform: translateY(2px); box-shadow: 0 1px 0 rgba(30, 5, 45, 0.45); }
+  .purple-top {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin: -4px 4px 14px;
+  }
+  .purple-bell { width: 34px; height: 36px; flex-shrink: 0; }
+  .purple-text { display: flex; flex-direction: column; line-height: 1.05; }
+  .purple-name { color: #ffffff; font-size: 22px; font-weight: 900; letter-spacing: 0.04em; }
+  .purple-sub { color: #ffc72c; font-family: Georgia, serif; font-style: italic; font-weight: 700; font-size: 14px; }
+
+  /* =====================================================================
+     GAME SKINS
+     ===================================================================== */
+
+  /* Shared: Ring World's angled-corner UI panels */
+  body[data-skin^="ringworld"] .keys button {
+    clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
+  }
+  body[data-skin^="ringworld"] .display { font-family: "Rajdhani", sans-serif; font-weight: 700; }
+  body[data-skin^="ringworld"] .keys button { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 24px; }
+  .ring-top {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin: -4px 4px 14px;
+  }
+  .ring-logo {
+    font-family: "Michroma", sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.32em;
+    background: linear-gradient(180deg, #ffffff 0%, #c9d3dc 45%, #7d8a96 55%, #e8eef3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .ring-sub { margin-left: auto; font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.22em; text-align: right; line-height: 1.2; }
+  /* HUD shield bar across the top of the screen */
+  body[data-skin^="ringworld"] .screen { position: relative; }
+  body[data-skin^="ringworld"] .screen::before {
+    content: "";
+    position: absolute;
+    top: 8px; left: 18px; right: 18px;
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--shield) 0 10px, transparent 10px 12px);
+    box-shadow: 0 0 8px var(--shield);
+    opacity: 0.85;
+  }
+
+  /* ---------- Ring World — the ring, deep space, the blue HUD ---------- */
+  body[data-skin="ringworld"] {
+    --bg:
+      radial-gradient(ellipse 150% 38% at 50% 108%, transparent 60%, rgba(170, 215, 255, 0.7) 61%, rgba(110, 170, 230, 0.35) 62.5%, transparent 65%),
+      radial-gradient(circle, rgba(255, 255, 255, 0.7) 0 1px, transparent 1.5px) 0 0 / 61px 61px,
+      radial-gradient(circle, rgba(255, 255, 255, 0.4) 0 1px, transparent 1.5px) 30px 20px / 43px 43px,
+      linear-gradient(180deg, #03060f 0%, #0b1a33 60%, #1a3558 100%);
+    --body: linear-gradient(160deg, #2b3542 0%, #1a2129 60%, #12171d 100%);
+    --screen: #03101a;
+    --text: #8fd8ff;
+    --muted: #4f95c0;
+    --key: #1a242f;
+    --key-text: #c3e8ff;
+    --key-hover: #22303e;
+    --fn: #2a3947;
+    --op: linear-gradient(180deg, #3a9ae6 0%, #1c5f9e 100%);
+    --op-text: #ffffff;
+    --op-active: #03101a;
+    --op-active-text: #8fd8ff;
+    --key-radius: 0;
+    --key-shadow: inset 0 0 0 1px rgba(143, 216, 255, 0.28);
+    --body-radius: 4px;
+    --shadow: 0 0 0 1px #3e5266, 0 0 36px rgba(80, 170, 255, 0.28), 0 25px 60px rgba(0, 0, 0, 0.7);
+    --shield: #5ab8ff;
+  }
+  body[data-skin="ringworld"] .ringworld-top { display: flex; }
+  body[data-skin="ringworld"] .ring-sub { color: #8fd8ff; }
+  body[data-skin="ringworld"] .screen { border-radius: 2px; padding-top: 22px; box-shadow: inset 0 0 0 1px rgba(143, 216, 255, 0.45), inset 0 0 24px rgba(90, 184, 255, 0.15); }
+  body[data-skin="ringworld"] .display { text-shadow: 0 0 10px rgba(143, 216, 255, 0.7); }
+  body[data-skin="ringworld"] .fn { color: #8fd8ff; }
+  body[data-skin="ringworld"] .op.active { box-shadow: inset 0 0 0 2px #5ab8ff; }
+  .ring-ring { width: 36px; height: 22px; flex-shrink: 0; }
+
+  /* Easter egg: show 419 on the Ring World skin and Dropship 419 does a
+     drop-off, like a classic beach landing. */
+  .dropship-fx { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+  .screen.fx .display, .screen.fx .history { opacity: 0; transition: opacity 0.25s; }
+  .dropship {
+    position: absolute;
+    top: 18px;
+    left: -150px;
+    width: 136px;
+    filter: drop-shadow(0 0 6px rgba(90, 184, 255, 0.55));
+    animation: dropship-fly 4s cubic-bezier(0.45, 0, 0.25, 1) forwards;
+  }
+  @keyframes dropship-fly {
+    0%   { left: -150px;             transform: translateY(8px) rotate(4deg); }
+    28%  { left: calc(50% - 68px);   transform: translateY(0) rotate(0deg); }
+    38%  { left: calc(50% - 68px);   transform: translateY(4px) rotate(0deg); }
+    50%  { left: calc(50% - 68px);   transform: translateY(1px) rotate(0deg); }
+    62%  { left: calc(50% - 64px);   transform: translateY(4px) rotate(-1deg); }
+    100% { left: calc(100% + 20px);  transform: translateY(-18px) rotate(-7deg); }
+  }
+  .dropship .thrust { animation: thrust 0.12s linear infinite alternate; transform-box: fill-box; transform-origin: right center; }
+  @keyframes thrust { from { opacity: 0.6; transform: scaleX(0.8); } to { opacity: 1; transform: scaleX(1.15); } }
+  .dropship-msg {
+    position: absolute;
+    left: 18px;
+    bottom: 9px;
+    text-align: left;
+    font-family: "Rajdhani", sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: #8fd8ff;
+    text-shadow: 0 0 8px rgba(143, 216, 255, 0.8);
+    opacity: 0;
+    animation: dropship-msg 4s ease forwards;
+  }
+  .dropship-msg b { display: block; font-size: 16px; letter-spacing: 0.1em; color: #ffffff; }
+  @keyframes dropship-msg {
+    0%, 22% { opacity: 0; transform: translateY(5px); }
+    32%, 85% { opacity: 1; transform: none; }
+    100% { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dropship { animation: none; left: calc(50% - 68px); }
+  }
+
+  /* ---------- Ring World II — gunmetal chrome over Earth's blue horizon ---------- */
+  body[data-skin="ringworld2"] {
+    --bg:
+      radial-gradient(ellipse 170% 55% at 50% 125%, #0f3a66 0 55%, rgba(120, 190, 255, 0.75) 56%, rgba(60, 120, 200, 0.25) 58%, transparent 63%),
+      radial-gradient(circle, rgba(255, 255, 255, 0.6) 0 1px, transparent 1.5px) 0 0 / 57px 57px,
+      linear-gradient(180deg, #010207 0%, #060d1c 100%);
+    --body: linear-gradient(180deg, #9aa5ae 0%, #6b7680 45%, #4b545d 55%, #3a424a 100%);
+    --screen: #07121c;
+    --text: #e2f4ff;
+    --muted: #86b4d6;
+    --key: #262e36;
+    --key-text: #e6edf2;
+    --key-hover: #303a44;
+    --fn: #48535e;
+    --op: linear-gradient(180deg, #6cc0ff 0%, #2b6db5 100%);
+    --op-text: #ffffff;
+    --op-active: #07121c;
+    --op-active-text: #6cc0ff;
+    --key-radius: 0;
+    --key-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+    --body-radius: 4px;
+    --shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 0 1px #20262c, 0 0 40px rgba(90, 170, 255, 0.3), 0 25px 60px rgba(0, 0, 0, 0.75);
+    --shield: #6cc0ff;
+  }
+  body[data-skin="ringworld2"] .ring2-top { display: flex; }
+  body[data-skin="ringworld2"] .screen { border-radius: 2px; padding-top: 22px; box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.8), 0 0 0 2px #2a3138, 0 0 0 3px #b5c0c9; }
+  body[data-skin="ringworld2"] .display { text-shadow: 0 0 10px rgba(108, 192, 255, 0.6); }
+  body[data-skin="ringworld2"] .op.active { box-shadow: inset 0 0 0 2px #6cc0ff; }
+  body[data-skin="ringworld2"] .ring-logo {
+    background: linear-gradient(180deg, #3a444e 0%, #1a2027 50%, #4d5864 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.5)) drop-shadow(0 0 5px rgba(108, 192, 255, 0.55));
+  }
+  body[data-skin="ringworld3"] .ring-logo { filter: drop-shadow(0 1px 0 #1d2211) drop-shadow(0 0 3px rgba(0, 0, 0, 0.6)); }
+  .ring2-num {
+    font-family: "Michroma", sans-serif;
+    font-size: 34px;
+    line-height: 1;
+    color: #eaf6ff;
+    text-shadow: 0 0 10px rgba(108, 192, 255, 0.9), 0 2px 0 #2b3a48;
+    margin-left: -6px;
+  }
+
+  /* ---------- Ring World III — green armour, gold visor, an amber sky ---------- */
+  body[data-skin="ringworld3"] {
+    --bg:
+      linear-gradient(180deg, #120d06 0%, #3f2c12 40%, #b77b28 78%, #f3cf7d 100%);
+    --body: linear-gradient(160deg, #66753a 0%, #46512a 55%, #2f371c 100%);
+    --screen: linear-gradient(125deg, #fff0b8 0%, #e9ad33 25%, #a8680f 55%, #f6cc61 80%, #8a520c 100%);
+    --text: #1f1402;
+    --muted: #5a3a06;
+    --key: #262a1a;
+    --key-text: #e9e5cf;
+    --key-hover: #30351f;
+    --fn: #56642f;
+    --op: linear-gradient(180deg, #f5cd5b 0%, #c98d1f 100%);
+    --op-text: #231602;
+    --op-active: #262a1a;
+    --op-active-text: #f5cd5b;
+    --key-radius: 0;
+    --key-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+    --body-radius: 6px;
+    --shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 0 1px #1d2211, 0 25px 60px rgba(40, 20, 0, 0.6);
+    --shield: #9fe3ff;
+  }
+  body[data-skin="ringworld3"] .ring3-top { display: flex; }
+  body[data-skin="ringworld3"] .ring-sub { color: #f5cd5b; }
+  /* The screen is the gold visor */
+  body[data-skin="ringworld3"] .screen {
+    border-radius: 26px 26px 10px 10px;
+    padding-top: 24px;
+    box-shadow: inset 0 -8px 16px rgba(90, 50, 0, 0.45), inset 0 6px 12px rgba(255, 255, 255, 0.45), 0 0 0 4px #262a1a, 0 0 0 6px #56642f;
+  }
+  body[data-skin="ringworld3"] .display { text-shadow: 0 1px 0 rgba(255, 240, 190, 0.6); }
+  body[data-skin="ringworld3"] .fn { color: #f1ecd4; }
+  body[data-skin="ringworld3"] .op.active { box-shadow: inset 0 0 0 2px #f5cd5b; }
+
+  /* ---------- Ashen Realm — stone, ash and the bonfire ---------- */
+  body[data-skin="ashenrealm"] {
+    --bg:
+      radial-gradient(ellipse 60% 35% at 50% 100%, rgba(255, 120, 30, 0.28), transparent 70%),
+      radial-gradient(circle, rgba(255, 150, 60, 0.55) 0 1px, transparent 1.6px) 10px 40px / 83px 97px,
+      radial-gradient(circle, rgba(255, 110, 30, 0.4) 0 1px, transparent 1.6px) 50px 10px / 71px 113px,
+      #0a0908;
+    --body: linear-gradient(180deg, #25221d 0%, #171511 100%);
+    --screen: #070605;
+    --text: #dcd3bd;
+    --muted: #7c7262;
+    --key: #1c1a16;
+    --key-text: #d2c9b1;
+    --key-hover: #27241e;
+    --fn: #2b2721;
+    --op: #24170c;
+    --op-text: #ff9f45;
+    --op-active: #ff9f45;
+    --op-active-text: #1a0f05;
+    --key-radius: 2px;
+    --key-shadow: inset 0 0 0 1px rgba(170, 140, 90, 0.3), 0 2px 0 rgba(0, 0, 0, 0.6);
+    --body-radius: 3px;
+    --shadow: 0 0 0 1px #4a3e2c, 0 0 0 4px #14120f, 0 0 0 5px #3a3124, 0 30px 70px rgba(0, 0, 0, 0.85);
+    font-family: "Cinzel", Georgia, serif;
+  }
+  body[data-skin="ashenrealm"] .ashen-top { display: flex; }
+  body[data-skin="ashenrealm"] .screen { border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(170, 140, 90, 0.35), inset 0 0 30px rgba(0, 0, 0, 0.9); }
+  body[data-skin="ashenrealm"] .display { font-weight: 400; letter-spacing: 0.04em; }
+  body[data-skin="ashenrealm"] .keys button { font-family: "Cinzel", Georgia, serif; }
+  body[data-skin="ashenrealm"] .op { text-shadow: 0 0 8px rgba(255, 140, 40, 0.8); box-shadow: inset 0 0 0 1px rgba(255, 140, 40, 0.35), 0 2px 0 rgba(0, 0, 0, 0.6); }
+  body[data-skin="ashenrealm"] .op.active { text-shadow: none; }
+  /* Divide by zero... */
+  body[data-skin="ashenrealm"] .display.died {
+    color: #a3161a;
+    font-size: 34px !important;
+    letter-spacing: 0.12em;
+    text-align: center;
+    text-shadow: 0 0 14px rgba(163, 22, 26, 0.6);
+    animation: you-died 2.4s ease-out;
+  }
+  body[data-skin="ashenrealm"] .screen:has(.died) .history { visibility: hidden; }
+  @keyframes you-died {
+    from { opacity: 0; letter-spacing: 0.02em; }
+    to { opacity: 1; letter-spacing: 0.12em; }
+  }
+  .ashen-top {
+    display: none;
+    align-items: flex-end;
+    gap: 12px;
+    margin: -6px 4px 12px;
+  }
+  .ashen-bonfire { width: 34px; height: 44px; flex-shrink: 0; overflow: visible; }
+  .ashen-flame { transform-origin: 17px 36px; animation: flicker 0.9s ease-in-out infinite alternate; }
+  .ashen-flame.inner { animation-duration: 0.6s; }
+  @keyframes flicker {
+    0% { transform: scale(1, 1); opacity: 0.9; }
+    50% { transform: scale(0.92, 1.08) skewX(-3deg); opacity: 1; }
+    100% { transform: scale(1.05, 0.94) skewX(2deg); opacity: 0.85; }
+  }
+  .ashen-name { font-family: "Cinzel", Georgia, serif; font-size: 21px; letter-spacing: 0.22em; color: #dcd3bd; padding-bottom: 4px; }
+
+  /* ---------- Crystal Saga VII — the blue menu windows and magic orbs ---------- */
+  body[data-skin="crystal7"] {
+    --bg:
+      radial-gradient(ellipse 70% 45% at 25% 85%, rgba(70, 255, 150, 0.28), transparent 70%),
+      radial-gradient(ellipse 50% 35% at 85% 15%, rgba(40, 210, 130, 0.18), transparent 70%),
+      #020608;
+    --body: linear-gradient(180deg, #3346b4 0%, #18217a 50%, #080c3e 100%);
+    --screen: linear-gradient(180deg, #2536a4 0%, #0b1154 100%);
+    --text: #ffffff;
+    --muted: #b9c3ff;
+    --key: linear-gradient(180deg, #3040ac 0%, #0e1560 100%);
+    --key-text: #ffffff;
+    --key-hover: linear-gradient(180deg, #3d4fc4 0%, #141c74 100%);
+    --fn: linear-gradient(180deg, #243293 0%, #0a0f48 100%);
+    --op: #000000;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #000000;
+    --key-radius: 6px;
+    --key-shadow: inset 0 0 0 2px #cfd0e0, inset 0 0 0 3px #4a4a78;
+    --body-radius: 10px;
+    --shadow: inset 0 0 0 3px #dcdcea, inset 0 0 0 4px #4a4a78, 0 0 40px rgba(60, 255, 150, 0.15), 0 25px 60px rgba(0, 0, 0, 0.7);
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    /* The pointing-glove cursor from the menus */
+    --glove: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='20'><g fill='white' stroke='black' stroke-width='1.4'><rect x='1.5' y='5' width='12' height='12' rx='3.5'/><rect x='10' y='5' width='16' height='4.6' rx='2.3'/><rect x='10' y='9.6' width='6' height='3.2' rx='1.6'/><rect x='10' y='12.8' width='5' height='3.2' rx='1.6'/></g></svg>") 26 7, pointer;
+  }
+  body[data-skin="crystal7"] .crystal7-top { display: flex; }
+  body[data-skin="crystal7"] button { cursor: var(--glove); }
+  body[data-skin="crystal7"] .screen { border-radius: 6px; box-shadow: inset 0 0 0 2px #cfd0e0, inset 0 0 0 3px #4a4a78; }
+  body[data-skin="crystal7"] .display, body[data-skin="crystal7"] .keys button { text-shadow: 2px 2px 0 #1a1a2e; font-weight: 700; }
+  body[data-skin="crystal7"] .fn { color: #7fe3ff; }
+  body[data-skin="crystal7"] .keys button:hover { background: var(--key-hover); }
+  body[data-skin="crystal7"] .fn:hover { background: var(--key-hover); }
+  /* Operators are magic orbs */
+  body[data-skin="crystal7"] .op {
+    border-radius: 50%;
+    width: 62px;
+    height: 62px;
+    justify-self: center;
+    font-size: 24px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 12px var(--glow), inset -4px -6px 10px rgba(0, 0, 0, 0.45);
+  }
+  body[data-skin="crystal7"] .op:hover { filter: brightness(1.18); }
+  body[data-skin="crystal7"] [data-op="/"] { --glow: rgba(190, 90, 255, 0.7); background: radial-gradient(circle at 35% 30%, #ffffff 0 8%, #e2b5ff 18%, #9b3fe0 50%, #3e0c68 100%); }
+  body[data-skin="crystal7"] [data-op="*"] { --glow: rgba(255, 70, 60, 0.7); background: radial-gradient(circle at 35% 30%, #ffffff 0 8%, #ffb0a8 18%, #e02a20 50%, #5e0703 100%); }
+  body[data-skin="crystal7"] [data-op="-"] { --glow: rgba(255, 220, 60, 0.7); background: radial-gradient(circle at 35% 30%, #ffffff 0 8%, #fff2a0 18%, #e3b90e 50%, #6a4e00 100%); }
+  body[data-skin="crystal7"] [data-op="+"] { --glow: rgba(60, 150, 255, 0.7); background: radial-gradient(circle at 35% 30%, #ffffff 0 8%, #b0d8ff 18%, #2372e0 50%, #062b68 100%); }
+  body[data-skin="crystal7"] [data-action="equals"] { --glow: rgba(60, 255, 120, 0.7); background: radial-gradient(circle at 35% 30%, #ffffff 0 8%, #b6ffc4 18%, #1fbf45 50%, #04521a 100%); }
+  body[data-skin="crystal7"] .op.active { box-shadow: 0 0 0 3px #ffffff, 0 0 22px var(--glow); }
+  .crystal7-top {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin: -4px 4px 14px;
+  }
+  .crystal7-meteor { width: 40px; height: 28px; flex-shrink: 0; }
+  .crystal-title { font-family: Optima, "Cinzel", Georgia, serif; font-size: 17px; letter-spacing: 0.14em; line-height: 1.1; }
+  .crystal-title b { font-size: 22px; font-weight: 400; margin-left: 4px; }
+  body[data-skin="crystal7"] .crystal-title { color: #ffffff; text-shadow: 2px 2px 0 #1a1a2e; }
+
+  /* ---------- Crystal Saga IX — gilded parchment, grey menu windows, the crystal ---------- */
+  body[data-skin="crystal9"] {
+    --bg:
+      radial-gradient(ellipse 60% 25% at 30% 30%, rgba(255, 255, 255, 0.35), transparent 70%),
+      radial-gradient(ellipse 50% 20% at 75% 55%, rgba(255, 255, 255, 0.25), transparent 70%),
+      linear-gradient(180deg, #3a2b52 0%, #86608a 40%, #e7b788 75%, #f6dcae 100%);
+    --body: linear-gradient(180deg, #efe4c8 0%, #d6c197 100%);
+    --screen:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(0, 0, 0, 0.2)),
+      repeating-conic-gradient(#8d95a8 0 25%, #838ba0 0 50%) 0 0 / 8px 8px;
+    --text: #ffffff;
+    --muted: #eef0ff;
+    --key: linear-gradient(180deg, #e2e6ee 0%, #a3abbd 100%);
+    --key-text: #262838;
+    --key-hover: linear-gradient(180deg, #eef1f6 0%, #b3bbcc 100%);
+    --fn: linear-gradient(180deg, #8c94aa 0%, #5d6479 100%);
+    --op: linear-gradient(135deg, #d6f1ff 0%, #5fb3ea 45%, #1f64a4 100%);
+    --op-text: #ffffff;
+    --op-active: #262838;
+    --op-active-text: #d6f1ff;
+    --key-radius: 8px;
+    --key-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 2px 0 #5d6479;
+    --body-radius: 14px;
+    --shadow: inset 0 0 0 3px #9a7a34, inset 0 0 0 5px #efe4c8, inset 0 0 0 6px #9a7a34, 0 25px 55px rgba(60, 30, 50, 0.45);
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  body[data-skin="crystal9"] .crystal9-top { display: flex; }
+  body[data-skin="crystal9"] .screen { border-radius: 8px; box-shadow: inset 0 0 0 2px #e6e9f2, inset 0 0 0 3px #4a5064; }
+  body[data-skin="crystal9"] .display,
+  body[data-skin="crystal9"] .history { text-shadow: 1px 1px 0 #262838, -1px 1px 0 #262838, 1px -1px 0 #262838, -1px -1px 0 #262838; }
+  body[data-skin="crystal9"] .keys button { font-weight: 700; }
+  body[data-skin="crystal9"] .fn { color: #ffffff; }
+  body[data-skin="crystal9"] .op { text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4); }
+  body[data-skin="crystal9"] [data-action="equals"] { background: linear-gradient(180deg, #f3d27a 0%, #c6922c 100%); color: #3a2400; text-shadow: none; }
+  body[data-skin="crystal9"] .keys button:hover { background: var(--key-hover); }
+  body[data-skin="crystal9"] .fn:hover { background: var(--fn); filter: brightness(1.1); }
+  body[data-skin="crystal9"] .op.active { box-shadow: inset 0 0 0 2px #5fb3ea; }
+  .crystal9-top {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin: -2px 6px 14px;
+  }
+  .crystal9-crystal { width: 22px; height: 34px; flex-shrink: 0; filter: drop-shadow(0 0 6px rgba(95, 179, 234, 0.7)); }
+  body[data-skin="crystal9"] .crystal-title { color: #4a3414; }
+
+  /* ---------- Foggy Town (shared): film grain over everything ---------- */
+  body[data-skin^="foggy"]::before {
+    content: "";
+    position: fixed;
+    inset: -50%;
+    pointer-events: none;
+    z-index: 2;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.13;
+    animation: grain 0.5s steps(4) infinite;
+  }
+  @keyframes grain {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-3%, 2%); }
+    50% { transform: translate(2%, -3%); }
+    75% { transform: translate(-2%, -1%); }
+  }
+  body[data-skin^="foggy"] .display, body[data-skin^="foggy"] .keys button, body[data-skin^="foggy"] .history { font-family: "Special Elite", "Courier New", monospace; }
+  body[data-skin^="foggy"] .display { font-weight: 400; }
+  .foggy-title { font-family: "Special Elite", "Courier New", monospace; font-size: 20px; letter-spacing: 0.12em; }
+
+  /* ---------- Foggy Town 2 — fog, rust and radio static ---------- */
+  body[data-skin="foggy2"] {
+    --bg:
+      radial-gradient(ellipse 80% 50% at 50% 50%, rgba(220, 225, 222, 0.5), transparent 70%),
+      linear-gradient(180deg, #a7afab 0%, #7d8682 60%, #5c6461 100%);
+    --body: linear-gradient(160deg, #5c4c3e 0%, #3c3027 55%, #2a221c 100%);
+    --screen: #0e100f;
+    --text: #cdd3cd;
+    --muted: #7f8782;
+    --key: #2f2b27;
+    --key-text: #d9d4c8;
+    --key-hover: #3a3530;
+    --fn: #4b4038;
+    --op: #6a2b1b;
+    --op-text: #eadbc9;
+    --op-active: #d9d4c8;
+    --op-active-text: #6a2b1b;
+    --key-radius: 3px;
+    --key-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 0 rgba(0, 0, 0, 0.4);
+    --body-radius: 6px;
+    --shadow: inset 0 0 40px rgba(120, 50, 20, 0.35), 0 0 0 1px #1f1914, 0 25px 60px rgba(30, 30, 30, 0.5);
+  }
+  /* Drifting fog */
+  body[data-skin="foggy2"]::after {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    pointer-events: none;
+    z-index: 2;
+    background:
+      radial-gradient(ellipse 40% 20% at 20% 30%, rgba(235, 238, 236, 0.45), transparent 70%),
+      radial-gradient(ellipse 45% 25% at 80% 70%, rgba(235, 238, 236, 0.4), transparent 70%),
+      radial-gradient(ellipse 35% 18% at 60% 10%, rgba(235, 238, 236, 0.35), transparent 70%);
+    animation: fog 26s ease-in-out infinite alternate;
+  }
+  @keyframes fog { to { transform: translateX(12%); } }
+  body[data-skin="foggy2"] .foggy2-top { display: flex; }
+  body[data-skin="foggy2"] .screen { position: relative; border-radius: 3px; box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9), 0 0 0 2px #1f1914; }
+  body[data-skin="foggy2"] .screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='1' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.12;
+    mix-blend-mode: screen;
+    animation: grain 0.3s steps(3) infinite;
+  }
+  body[data-skin="foggy2"] .display { text-shadow: 0 0 6px rgba(205, 211, 205, 0.4); animation: static-jitter 4s infinite; }
+  @keyframes static-jitter {
+    0%, 94%, 100% { transform: none; opacity: 1; }
+    95% { transform: translateX(-2px); opacity: 0.6; }
+    97% { transform: translateX(1px); opacity: 0.85; }
+  }
+  body[data-skin="foggy2"] .fn { color: #e0d8cc; }
+  body[data-skin="foggy2"] .op.active { box-shadow: inset 0 0 0 2px #6a2b1b; }
+  .foggy2-top {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: -4px 0 14px;
+  }
+  .foggy2-sign {
+    background: #1d5b3b;
+    color: #f2f2ec;
+    border: 2px solid #f2f2ec;
+    outline: 3px solid #1d5b3b;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-align: center;
+    line-height: 1.25;
+  }
+  .foggy2-sign b { display: block; font-size: 15px; letter-spacing: 0.06em; }
+  body[data-skin="foggy2"] .foggy-title { color: #b9b1a4; }
+
+  /* ---------- Foggy Town 3 — the other world: blood, rust and an occult seal ---------- */
+  body[data-skin="foggy3"] {
+    --bg:
+      radial-gradient(circle at 50% 35%, rgba(120, 20, 10, 0.55), transparent 55%),
+      repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.25) 0 2px, transparent 2px 46px),
+      linear-gradient(180deg, #2a0705 0%, #0b0201 100%);
+    --body:
+      radial-gradient(ellipse 30% 18% at 80% 15%, rgba(110, 10, 5, 0.7), transparent 70%),
+      radial-gradient(ellipse 25% 20% at 15% 85%, rgba(90, 40, 10, 0.7), transparent 70%),
+      linear-gradient(160deg, #4b1712 0%, #2b0b08 60%, #1a0605 100%);
+    --screen: #120302;
+    --text: #ecc9a1;
+    --muted: #8f3d2c;
+    --key: #2b0e0a;
+    --key-text: #e8d0bf;
+    --key-hover: #3a130e;
+    --fn: #4d1c13;
+    --op: #8c1b10;
+    --op-text: #f5e2d2;
+    --op-active: #e8d0bf;
+    --op-active-text: #8c1b10;
+    --key-radius: 2px;
+    --key-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 -8px 12px rgba(80, 10, 5, 0.35), 0 2px 0 rgba(0, 0, 0, 0.5);
+    --body-radius: 4px;
+    --shadow: 0 0 0 1px #6a1e14, 0 0 0 3px #140403, 0 0 50px rgba(150, 20, 10, 0.35), 0 25px 60px rgba(0, 0, 0, 0.8);
+  }
+  body[data-skin="foggy3"] .foggy3-top { display: flex; }
+  body[data-skin="foggy3"] .screen { border-radius: 2px; box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.95), 0 0 0 1px #5a150e; }
+  /* A failing fluorescent light */
+  body[data-skin="foggy3"] .display { text-shadow: 0 0 8px rgba(236, 201, 161, 0.35); animation: fluoro 6s infinite; }
+  @keyframes fluoro {
+    0%, 88%, 92%, 100% { opacity: 1; }
+    89% { opacity: 0.25; }
+    90% { opacity: 0.9; }
+    91% { opacity: 0.35; }
+  }
+  body[data-skin="foggy3"] .op[data-action="equals"] { background: #b0200f; }
+  body[data-skin="foggy3"] .op.active { box-shadow: inset 0 0 0 2px #8c1b10; }
+  .foggy3-top {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin: -4px 4px 14px;
+  }
+  .foggy3-seal { width: 40px; height: 40px; flex-shrink: 0; animation: seal-pulse 3.5s ease-in-out infinite; }
+  @keyframes seal-pulse {
+    0%, 100% { filter: drop-shadow(0 0 2px rgba(200, 30, 20, 0.4)); }
+    50% { filter: drop-shadow(0 0 9px rgba(230, 40, 25, 0.9)); }
+  }
+  body[data-skin="foggy3"] .foggy-title { color: #d7b89c; }
+
+  /* ---------- Foggy Town 4: The Room — Room 302, chained from the inside ---------- */
+  body[data-skin="foggy4"] {
+    --bg:
+      radial-gradient(ellipse 70% 60% at 50% 45%, transparent 30%, rgba(0, 0, 0, 0.85) 100%),
+      repeating-linear-gradient(90deg, #3d3b25 0 18px, #36341f 18px 36px);
+    --body:
+      repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 3px, transparent 3px 11px),
+      linear-gradient(90deg, #4a3321 0%, #5d412a 50%, #4a3321 100%);
+    --screen: #10130f;
+    --text: #c9d1b9;
+    --muted: #7a806c;
+    --key: #2c2a20;
+    --key-text: #dbd6bd;
+    --key-hover: #37342a;
+    --fn: #474331;
+    --op: #5b1f15;
+    --op-text: #eadfcb;
+    --op-active: #dbd6bd;
+    --op-active-text: #5b1f15;
+    --key-radius: 3px;
+    --key-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.55), 0 2px 0 rgba(0, 0, 0, 0.45);
+    --body-radius: 3px;
+    --shadow: inset 0 0 0 5px #3a281a, inset 0 0 0 6px #22170e, 0 25px 60px rgba(0, 0, 0, 0.7);
+  }
+  body[data-skin="foggy4"] .foggy4-top { display: flex; }
+  /* The screen is the peephole view: round-cornered and vignetted */
+  body[data-skin="foggy4"] .screen { border-radius: 40px; box-shadow: inset 0 0 30px 6px rgba(0, 0, 0, 0.95), 0 0 0 3px #a8894a, 0 0 0 5px #3a281a; }
+  body[data-skin="foggy4"] .display { text-shadow: 0 0 6px rgba(201, 209, 185, 0.35); }
+  body[data-skin="foggy4"] .history { padding-right: 10px; }
+  body[data-skin="foggy4"] .display { padding-right: 10px; }
+  body[data-skin="foggy4"] .fn { color: #efe9d0; }
+  body[data-skin="foggy4"] .op.active { box-shadow: inset 0 0 0 2px #5b1f15; }
+  .foggy4-top {
+    display: none;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin: -4px 0 14px;
+    padding: 6px 0 4px;
+  }
+  /* Two chains across the door */
+  .foggy4-top::before, .foggy4-top::after {
+    content: "";
+    position: absolute;
+    left: -12px; right: -12px;
+    top: 13px;
+    height: 10px;
+    background: radial-gradient(ellipse 6px 3.4px at center, transparent 55%, #9a9a94 60% 78%, transparent 82%) 0 0 / 11px 10px repeat-x;
+    filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.7));
+    z-index: 1;
+    pointer-events: none;
+  }
+  .foggy4-top::before { transform: rotate(4deg); }
+  .foggy4-top::after { transform: rotate(-4deg); }
+  .foggy4-plate {
+    background: linear-gradient(180deg, #e0c47a, #a8894a);
+    color: #2b1d0c;
+    font-family: Georgia, serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    padding: 3px 12px;
+    border-radius: 2px;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.6);
+  }
+  .foggy4-lock { position: absolute; z-index: 2; top: 14px; left: 50%; width: 20px; height: 24px; margin-left: 62px; }
+  body[data-skin="foggy4"] .foggy-title { color: #c9c1a6; font-size: 13px; }
+
+  /* ---------- Happy Bee skin: bright red, bee yellow, honeycomb ---------- */
+  body[data-skin="happybee"] {
+    --bg:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='100'><path d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='rgba(200,16,46,0.13)' stroke-width='2'/></svg>") 0 0 / 56px 100px,
+      radial-gradient(circle at 50% 30%, #ffe27a, #ffc20e 70%);
+    --body: linear-gradient(180deg, #ee2a24 0%, #d11a1f 100%);
+    --screen: #fffaf0;
+    --text: #d11a1f;
+    --muted: #e0823a;
+    --key: #ffffff;
+    --key-text: #d11a1f;
+    --key-hover: #fff4d6;
+    --fn: #a3121a;
+    --op: #ffc20e;
+    --op-text: #c8102e;
+    --op-active: #ffffff;
+    --op-active-text: #c8102e;
+    --key-radius: 18px;
+    --key-shadow: 0 4px 0 rgba(120, 10, 15, 0.45);
+    --body-radius: 32px;
+    --shadow: inset 0 0 0 4px #ffffff, inset 0 0 0 7px #ffc20e, 0 22px 50px rgba(160, 60, 0, 0.35);
+    font-family: "Fredoka", "Arial Rounded MT Bold", sans-serif;
+  }
+  body[data-skin="happybee"] .bee-top { display: flex; }
+  body[data-skin="happybee"] .calc { padding: 22px; }
+  body[data-skin="happybee"] .screen { border-radius: 20px; box-shadow: inset 0 3px 8px rgba(160, 20, 20, 0.2), 0 0 0 4px #ffc20e; }
+  body[data-skin="happybee"] .display { font-weight: 700; }
+  body[data-skin="happybee"] .keys button { font-family: "Fredoka", "Arial Rounded MT Bold", sans-serif; font-weight: 700; font-size: 24px; }
+  body[data-skin="happybee"] .fn { color: #ffffff; }
+  body[data-skin="happybee"] .op.active { box-shadow: inset 0 0 0 3px #ffc20e; }
+  body[data-skin="happybee"] .keys button:active,
+  body[data-skin="happybee"] .keys button.pressed { transform: translateY(3px); box-shadow: 0 1px 0 rgba(120, 10, 15, 0.45); }
+  .bee-top {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    margin: -4px 4px 14px;
+  }
+  .bee-bee { width: 48px; height: 50px; flex-shrink: 0; animation: bee-bob 2.4s ease-in-out infinite; transform-origin: 50% 90%; }
+  @keyframes bee-bob {
+    0%, 100% { transform: rotate(-4deg); }
+    50% { transform: rotate(4deg) translateY(-2px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .bee-bee { animation: none; } }
+  .bee-text { display: flex; flex-direction: column; line-height: 1; }
+  .bee-name {
+    font-family: "Fredoka", "Arial Rounded MT Bold", sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+    text-shadow: 0 3px 0 #a3121a;
+  }
+  .bee-sub { margin-top: 4px; font-family: "Fredoka", sans-serif; font-weight: 500; font-size: 13px; color: #ffc20e; letter-spacing: 0.02em; }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 16px;
+    transition: background 0.3s;
+  }
+  .wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 340px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ---------- Toolbar: skin switcher + flip ----------
+     Uses its own dark "glass" look so it reads the same on every skin. */
+  .toolbar {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .picker, .flip-btn, .skin-menu {
+    background: rgba(18, 18, 24, 0.78);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+  .picker {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 999px;
+  }
+  .toolbar button {
+    height: auto;
+    font: 500 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #ffffff;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 999px;
+    transition: background 0.15s, transform 0.12s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+  .toolbar button:hover { background: rgba(255, 255, 255, 0.12); }
+  .toolbar button:active { transform: scale(0.9); }
+  .nav-btn {
+    width: 34px;
+    height: 34px !important;
+    display: grid;
+    place-items: center;
+    font-size: 22px !important;
+    line-height: 1;
+    padding: 0 0 3px;
+  }
+  .current {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 176px;
+    padding: 3px 12px 3px 4px;
+  }
+  .current-name {
+    flex: 1;
+    overflow: hidden;
+    text-align: left;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .current-name span { display: inline-block; }
+  .current-name .from-right { animation: name-from-right 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
+  .current-name .from-left { animation: name-from-left 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
+  @keyframes name-from-right { from { transform: translateX(18px); opacity: 0; } }
+  @keyframes name-from-left { from { transform: translateX(-18px); opacity: 0; } }
+  .caret { opacity: 0.75; flex-shrink: 0; transition: transform 0.25s; }
+  .current[aria-expanded="true"] .caret { transform: rotate(180deg); }
+  .flip-btn {
+    display: none;
+    margin-left: auto;
+    padding: 9px 14px;
+  }
+  body[data-skin="retro"] .flip-btn { display: inline-block; }
+
+  /* Mini calculator preview used in the switcher and the grid */
+  .mini {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.18em;
+    width: 2.4em;
+    height: 3.2em;
+    padding: 0.28em;
+    border-radius: 0.4em;
+    background: var(--b);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), 0 0.15em 0.4em rgba(0, 0, 0, 0.35);
+    flex-shrink: 0;
+    transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+  .mini-screen { display: block; height: 0.8em; border-radius: 0.15em; background: var(--sc); }
+  .mini-dots { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 0.2em; }
+  .mini-dots i { border-radius: 0.2em; }
+  .current .mini { font-size: 9px; }
+
+  /* Pop-up grid of skins */
+  .skin-menu {
+    background: rgba(18, 18, 24, 0.94);
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    padding: 12px;
+    border-radius: 20px;
+    transform-origin: top left;
+    opacity: 0;
+    transform: scale(0.94) translateY(-8px);
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 0.18s, transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2), visibility 0s 0.22s;
+  }
+  .skin-menu.open {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    visibility: visible;
+    transition: opacity 0.18s, transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  }
+  .skin-search {
+    width: 100%;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    padding: 9px 12px;
+    background: rgba(255, 255, 255, 0.09);
+    color: #ffffff;
+    font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .skin-search::placeholder { color: rgba(255, 255, 255, 0.5); }
+  .skin-search:focus { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35); }
+  .skin-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 2px;
+  }
+  .toolbar .tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 12px 4px 9px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .toolbar .tile[hidden] { display: none; }
+  .toolbar .tile:hover { background: rgba(255, 255, 255, 0.11); }
+  .toolbar .tile:active { transform: scale(0.93); }
+  .tile .mini { font-size: 14px; }
+  .tile:hover .mini { transform: translateY(-3px) rotate(-5deg) scale(1.06); }
+  .toolbar .tile[aria-pressed="true"] {
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 0 0 2px #ffffff;
+    color: #ffffff;
+    font-weight: 600;
+  }
+  .skin-menu.open .tile { animation: tile-in 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; animation-delay: calc(var(--i) * 18ms); }
+  @keyframes tile-in { from { opacity: 0; transform: translateY(8px) scale(0.9); } }
+  .skin-cats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .toolbar .cat {
+    padding: 5px 10px;
+    font-size: 12.5px;
+    background: rgba(255, 255, 255, 0.07);
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .toolbar .cat b { font-weight: 500; opacity: 0.5; margin-left: 5px; }
+  .toolbar .cat[aria-pressed="true"] { background: #ffffff; color: #111111; }
+  .group-label {
+    grid-column: 1 / -1;
+    padding: 8px 4px 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+  }
+  .group-label:first-child { padding-top: 0; }
+  .skin-empty { padding: 18px 0 8px; text-align: center; font-size: 13px; color: rgba(255, 255, 255, 0.55); }
+
+  /* Little "pop" when the skin changes */
+  .calc.switching { animation: skin-pop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.4); }
+  @keyframes skin-pop { from { scale: 0.95; opacity: 0.5; } }
+  @media (prefers-reduced-motion: reduce) {
+    .calc.switching, .skin-menu.open .tile, .current-name span { animation: none; }
+  }
+
+  /* ---------- Calculator body ---------- */
+  .calc {
+    background: var(--body);
+    border-radius: var(--body-radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    transition: transform 0.8s cubic-bezier(0.5, 0, 0.2, 1);
+  }
+  .calc.flipped { transform: rotate(180deg); }
+  .brand {
+    display: none;
+    justify-content: space-between;
+    align-items: baseline;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    margin: -4px 4px 12px;
+  }
+  .brand strong { color: var(--text); font-size: 15px; letter-spacing: 0.08em; font-style: italic; }
+  body[data-skin="retro"] .brand { display: flex; }
+
+  .screen {
+    background: var(--screen);
+    border-radius: 18px;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+    text-align: right;
+    min-height: 104px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+  }
+  body[data-skin="retro"] .screen {
+    border-radius: 6px;
+    min-height: 90px;
+    justify-content: center;
+    box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.9), 0 0 0 3px #111, 0 0 0 5px #3b3733;
+  }
+  body[data-skin="retro"] .history { display: none; }
+
+  .history {
+    color: var(--muted);
+    font-size: 15px;
+    min-height: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .display {
+    font-size: 48px;
+    font-weight: 300;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Seven-segment digits (retro skin) ---------- */
+  .led {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.08em 0.12em;
+    transform: skewX(-6deg);
+    filter: drop-shadow(0 0 3px var(--seg-glow));
+  }
+  .digit {
+    position: relative;
+    width: 0.5em;
+    height: 0.86em;
+    margin-left: 0.17em;
+  }
+  .seg, .dp {
+    position: absolute;
+    background: var(--seg-on);
+    opacity: 0.07;
+  }
+  .seg.on, .dp.on { opacity: 1; }
+  .seg.a, .seg.g, .seg.d {
+    left: 0.05em; right: 0.05em; height: 0.08em;
+    clip-path: polygon(0 50%, 0.04em 0, calc(100% - 0.04em) 0, 100% 50%, calc(100% - 0.04em) 100%, 0.04em 100%);
+  }
+  .seg.a { top: 0; }
+  .seg.g { top: calc(50% - 0.04em); }
+  .seg.d { bottom: 0; }
+  .seg.b, .seg.c, .seg.e, .seg.f {
+    width: 0.08em; height: calc(50% - 0.05em);
+    clip-path: polygon(50% 0, 100% 0.04em, 100% calc(100% - 0.04em), 50% 100%, 0 calc(100% - 0.04em), 0 0.04em);
+  }
+  .seg.f { left: 0; top: 0.04em; }
+  .seg.b { right: 0; top: 0.04em; }
+  .seg.e { left: 0; bottom: 0.04em; }
+  .seg.c { right: 0; bottom: 0.04em; }
+  .dp { width: 0.09em; height: 0.09em; right: -0.13em; bottom: 0; border-radius: 50%; }
+
+  /* ---------- Keys ---------- */
+  .keys {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  button {
+    font: inherit;
+    font-size: 22px;
+    border: none;
+    border-radius: var(--key-radius);
+    height: 64px;
+    cursor: pointer;
+    background: var(--key);
+    color: var(--key-text);
+    box-shadow: var(--key-shadow);
+    transition: background 0.12s, transform 0.06s;
+  }
+  button:hover { background: var(--key-hover); }
+  button:active, button.pressed { transform: scale(0.95); }
+  body[data-skin="retro"] .keys button:active,
+  body[data-skin="retro"] .keys button.pressed { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.45); }
+  button:focus-visible { outline: 3px solid var(--op); outline-offset: 2px; }
+  .fn { background: var(--fn); }
+  body[data-skin="retro"] .fn { color: #f3eddf; }
+  .op { background: var(--op); color: var(--op-text); font-size: 26px; }
+  .op:hover { background: var(--op); filter: brightness(1.08); }
+  .op.active { background: var(--op-active); color: var(--op-active-text); box-shadow: inset 0 0 0 2px var(--op); }
+  .zero { grid-column: span 2; }
+</style>
+</head>
+<body data-skin="modern">
+  <div class="wrap">
+    <div class="toolbar">
+      <div class="picker">
+        <button class="nav-btn" id="prevSkin" aria-label="Previous skin" title="Previous skin ( [ )">‹</button>
+        <button class="current" id="skinTrigger" aria-haspopup="dialog" aria-expanded="false" title="Choose a skin">
+          <span id="currentMini"></span>
+          <span class="current-name"><span id="currentName"></span></span>
+          <svg class="caret" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="nav-btn" id="nextSkin" aria-label="Next skin" title="Next skin ( ] )">›</button>
+      </div>
+      <button class="flip-btn" id="flip" aria-pressed="false">Flip ↻</button>
+      <div class="skin-menu" id="skinMenu" role="dialog" aria-label="Choose a skin">
+        <input class="skin-search" id="skinSearch" type="search" autocomplete="off" spellcheck="false">
+        <div class="skin-cats" id="skinCats" role="group" aria-label="Categories"></div>
+        <div class="skin-grid" id="skinGrid"></div>
+        <div class="skin-empty" id="skinEmpty" hidden>No skins match</div>
+      </div>
+    </div>
+
+    <main class="calc" aria-label="Calculator">
+      <div class="brand"><strong>DD-58008</strong><span>ELECTRONIC</span></div>
+      <div class="tag"><span>NEON//CALC</span><span>v2.077 ● ONLINE</span></div>
+      <div class="dex-top" aria-hidden="true">
+        <div class="dex-lens"></div>
+        <div class="dex-lights"><span></span><span></span><span></span></div>
+        <div class="dex-label">MONSTER DEX</div>
+      </div>
+      <div class="grey-top" aria-hidden="true">
+        <div class="grey-shapes"><span>△</span><span>○</span><span>✕</span><span>□</span></div>
+        <div class="grey-name">GREY</div>
+      </div>
+      <div class="green-top" aria-hidden="true">
+        <div class="green-orb"></div>
+        <div class="green-name">GREEN</div>
+        <div class="green-vents"></div>
+      </div>
+      <div class="eightbit-top" aria-hidden="true">
+        <div class="eightbit-name">8-BIT</div>
+        <div class="eightbit-sub">ENTERTAINMENT<br>SYSTEM</div>
+      </div>
+      <div class="lager-top" aria-hidden="true">
+        <div class="lager-cap"></div>
+        <div class="lager-name">BLUE LAGER</div>
+        <div class="lager-sub">EASY TO<br>DRINK</div>
+      </div>
+      <div class="peak-top" aria-hidden="true">
+        <svg class="peak-mountains" viewBox="0 0 300 42" preserveAspectRatio="none">
+          <polygon class="peak" points="0,42 40,18 70,30 115,4 160,28 195,12 240,32 270,20 300,42" />
+          <polygon fill="#ffffff" points="104,12 115,4 127,13 120,11 115,15 110,11" />
+          <polygon fill="#ffffff" points="187,17 195,12 204,18 198,17 195,20 191,17" />
+          <polygon fill="#ffffff" points="34,22 40,18 47,23 42,22 40,24 37,22" />
+        </svg>
+        <div class="peak-name">Silver Peak</div>
+        <div class="peak-sub">COLD ACTIVATED</div>
+      </div>
+      <div class="citrus-top" aria-hidden="true">
+        <div class="citrus-name">NEON CITRUS</div>
+        <div class="citrus-sub">STAY <b>FIZZY</b></div>
+      </div>
+      <div class="teal-top" aria-hidden="true">
+        <div class="teal-brand">NEON CITRUS</div>
+        <div class="teal-name">TROPICAL TEAL</div>
+        <svg class="teal-waves" viewBox="0 0 300 14" preserveAspectRatio="none">
+          <path d="M0 7 Q 18.75 0 37.5 7 T 75 7 T 112.5 7 T 150 7 T 187.5 7 T 225 7 T 262.5 7 T 300 7"
+                fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="midnight-top" aria-hidden="true">
+        <div class="midnight-moon"></div>
+        <div class="midnight-text">
+          <span class="midnight-brand">NEON CITRUS</span>
+          <span class="midnight-name">MIDNIGHT BERRY</span>
+        </div>
+      </div>
+      <div class="ring-top ringworld-top" aria-hidden="true">
+        <svg class="ring-ring" viewBox="0 0 36 22">
+          <ellipse cx="18" cy="11" rx="16" ry="6" fill="none" stroke="#bfe4ff" stroke-width="2.4" transform="rotate(-14 18 11)" />
+          <ellipse cx="18" cy="11" rx="16" ry="6" fill="none" stroke="#5ab8ff" stroke-width="0.8" transform="rotate(-14 18 11)" />
+        </svg>
+        <div class="ring-logo">RING</div>
+        <div class="ring-sub">FIRST<br>CONTACT</div>
+      </div>
+      <div class="ring-top ring2-top" aria-hidden="true">
+        <div class="ring-logo">RING</div>
+        <div class="ring2-num">2</div>
+      </div>
+      <div class="ring-top ring3-top" aria-hidden="true">
+        <div class="ring-logo">RING 3</div>
+        <div class="ring-sub">LAST<br>STAND</div>
+      </div>
+      <div class="ashen-top" aria-hidden="true">
+        <svg class="ashen-bonfire" viewBox="0 0 34 44">
+          <path class="ashen-flame" d="M17 6 C22 14 27 18 25 28 C24 34 20 38 17 38 C13 38 9 34 9 28 C9 21 13 18 17 6 Z" fill="#ff7a1a" />
+          <path class="ashen-flame inner" d="M17 16 C20 21 22 24 21 30 C20 34 18 36 17 36 C15 36 13 34 13 30 C13 25 15 22 17 16 Z" fill="#ffd36a" />
+          <rect x="16" y="4" width="2" height="34" fill="#3b3a36" />
+          <path d="M14.5 18 L19.5 17 M14.5 22 L19.5 21 M14.5 26 L19.5 25 M14.5 30 L19.5 29" stroke="#6b665c" stroke-width="1.3" />
+          <rect x="12.5" y="4" width="9" height="2" fill="#3b3a36" />
+          <ellipse cx="17" cy="40" rx="15" ry="4" fill="#3a3632" />
+          <ellipse cx="17" cy="39" rx="11" ry="2.6" fill="#57514a" />
+        </svg>
+        <div class="ashen-name">ASHEN REALM</div>
+      </div>
+      <div class="crystal7-top" aria-hidden="true">
+        <svg class="crystal7-meteor" viewBox="0 0 40 28">
+          <defs>
+            <radialGradient id="meteorCore" cx="0.4" cy="0.4">
+              <stop offset="0" stop-color="#e9fffb" />
+              <stop offset="0.35" stop-color="#7ff5d6" />
+              <stop offset="1" stop-color="#0d6b7a" />
+            </radialGradient>
+            <linearGradient id="meteorTail" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#7ff5d6" stop-opacity="0" />
+              <stop offset="1" stop-color="#7ff5d6" stop-opacity="0.8" />
+            </linearGradient>
+          </defs>
+          <path d="M2 2 L26 14 L22 20 Z" fill="url(#meteorTail)" />
+          <circle cx="27" cy="18" r="9" fill="url(#meteorCore)" />
+        </svg>
+        <div class="crystal-title">CRYSTAL SAGA<b>VII</b></div>
+      </div>
+      <div class="crystal9-top" aria-hidden="true">
+        <svg class="crystal9-crystal" viewBox="0 0 22 34">
+          <defs>
+            <linearGradient id="crystal" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#f2fbff" />
+              <stop offset="0.45" stop-color="#7cc6f2" />
+              <stop offset="1" stop-color="#1f5f9e" />
+            </linearGradient>
+          </defs>
+          <polygon points="11,1 21,12 11,33 1,12" fill="url(#crystal)" stroke="#c6a24a" stroke-width="1" />
+          <polyline points="1,12 11,15 21,12 M11,15 11,33" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.8" />
+        </svg>
+        <div class="crystal-title">CRYSTAL SAGA<b>IX</b></div>
+      </div>
+      <div class="foggy2-top" aria-hidden="true">
+        <div class="foggy2-sign">WELCOME TO<b>FOGGY TOWN</b></div>
+        <div class="foggy-title">FOGGY TOWN 2</div>
+      </div>
+      <div class="foggy3-top" aria-hidden="true">
+        <svg class="foggy3-seal" viewBox="0 0 40 40" fill="none" stroke="#c0281a" stroke-width="1.2">
+          <circle cx="20" cy="20" r="18.5" />
+          <circle cx="20" cy="20" r="15" />
+          <circle cx="20" cy="20" r="5" />
+          <rect x="10" y="10" width="20" height="20" />
+          <rect x="10" y="10" width="20" height="20" transform="rotate(45 20 20)" />
+          <path d="M20 1.5 V5 M20 35 V38.5 M1.5 20 H5 M35 20 H38.5 M6.9 6.9 L9.4 9.4 M30.6 30.6 L33.1 33.1 M6.9 33.1 L9.4 30.6 M30.6 9.4 L33.1 6.9" />
+        </svg>
+        <div class="foggy-title">FOGGY TOWN 3</div>
+      </div>
+      <div class="foggy4-top" aria-hidden="true">
+        <div class="foggy4-plate">302</div>
+        <div class="foggy-title">FOGGY TOWN 4 · THE ROOM</div>
+        <svg class="foggy4-lock" viewBox="0 0 20 24">
+          <path d="M5 11 V7 a5 5 0 0 1 10 0 V11" fill="none" stroke="#8d8d86" stroke-width="2.4" />
+          <rect x="2" y="10" width="16" height="13" rx="2" fill="#6e6a5e" stroke="#2a2822" stroke-width="1" />
+          <circle cx="10" cy="16" r="1.8" fill="#2a2822" />
+        </svg>
+      </div>
+      <div class="bee-top" aria-hidden="true">
+        <svg class="bee-bee" viewBox="0 0 48 50">
+          <!-- antennae -->
+          <path d="M18 12 C16 7 13 5 10 4 M30 12 C32 7 35 5 38 4" fill="none" stroke="#2b1a10" stroke-width="2" stroke-linecap="round" />
+          <circle cx="10" cy="4" r="3.2" fill="#2b1a10" />
+          <circle cx="38" cy="4" r="3.2" fill="#2b1a10" />
+          <!-- face -->
+          <circle cx="24" cy="29" r="19" fill="#ffc20e" stroke="#a3121a" stroke-width="2" />
+          <!-- eyes -->
+          <ellipse cx="17" cy="25" rx="4.6" ry="5.6" fill="#ffffff" stroke="#2b1a10" stroke-width="1.2" />
+          <ellipse cx="31" cy="25" rx="4.6" ry="5.6" fill="#ffffff" stroke="#2b1a10" stroke-width="1.2" />
+          <circle cx="18" cy="26" r="2.3" fill="#2b1a10" />
+          <circle cx="30" cy="26" r="2.3" fill="#2b1a10" />
+          <!-- cheeks -->
+          <ellipse cx="10.5" cy="34" rx="3.2" ry="2" fill="#f28a5a" opacity="0.7" />
+          <ellipse cx="37.5" cy="34" rx="3.2" ry="2" fill="#f28a5a" opacity="0.7" />
+          <!-- big smile -->
+          <path d="M14 33 Q24 46 34 33 Z" fill="#a3121a" stroke="#2b1a10" stroke-width="1.2" stroke-linejoin="round" />
+          <path d="M19 39 Q24 43 29 39 Q24 37.5 19 39 Z" fill="#f06a6a" />
+        </svg>
+        <div class="bee-text">
+          <span class="bee-name">Happy Bee</span>
+          <span class="bee-sub">Buzz Buzz!</span>
+        </div>
+      </div>
+      <div class="purple-top" aria-hidden="true">
+        <svg class="purple-bell" viewBox="0 0 34 36">
+          <path d="M17 2 C9 2 6 9 6 16 L6 23 L2 28 L32 28 L28 23 L28 16 C28 9 25 2 17 2 Z" fill="#ffffff" />
+          <circle cx="17" cy="32" r="3.2" fill="#ffffff" />
+        </svg>
+        <div class="purple-text">
+          <span class="purple-name">PURPLE TACO</span>
+          <span class="purple-sub">Eat More</span>
+        </div>
+      </div>
+      <div class="screen">
+        <div class="history" id="history"></div>
+        <div class="display" id="display" aria-live="polite">0</div>
+      </div>
+      <div class="keys">
+        <button class="fn" data-action="clear" id="clear">AC</button>
+        <button class="fn" data-action="sign">±</button>
+        <button class="fn" data-action="percent">%</button>
+        <button class="op" data-op="/">÷</button>
+
+        <button data-digit="7">7</button>
+        <button data-digit="8">8</button>
+        <button data-digit="9">9</button>
+        <button class="op" data-op="*">×</button>
+
+        <button data-digit="4">4</button>
+        <button data-digit="5">5</button>
+        <button data-digit="6">6</button>
+        <button class="op" data-op="-">−</button>
+
+        <button data-digit="1">1</button>
+        <button data-digit="2">2</button>
+        <button data-digit="3">3</button>
+        <button class="op" data-op="+">+</button>
+
+        <button class="zero" data-digit="0">0</button>
+        <button data-action="decimal">.</button>
+        <button class="op" data-action="equals">=</button>
+      </div>
+    </main>
+  </div>
+
+<script>
+  const displayEl = document.getElementById('display');
+  const historyEl = document.getElementById('history');
+  const clearBtn = document.getElementById('clear');
+  const calcEl = document.querySelector('.calc');
+  const flipBtn = document.getElementById('flip');
+  const SYMBOLS = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+
+  const state = {
+    current: '0',      // what's on the display
+    previous: null,    // stored left-hand number
+    operator: null,    // pending operator
+    fresh: false,      // next digit starts a new number
+  };
+
+  function compute(a, b, op) {
+    switch (op) {
+      case '+': return a + b;
+      case '-': return a - b;
+      case '*': return a * b;
+      case '/': return b === 0 ? NaN : a / b;
+    }
+  }
+
+  // Tidy floating-point noise (0.1 + 0.2 → 0.3) and keep numbers readable.
+  function format(n) {
+    if (!isFinite(n)) return 'Error';
+    const rounded = parseFloat(n.toPrecision(12));
+    if (Math.abs(rounded) >= 1e12 || (rounded !== 0 && Math.abs(rounded) < 1e-9)) {
+      return rounded.toExponential(6).replace(/\.?0+e/, 'e');
+    }
+    return String(rounded);
+  }
+
+  function withCommas(str) {
+    if (str === 'Error' || str.includes('e')) return str;
+    const [int, dec] = str.split('.');
+    const sign = int.startsWith('-') ? '-' : '';
+    const digits = sign ? int.slice(1) : int;
+    const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return sign + grouped + (dec !== undefined ? '.' + dec : '');
+  }
+
+  // ---------- Seven-segment rendering (retro skin) ----------
+  //   aaa
+  //  f   b
+  //   ggg
+  //  e   c
+  //   ddd
+  const SEGMENTS = {
+    '0': 'abcdef', '1': 'bc', '2': 'abged', '3': 'abgcd', '4': 'fgbc',
+    '5': 'afgcd', '6': 'afgedc', '7': 'abc', '8': 'abcdefg', '9': 'abcdfg',
+    '-': 'g', 'E': 'adefg', 'e': 'adefg', 'r': 'eg', 'o': 'cdeg', ' ': '',
+  };
+  const MIN_CELLS = 8;
+
+  function renderLed(text) {
+    // Split into cells; a decimal point lights the dot on the digit before it.
+    const cells = [];
+    for (const ch of text) {
+      if (ch === '.') { if (cells.length) cells[cells.length - 1].dp = true; }
+      else if (ch in SEGMENTS) cells.push({ ch, dp: false });
+    }
+    while (cells.length < MIN_CELLS) cells.unshift({ ch: ' ', dp: false });
+
+    const html = cells.map(({ ch, dp }) => {
+      const lit = SEGMENTS[ch];
+      const segs = 'abcdefg'.split('')
+        .map(s => `<span class="seg ${s}${lit.includes(s) ? ' on' : ''}"></span>`).join('');
+      return `<span class="digit">${segs}<span class="dp${dp ? ' on' : ''}"></span></span>`;
+    }).join('');
+
+    displayEl.innerHTML = `<div class="led" aria-hidden="true">${html}</div>`;
+    displayEl.setAttribute('aria-label', text);
+    displayEl.style.fontSize = cells.length > 12 ? '30px' : cells.length > 9 ? '40px' : '52px';
+  }
+
+  function render() {
+    const died = document.body.dataset.skin === 'ashenrealm' && state.current === 'Error';
+    displayEl.classList.toggle('died', died);
+    if (document.body.dataset.skin === 'retro') {
+      renderLed(state.current === 'Error' ? 'Error' : state.current);
+    } else {
+      const text = withCommas(state.current);
+      displayEl.textContent = died ? 'YOU DIED' : text;
+      displayEl.removeAttribute('aria-label');
+      // Shrink the font for long numbers so they fit.
+      // The pixel font in the Monster Dex skin is extra wide, so it gets a smaller size.
+      const len = text.length;
+      const sizes = document.body.dataset.skin === 'monsterdex' ? [13, 17, 22] : [28, 36, 48];
+      displayEl.style.fontSize = (len > 14 ? sizes[0] : len > 10 ? sizes[1] : sizes[2]) + 'px';
+    }
+
+    historyEl.textContent = state.operator
+      ? `${withCommas(format(state.previous))} ${SYMBOLS[state.operator]}`
+      : '';
+
+    clearBtn.textContent = state.current !== '0' && !state.fresh ? 'C' : 'AC';
+
+    document.querySelectorAll('[data-op]').forEach(btn => {
+      btn.classList.toggle('active', state.fresh && btn.dataset.op === state.operator);
+    });
+
+    // Ring World easter egg: the moment the screen reads 419, Dropship 419 flies in.
+    if (document.body.dataset.skin === 'ringworld' && state.current === '419' && lastShown !== '419') {
+      dropshipDrop();
+    }
+    lastShown = state.current;
+  }
+
+  let lastShown = null;
+
+  function dropshipDrop() {
+    const screen = document.querySelector('.screen');
+    if (screen.querySelector('.dropship-fx')) return;
+    const fx = document.createElement('div');
+    fx.className = 'dropship-fx';
+    fx.setAttribute('aria-hidden', 'true');
+    // Side-on dropship, nose pointing right
+    fx.innerHTML = `
+      <svg class="dropship" viewBox="0 0 136 44">
+        <path class="thrust" d="M40 9 L28 11 L40 13 Z M38 31 L24 33.5 L38 36 Z" fill="#9fe0ff" />
+        <path d="M6 20 L1 5 L13 5 L24 16 L40 13 L86 11 L104 13 L122 19 L130 23 L118 27 L92 29 L34 29 L12 27 Z"
+              fill="#1e2a36" stroke="#8fd8ff" stroke-width="1.2" stroke-linejoin="round" />
+        <path d="M104 14.5 L121 20 L106 21.5 Z" fill="#5ab8ff" opacity="0.85" />
+        <rect x="40" y="6" width="30" height="7" rx="3.5" fill="#2a3947" stroke="#8fd8ff" stroke-width="1" />
+        <rect x="38" y="29" width="34" height="8" rx="4" fill="#2a3947" stroke="#8fd8ff" stroke-width="1" />
+        <path d="M46 21 H84 M52 17 V25 M62 17 V25 M72 17 V25" stroke="#3e5266" stroke-width="1" />
+      </svg>
+      <div class="dropship-msg">INCOMING · DROPSHIP 419<b>DROP-OFF</b></div>`;
+    screen.appendChild(fx);
+    screen.classList.add('fx');
+    setTimeout(() => {
+      fx.remove();
+      screen.classList.remove('fx');
+    }, 4100);
+  }
+
+  function inputDigit(d) {
+    if (state.current === 'Error') clearAll();
+    if (state.fresh) {
+      state.current = d;
+      state.fresh = false;
+    } else if (state.current.replace(/[-.]/g, '').length < 15) {
+      state.current = state.current === '0' ? d : state.current + d;
+    }
+  }
+
+  function inputDecimal() {
+    if (state.current === 'Error') clearAll();
+    if (state.fresh) {
+      state.current = '0.';
+      state.fresh = false;
+    } else if (!state.current.includes('.')) {
+      state.current += '.';
+    }
+  }
+
+  function chooseOperator(op) {
+    if (state.current === 'Error') return;
+    const value = parseFloat(state.current);
+    if (state.operator && !state.fresh) {
+      // Chain: 2 + 3 + → shows 5 and waits for the next number.
+      const result = compute(state.previous, value, state.operator);
+      state.current = format(result);
+      if (state.current === 'Error') { state.previous = null; state.operator = null; return; }
+      state.previous = parseFloat(state.current);
+    } else if (!state.operator || !state.fresh) {
+      state.previous = value;
+    }
+    state.operator = op;
+    state.fresh = true;
+  }
+
+  function equals() {
+    if (!state.operator || state.current === 'Error') return;
+    const a = state.previous;
+    const b = parseFloat(state.current);
+    const op = state.operator;
+    state.current = format(compute(a, b, op));
+    state.previous = null;
+    state.operator = null;
+    state.fresh = true;
+    render();
+    // Show the finished sum above the answer, e.g. "12 × 3 ="
+    historyEl.textContent = `${withCommas(format(a))} ${SYMBOLS[op]} ${withCommas(format(b))} =`;
+  }
+
+  function clearAll() {
+    state.current = '0';
+    state.previous = null;
+    state.operator = null;
+    state.fresh = false;
+  }
+
+  function clear() {
+    // First press clears the entry (C); second clears everything (AC).
+    if (state.current !== '0' && !state.fresh) {
+      state.current = '0';
+    } else {
+      clearAll();
+    }
+  }
+
+  function toggleSign() {
+    if (state.current === 'Error' || state.current === '0') return;
+    state.current = state.current.startsWith('-') ? state.current.slice(1) : '-' + state.current;
+  }
+
+  function percent() {
+    if (state.current === 'Error') return;
+    const value = parseFloat(state.current);
+    // 200 + 10% → 200 + 20 (like a pocket calculator); on its own, 50% → 0.5
+    const result = state.operator && (state.operator === '+' || state.operator === '-')
+      ? state.previous * value / 100
+      : value / 100;
+    state.current = format(result);
+    state.fresh = false;
+  }
+
+  function backspace() {
+    if (state.fresh || state.current === 'Error') return;
+    state.current = state.current.length > 1 && !(state.current.length === 2 && state.current.startsWith('-'))
+      ? state.current.slice(0, -1)
+      : '0';
+  }
+
+  function handle(btn) {
+    const { digit, op, action } = btn.dataset;
+    if (digit !== undefined) inputDigit(digit);
+    else if (op) chooseOperator(op);
+    else if (action === 'decimal') inputDecimal();
+    else if (action === 'clear') clear();
+    else if (action === 'sign') toggleSign();
+    else if (action === 'percent') percent();
+    else if (action === 'equals') { equals(); return; }
+    render();
+  }
+
+  document.querySelector('.keys').addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (btn) handle(btn);
+  });
+
+  // ---------- Skins ----------
+  // To add a skin: add its CSS block above, then one line here.
+  // body / screen / dots are just the colours for its little preview.
+  const CATEGORIES = ['Classic', 'Consoles', 'Food & Drink', 'Games'];
+  const SKINS = [
+    { id: 'modern',        cat: 'Classic',      name: 'Modern',        body: '#ffffff', screen: '#e8eaee', dots: ['#e4e6eb', '#e4e6eb', '#ff9f0a', '#ff9f0a'] },
+    { id: 'retro',         cat: 'Classic',      name: 'Retro',         body: '#26221f', screen: '#2a0806', dots: ['#e9e2d0', '#7d756b', '#c8642a', '#ff2a14'] },
+    { id: 'cyberpunk',     cat: 'Classic',      name: 'Cyberpunk',     body: '#0d0717', screen: '#030108', dots: ['#00f0ff', '#140b24', '#ff2bd6', '#ff2bd6'] },
+    { id: 'greyconsole',   cat: 'Consoles',     name: 'Grey Console',  body: '#cfcfcb', screen: '#1c1c1e', dots: ['#3ec4a5', '#ff5a5f', '#7fa9ea', '#f08dc6'] },
+    { id: 'greenmachine',  cat: 'Consoles',     name: 'Green Machine', body: '#141414', screen: '#107c10', dots: ['#5dc21e', '#e81123', '#1f8fff', '#ffb900'] },
+    { id: 'eightbit',      cat: 'Consoles',     name: '8-Bit Console', body: '#d4d4d0', screen: '#111111', dots: ['#2b2b2b', '#8e8e8e', '#c8102e', '#c8102e'] },
+    { id: 'bluelager',     cat: 'Food & Drink', name: 'Blue Lager',    body: '#1f5fcc', screen: '#0b1f4d', dots: ['#ffffff', '#c3ccd8', '#ffffff', '#9aa6b6'] },
+    { id: 'silverpeak',    cat: 'Food & Drink', name: 'Silver Peak',   body: '#d9dde1', screen: '#2f7de1', dots: ['#13294b', '#fdfdfd', '#c8102e', '#c8102e'] },
+    { id: 'neoncitrus',    cat: 'Food & Drink', name: 'Neon Citrus',   body: '#3fae2a', screen: '#050805', dots: ['#111111', '#ffffff', '#e4002b', '#c4ff0e'] },
+    { id: 'tropicalteal',  cat: 'Food & Drink', name: 'Tropical Teal', body: '#17bfc0', screen: '#013b4d', dots: ['#ffffff', '#013b4d', '#015b73', '#c4ff0e'] },
+    { id: 'midnightberry', cat: 'Food & Drink', name: 'Midnight Berry', body: '#2e1a78', screen: '#07041a', dots: ['#1d1350', '#7fe9ff', '#8a2be2', '#00b8ff'] },
+    { id: 'purpletaco',    cat: 'Food & Drink', name: 'Purple Taco',   body: '#702082', screen: '#ffffff', dots: ['#ffffff', '#2b0b3d', '#e31c79', '#ffc72c'] },
+    { id: 'happybee',      cat: 'Food & Drink', name: 'Happy Bee',     body: '#e2231a', screen: '#fffaf0', dots: ['#ffffff', '#a3121a', '#ffc20e', '#ffc20e'] },
+    { id: 'monsterdex',    cat: 'Games',        name: 'Monster Dex',   body: '#dc1a32', screen: '#9bbc0f', dots: ['#2f7fd1', '#2f7fd1', '#ffcb05', '#4dad5b'] },
+    { id: 'ringworld',     cat: 'Games',        name: 'Ring World',    body: '#1f2832', screen: '#5ab8ff', dots: ['#1a242f', '#2a3947', '#3a9ae6', '#3a9ae6'] },
+    { id: 'ringworld2',    cat: 'Games',        name: 'Ring World II', body: '#7d8892', screen: '#07121c', dots: ['#262e36', '#48535e', '#6cc0ff', '#6cc0ff'] },
+    { id: 'ringworld3',    cat: 'Games',        name: 'Ring World III', body: '#4f5b2e', screen: '#e9ad33', dots: ['#262a1a', '#56642f', '#f5cd5b', '#f5cd5b'] },
+    { id: 'ashenrealm',    cat: 'Games',        name: 'Ashen Realm',   body: '#1f1c18', screen: '#070605', dots: ['#1c1a16', '#2b2721', '#ff9f45', '#ff7a1a'] },
+    { id: 'crystal7',      cat: 'Games',        name: 'Crystal Saga VII',  body: '#18217a', screen: '#2536a4', dots: ['#9b3fe0', '#e02a20', '#e3b90e', '#1fbf45'] },
+    { id: 'crystal9',      cat: 'Games',        name: 'Crystal Saga IX',   body: '#e3d3ad', screen: '#8d95a8', dots: ['#c7ccd8', '#6d7489', '#5fb3ea', '#d9a93f'] },
+    { id: 'foggy2',        cat: 'Games',        name: 'Foggy Town 2',  body: '#4a3c31', screen: '#9aa3a0', dots: ['#2f2b27', '#4b4038', '#6a2b1b', '#6a2b1b'] },
+    { id: 'foggy3',        cat: 'Games',        name: 'Foggy Town 3',  body: '#3a100c', screen: '#120302', dots: ['#2b0e0a', '#4d1c13', '#8c1b10', '#b0200f'] },
+    { id: 'foggy4',        cat: 'Games',        name: 'Foggy Town 4',  body: '#553b26', screen: '#10130f', dots: ['#2c2a20', '#474331', '#5b1f15', '#a8894a'] },
+  ];
+
+  const skinMenu = document.getElementById('skinMenu');
+  const skinTrigger = document.getElementById('skinTrigger');
+  const skinSearch = document.getElementById('skinSearch');
+  const skinGrid = document.getElementById('skinGrid');
+  const skinEmpty = document.getElementById('skinEmpty');
+  const currentName = document.getElementById('currentName');
+  const currentMini = document.getElementById('currentMini');
+
+  function miniHTML(skin) {
+    const dots = skin.dots.map(c => `<i style="background:${c}"></i>`).join('');
+    return `<span class="mini" style="--b:${skin.body};--sc:${skin.screen}">` +
+           `<i class="mini-screen"></i><span class="mini-dots">${dots}</span></span>`;
+  }
+
+  const skinCats = document.getElementById('skinCats');
+  let activeCat = 'All';
+
+  skinCats.innerHTML = ['All', ...CATEGORIES].map(cat => {
+    const count = cat === 'All' ? SKINS.length : SKINS.filter(s => s.cat === cat).length;
+    return `<button class="cat" data-cat="${cat}">${cat}<b>${count}</b></button>`;
+  }).join('');
+  skinSearch.placeholder = `Search ${SKINS.length} skins…`;
+
+  // Draw the grid for the chosen category and search text, with a heading per group.
+  function buildGrid() {
+    const q = skinSearch.value.trim().toLowerCase();
+    const current = document.body.dataset.skin;
+    let html = '';
+    let i = 0;
+    for (const cat of CATEGORIES) {
+      if (activeCat !== 'All' && activeCat !== cat) continue;
+      const matches = SKINS.filter(s => s.cat === cat && s.name.toLowerCase().includes(q));
+      if (!matches.length) continue;
+      if (activeCat === 'All') html += `<div class="group-label">${cat}</div>`;
+      html += matches.map(skin =>
+        `<button class="tile" data-skin="${skin.id}" aria-pressed="${skin.id === current}" style="--i:${i++}">` +
+        `${miniHTML(skin)}<span>${skin.name}</span></button>`
+      ).join('');
+    }
+    skinGrid.innerHTML = html;
+    skinEmpty.hidden = i > 0;
+    skinCats.querySelectorAll('.cat').forEach(btn => {
+      btn.setAttribute('aria-pressed', btn.dataset.cat === activeCat);
+    });
+  }
+
+  skinCats.addEventListener('click', e => {
+    const btn = e.target.closest('.cat');
+    if (!btn) return;
+    activeCat = btn.dataset.cat;
+    buildGrid();
+  });
+
+  function skinIndex(id) {
+    return SKINS.findIndex(s => s.id === id);
+  }
+
+  function setSkin(id, direction) {
+    const skin = SKINS[skinIndex(id)] || SKINS[0];
+    const changed = document.body.dataset.skin !== skin.id;
+    document.body.dataset.skin = skin.id;
+
+    // Update the switcher: preview, name (sliding in from the side you moved to)
+    currentMini.innerHTML = miniHTML(skin);
+    currentName.textContent = skin.name;
+    currentName.className = direction === 'left' ? 'from-left' : direction === 'right' ? 'from-right' : '';
+    void currentName.offsetWidth;  // restart the animation on quick repeat clicks
+
+    skinGrid.querySelectorAll('.tile').forEach(tile => {
+      tile.setAttribute('aria-pressed', tile.dataset.skin === skin.id);
+    });
+
+    // Only the retro skin can be flipped; every other skin stays right side up.
+    if (skin.id !== 'retro') {
+      calcEl.classList.remove('flipped');
+      flipBtn.setAttribute('aria-pressed', false);
+    }
+
+    if (changed && direction) {
+      calcEl.classList.remove('switching');
+      void calcEl.offsetWidth;
+      calcEl.classList.add('switching');
+    }
+
+    try { localStorage.setItem('calc-skin', skin.id); } catch {}
+    render();
+  }
+
+  function cycleSkin(step) {
+    const i = skinIndex(document.body.dataset.skin);
+    const next = SKINS[(i + step + SKINS.length) % SKINS.length];
+    setSkin(next.id, step > 0 ? 'right' : 'left');
+  }
+
+  function openMenu() {
+    skinMenu.classList.add('open');
+    skinTrigger.setAttribute('aria-expanded', true);
+    skinSearch.value = '';
+    buildGrid();
+    setTimeout(() => skinSearch.focus(), 50);
+  }
+
+  function closeMenu() {
+    skinMenu.classList.remove('open');
+    skinTrigger.setAttribute('aria-expanded', false);
+    if (skinMenu.contains(document.activeElement)) skinTrigger.focus();
+  }
+
+  document.getElementById('prevSkin').addEventListener('click', () => cycleSkin(-1));
+  document.getElementById('nextSkin').addEventListener('click', () => cycleSkin(1));
+  skinTrigger.addEventListener('click', () => {
+    skinMenu.classList.contains('open') ? closeMenu() : openMenu();
+  });
+
+  skinGrid.addEventListener('click', e => {
+    const tile = e.target.closest('.tile');
+    if (!tile) return;
+    const from = skinIndex(document.body.dataset.skin);
+    const to = skinIndex(tile.dataset.skin);
+    setSkin(tile.dataset.skin, to >= from ? 'right' : 'left');
+    closeMenu();
+  });
+
+  skinSearch.addEventListener('input', buildGrid);
+  skinSearch.addEventListener('keydown', e => {
+    // Enter picks the first match
+    if (e.key === 'Enter') {
+      const first = skinGrid.querySelector('.tile:not([hidden])');
+      if (first) first.click();
+    }
+  });
+
+  // Click anywhere outside the switcher to close it
+  document.addEventListener('click', e => {
+    if (skinMenu.classList.contains('open') && !e.target.closest('.toolbar')) closeMenu();
+  });
+
+  flipBtn.addEventListener('click', () => {
+    const flipped = calcEl.classList.toggle('flipped');
+    flipBtn.setAttribute('aria-pressed', flipped);
+  });
+
+  // ---------- Keyboard support ----------
+  const KEY_MAP = {
+    '+': '[data-op="+"]', '-': '[data-op="-"]', '*': '[data-op="*"]', 'x': '[data-op="*"]',
+    '/': '[data-op="/"]', 'Enter': '[data-action="equals"]', '=': '[data-action="equals"]',
+    '.': '[data-action="decimal"]', ',': '[data-action="decimal"]', '%': '[data-action="percent"]',
+    'Escape': '[data-action="clear"]', 'Delete': '[data-action="clear"]',
+  };
+
+  document.addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (skinMenu.classList.contains('open') && e.key === 'Escape') { closeMenu(); return; }
+    if (e.target === skinSearch) return;  // typing in the search box isn't calculator input
+    if (e.key === '[' || e.key === ']') { cycleSkin(e.key === ']' ? 1 : -1); return; }
+    if (e.key === 'Backspace') { backspace(); render(); e.preventDefault(); return; }
+    const selector = /^[0-9]$/.test(e.key) ? `[data-digit="${e.key}"]` : KEY_MAP[e.key];
+    if (!selector) return;
+    e.preventDefault();
+    const btn = document.querySelector(selector);
+    btn.classList.add('pressed');
+    setTimeout(() => btn.classList.remove('pressed'), 100);
+    handle(btn);
+  });
+
+  let savedSkin = 'modern';
+  try { savedSkin = localStorage.getItem('calc-skin') || 'modern'; } catch {}
+  setSkin(savedSkin);
+</script>
+</body>
+</html>
