@@ -6,6 +6,13 @@
 <title>Calculator · 48 fun skins</title>
 <meta name="description" content="A fun browser calculator with 48 themed skins: consoles, snacks, drinks and games. Can you find the easter eggs?">
 <meta name="theme-color" content="#0d0f17">
+<!-- Phone install: lets the calculator be added to the home screen and work offline -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Calculator">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>">
 <!-- Share preview: the title, text and picture shown when the link is sent in a message or posted online -->
 <meta property="og:type" content="website">
@@ -2882,7 +2889,99 @@
   }
   .cart-egg { font-family: "Press Start 2P", monospace; font-size: 10px; line-height: 2; text-align: center; color: #ffffff; background: #111111; padding: 8px 12px; animation: oneup 2.6s ease forwards; }
   .cart-egg b { display: block; color: #c8102e; font-size: 14px; }
+  /* ---------- Egg hunt: a list of every easter egg, golden when found ---------- */
+  .eggs { border-radius: 18px; overflow: hidden; }
+  .eggs, .eggs-panel { background: rgba(18, 18, 24, 0.78); }
+  .eggs {
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .eggs button { font-family: inherit; color: inherit; background: transparent; box-shadow: none; height: auto; }
+  .eggs-toggle {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 4px 10px;
+    padding: 11px 14px 10px;
+    border-radius: 18px;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 700;
+    transition: background 0.15s;
+  }
+  .eggs-toggle:hover { background: rgba(255, 255, 255, 0.06); }
+  .eggs-toggle:focus-visible { outline: 2px solid #ffffff; outline-offset: -2px; }
+  .eggs-toggle .egg-svg { width: 22px; height: 26px; }
+  .eggs-count { font-size: 13px; font-weight: 700; color: #ffd75e; font-variant-numeric: tabular-nums; }
+  .eggs-caret { transition: transform 0.25s; opacity: 0.7; }
+  .eggs-toggle[aria-expanded="true"] .eggs-caret { transform: rotate(180deg); }
+  .eggs-bar { grid-column: 1 / -1; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+  .eggs-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #ffcc33, #fff3b0, #ffcc33); background-size: 200% 100%; transition: width 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2); animation: bar-shine 2.5s linear infinite; }
+  @keyframes bar-shine { to { background-position: -200% 0; } }
+  .eggs.bump .eggs-toggle { animation: eggs-bump 0.6s cubic-bezier(0.3, 1.6, 0.5, 1); }
+  @keyframes eggs-bump { 30% { transform: scale(1.04); } }
+  .eggs-panel { padding: 0 8px 10px; }
+  .eggs-panel[hidden] { display: none; }
+  .egg-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .egg-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    gap: 2px 12px;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+  }
+  .egg-row .egg-svg { grid-row: 1 / 3; width: 32px; height: 38px; justify-self: center; }
+  .egg-name { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 15px; font-weight: 700; }
+  .eggs .egg-skin { padding: 2px 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); font-size: 11px; font-weight: 600; letter-spacing: 0.02em; color: rgba(255, 255, 255, 0.85); }
+  .eggs button.egg-skin { cursor: pointer; }
+  .eggs button.egg-skin:hover { background: rgba(255, 255, 255, 0.22); }
+  .egg-hint { grid-column: 2; font-size: 13px; line-height: 1.35; color: rgba(255, 255, 255, 0.65); }
+  .egg-svg .shell { fill: rgba(255, 255, 255, 0.06); stroke: rgba(255, 255, 255, 0.35); stroke-width: 2; stroke-dasharray: 4 3; }
+  .egg-svg .shine, .egg-svg .spots { display: none; }
+  .egg-svg .q { fill: rgba(255, 255, 255, 0.45); font: 700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .found .egg-svg .shell { fill: url(#eggGold); stroke: #9a6a00; stroke-dasharray: none; }
+  .found .egg-svg .shine, .found .egg-svg .spots { display: inline; }
+  .found .egg-svg .q { display: none; }
+  .egg-row.found {
+    background: linear-gradient(135deg, rgba(255, 204, 51, 0.24), rgba(255, 170, 0, 0.08));
+    box-shadow: inset 0 0 0 1.5px rgba(255, 210, 90, 0.75), 0 0 16px rgba(255, 190, 40, 0.25);
+  }
+  .egg-row.found .egg-name { color: #ffe08a; }
+  .egg-row.found .egg-hint { color: rgba(255, 240, 200, 0.75); }
+  .egg-tick { grid-column: 3; grid-row: 1 / 3; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #ffcc33; color: #1b1405; font-size: 14px; font-weight: 900; box-shadow: 0 0 10px rgba(255, 204, 51, 0.6); }
+  .egg-row:not(.found) .egg-tick { display: none; }
+  /* The moment an egg is found: the row pops, a shine sweeps across and sparkles burst out */
+  .egg-row.just-found { animation: egg-pop 0.7s cubic-bezier(0.3, 1.6, 0.5, 1); }
+  .egg-row.just-found .egg-svg { animation: egg-wobble 0.9s ease-in-out; }
+  .egg-row.just-found::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 35%, rgba(255, 250, 220, 0.6) 50%, transparent 65%);
+    animation: egg-sweep 1s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes egg-pop { 0% { transform: scale(0.94); } 50% { transform: scale(1.04); } 100% { transform: none; } }
+  @keyframes egg-wobble { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-16deg) scale(1.2); } 40% { transform: rotate(12deg) scale(1.2); } 60% { transform: rotate(-8deg); } 80% { transform: rotate(4deg); } }
+  @keyframes egg-sweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+  .sparkle { position: absolute; left: 30px; top: 50%; width: 6px; height: 6px; margin: -3px; border-radius: 50%; background: #ffe680; box-shadow: 0 0 6px #ffcc33; pointer-events: none; animation: sparkle 0.8s ease-out forwards; }
+  @keyframes sparkle { from { transform: rotate(var(--a)) translateX(0) scale(1.4); opacity: 1; } to { transform: rotate(var(--a)) translateX(34px) scale(0); opacity: 0; } }
+  .eggs-secret { margin: 10px 4px 2px; font-size: 13px; text-align: center; color: #ffe08a; }
+  .eggs-secret[hidden] { display: none; }
+  .eggs-reset { display: block; margin: 8px auto 0; padding: 4px 10px; border-radius: 999px; font-size: 12px; color: rgba(255, 255, 255, 0.5) !important; }
+  .eggs-reset:hover { background: rgba(255, 255, 255, 0.1) !important; }
+
   @media (prefers-reduced-motion: reduce) {
+    .eggs-bar i, .eggs.bump .eggs-toggle, .egg-row.just-found, .egg-row.just-found .egg-svg, .sparkle { animation: none; }
+    .egg-row.just-found::after { display: none; }
     .display.upside { animation-duration: 0.01s; }
     .screen.glitch, .monster-egg svg { animation: none; }
   }
@@ -3322,6 +3421,28 @@
       <ol class="tape-list" id="tapeList"></ol>
       <div class="tape-empty" id="tapeEmpty">Your sums will show up here. Tap one to use the answer again.</div>
     </section>
+
+    <section class="eggs" id="eggs" aria-label="Egg hunt">
+      <button class="eggs-toggle" id="eggsToggle" aria-expanded="false" aria-controls="eggsPanel">
+        <span class="found" style="display:contents"><svg class="egg-svg" viewBox="0 0 40 48" aria-hidden="true"><path class="shell" d="M20 3C11 3 4 18 4 29a16 16 0 0 0 32 0C36 18 29 3 20 3Z"/><path class="spots" d="M9 30q11 5 22 0" fill="none" stroke="#fff3b0" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/><ellipse class="shine" cx="14" cy="18" rx="3.5" ry="6" fill="#fffbe6" opacity="0.85" transform="rotate(18 14 18)"/><text class="q" x="20" y="35" text-anchor="middle">?</text></svg></span>
+        <span>Egg hunt</span>
+        <span class="eggs-count" id="eggsCount"></span>
+        <svg class="eggs-caret" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="eggs-bar" aria-hidden="true"><i id="eggsBar"></i></span>
+      </button>
+      <div class="eggs-panel" id="eggsPanel" hidden>
+        <ol class="egg-list" id="eggList"></ol>
+        <p class="eggs-secret" id="eggsSecret" hidden>✨ You found them all! But one more secret is hidden… it's worth its weight in gold.</p>
+        <button class="eggs-reset" id="eggsReset">Start the hunt again</button>
+      </div>
+    </section>
+
+    <!-- Gold colour for the found eggs -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <linearGradient id="eggGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset="0.45" stop-color="#ffcc33"/><stop offset="1" stop-color="#c98a00"/></linearGradient>
+      </defs>
+    </svg>
   </div>
 
   <div class="help" id="help" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
@@ -3457,7 +3578,8 @@
     }
     // More number easter eggs: skin → the number that sets it off
     const egg = NUMBER_EGGS[document.body.dataset.skin];
-    if (egg && state.current === egg.at && lastShown !== egg.at) showEgg(egg.html(), egg.ms);
+    if (egg && state.current === egg.at && lastShown !== egg.at) { showEgg(egg.html(), egg.ms); eggFound(document.body.dataset.skin); }
+    if (died) eggFound('died');
     const prevShown = lastShown;
     lastShown = state.current;
     extraEggs(prevShown);
@@ -3469,6 +3591,7 @@
   function dropshipDrop() {
     const screen = document.querySelector('.screen');
     if (screen.querySelector('.dropship-fx')) return;
+    eggFound('ringworld');
     const fx = document.createElement('div');
     fx.className = 'dropship-fx';
     fx.setAttribute('aria-hidden', 'true');
@@ -3824,6 +3947,7 @@
   flipBtn.addEventListener('click', () => {
     const flipped = calcEl.classList.toggle('flipped');
     flipBtn.setAttribute('aria-pressed', flipped);
+    if (flipped && state.current === '58008') eggFound('flip');
   });
 
   // ---------- Keyboard support ----------
@@ -3842,7 +3966,10 @@
     codeStep = key === SECRET_CODE[codeStep] ? codeStep + 1 : key === SECRET_CODE[0] ? 1 : 0;
     if (codeStep === SECRET_CODE.length) {
       codeStep = 0;
-      if (document.body.dataset.skin === 'super16') showEgg('<div class="super16-egg">1UP ×30<b>CHEAT ACTIVATED</b></div>', 2700);
+      if (document.body.dataset.skin === 'super16') {
+        showEgg('<div class="super16-egg">1UP ×30<b>CHEAT ACTIVATED</b></div>', 2700);
+        eggFound('super16');
+      }
     }
   });
 
@@ -3912,12 +4039,14 @@
       void displayEl.offsetWidth;
       displayEl.classList.add('upside');
       setTimeout(() => displayEl.classList.remove('upside'), 3000);
+      eggFound('hello');
     }
     if (now === 'Error' && skin !== 'ashenrealm') {
       const cat = (findSkin(skin) || SKINS[0]).cat;
       const [big, small, soft] = GAME_OVER[cat];
       showEgg(`<div class="gameover-egg${soft ? ' soft' : ''}">${big}<b>${small}</b></div>`, 3000);
       playTune([392, 330, 262, 196], 'square');
+      eggFound('gameover');
     }
   }
 
@@ -3936,6 +4065,7 @@
     setTimeout(() => {
       screen.classList.remove('glitch');
       showEgg('<div class="cart-egg">*blows on cartridge*<b>IT WORKS!</b></div>', 2600);
+      eggFound('eightbit');
       playTune([523, 659, 784, 1047], 'square');
     }, 900);
   });
@@ -4141,9 +4271,113 @@
     e.preventDefault();
   }, true);
 
+  // ---------- Egg hunt ----------
+  // Every easter egg, with a hint that points the way without giving the answer.
+  // (The gold skin stays a secret, so it is not on this list.)
+  const EGGS = [
+    { id: 'flip',        name: 'Upside-Down Word',      skin: 'retro',       hint: 'Type the model number printed on the case, then turn the calculator over.' },
+    { id: 'died',        name: 'You Died',              skin: 'ashenrealm',  hint: 'This world is harsh. Try a sum that no one can win.' },
+    { id: 'gameover',    name: 'Game Over',             skin: null,          hint: 'Some sums break every calculator. Try one on any other skin.' },
+    { id: 'ringworld',   name: 'Dropship Drop-off',     skin: 'ringworld',   hint: 'Call in the famous dropship by its number.' },
+    { id: 'terminal',    name: 'Access Granted',        skin: 'terminal',    hint: 'Hackers spell “elite” with numbers.' },
+    { id: 'classiccola', name: 'Fizz!',                 skin: 'classiccola', hint: 'Type the year the very first cola was poured.' },
+    { id: 'mazemuncher', name: 'Broken Level',          skin: 'mazemuncher', hint: 'Reach the level that broke the arcade game.' },
+    { id: 'super16',     name: 'Cheat Code',            skin: 'super16',     hint: 'Enter the most famous cheat code in gaming. You need a keyboard.' },
+    { id: 'hello',       name: 'Say Hello',             skin: null,          hint: 'Old school trick: a number that reads as a greeting when turned upside down.' },
+    { id: 'monsterdex',  name: 'Wild Monster',          skin: 'monsterdex',  hint: 'Type how many monsters were in the very first Dex.' },
+    { id: 'eightbit',    name: 'Blow on the Cartridge', skin: 'eightbit',    hint: 'Old games glitched. Give the screen a few quick taps.' },
+  ];
+  const eggsEl = document.getElementById('eggs');
+  const eggsToggle = document.getElementById('eggsToggle');
+  const eggsPanel = document.getElementById('eggsPanel');
+  const eggList = document.getElementById('eggList');
+  let foundEggs = [];
+  try { foundEggs = JSON.parse(localStorage.getItem('calc-eggs')) || []; } catch {}
+
+  function eggIcon() {
+    return '<svg class="egg-svg" viewBox="0 0 40 48" aria-hidden="true"><path class="shell" d="M20 3C11 3 4 18 4 29a16 16 0 0 0 32 0C36 18 29 3 20 3Z"/><path class="spots" d="M9 30q11 5 22 0" fill="none" stroke="#fff3b0" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/><ellipse class="shine" cx="14" cy="18" rx="3.5" ry="6" fill="#fffbe6" opacity="0.85" transform="rotate(18 14 18)"/><text class="q" x="20" y="35" text-anchor="middle">?</text></svg>';
+  }
+
+  function buildEggs() {
+    eggList.innerHTML = EGGS.map(egg => {
+      const skin = egg.skin && SKINS[skinIndex(egg.skin)];
+      const chip = skin
+        ? `<button class="egg-skin" data-skin="${skin.id}" title="Switch to ${skin.name}">${skin.name}</button>`
+        : '<span class="egg-skin">Any skin</span>';
+      return `<li class="egg-row" data-egg="${egg.id}">${eggIcon()}
+        <span class="egg-name">${egg.name} ${chip}</span>
+        <span class="egg-hint">${egg.hint}</span>
+        <span class="egg-tick" aria-label="Found">✓</span></li>`;
+    }).join('');
+    updateEggs();
+  }
+
+  function updateEggs() {
+    let count = 0;
+    eggList.querySelectorAll('.egg-row').forEach(row => {
+      const found = foundEggs.includes(row.dataset.egg);
+      row.classList.toggle('found', found);
+      if (found) count++;
+    });
+    document.getElementById('eggsCount').textContent = `${count} / ${EGGS.length}`;
+    document.getElementById('eggsBar').style.width = `${count / EGGS.length * 100}%`;
+    document.getElementById('eggsSecret').hidden = count < EGGS.length;
+    eggsToggle.setAttribute('aria-label', `Egg hunt: ${count} of ${EGGS.length} found`);
+  }
+
+  function eggFound(id) {
+    const egg = EGGS.find(e => e.id === id);
+    if (!egg || foundEggs.includes(id)) return;
+    foundEggs.push(id);
+    try { localStorage.setItem('calc-eggs', JSON.stringify(foundEggs)); } catch {}
+    updateEggs();
+    // Celebrate: the row pops and sparkles, the bar bumps, and a message pops up
+    const row = eggList.querySelector(`[data-egg="${id}"]`);
+    row.classList.remove('just-found');
+    void row.offsetWidth;
+    row.classList.add('just-found');
+    for (let i = 0; i < 10; i++) {
+      const s = document.createElement('i');
+      s.className = 'sparkle';
+      s.style.setProperty('--a', `${i * 36}deg`);
+      row.appendChild(s);
+      setTimeout(() => s.remove(), 900);
+    }
+    setTimeout(() => row.classList.remove('just-found'), 1200);
+    eggsEl.classList.remove('bump');
+    void eggsEl.offsetWidth;
+    eggsEl.classList.add('bump');
+    setTimeout(() => toast(`🥚 Golden egg found: ${egg.name}!`), 600);
+    setTimeout(() => playTune([784, 988, 1175, 1568], 'triangle'), 650);
+  }
+
+  eggsToggle.addEventListener('click', () => {
+    const open = eggsPanel.hidden;
+    eggsPanel.hidden = !open;
+    eggsToggle.setAttribute('aria-expanded', open);
+  });
+  eggList.addEventListener('click', e => {
+    const chip = e.target.closest('button.egg-skin');
+    if (!chip) return;
+    setSkin(chip.dataset.skin, 'right');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  document.getElementById('eggsReset').addEventListener('click', () => {
+    if (!confirm('Hide all the eggs again and start a new hunt?')) return;
+    foundEggs = [];
+    try { localStorage.removeItem('calc-eggs'); } catch {}
+    updateEggs();
+  });
+  buildEggs();
+
   let savedSkin = 'modern';
   try { savedSkin = localStorage.getItem('calc-skin') || 'modern'; } catch {}
   setSkin(savedSkin);
+
+  // Phone install: save a copy for offline use (only works on a real website, not a file).
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
 </script>
 </body>
 </html>
