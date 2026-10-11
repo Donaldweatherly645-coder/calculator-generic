@@ -3,7 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Calculator</title>
+<title>Calculator · 48 fun skins</title>
+<meta name="description" content="A fun browser calculator with 48 themed skins: consoles, snacks, drinks and games. Can you find the easter eggs?">
+<meta name="theme-color" content="#0d0f17">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>">
+<!-- Share preview: the title, text and picture shown when the link is sent in a message or posted online -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://donaldweatherly645-coder.github.io/calculator-generic/">
+<meta property="og:title" content="Calculator · 48 fun skins">
+<meta property="og:description" content="A fun browser calculator with 48 themed skins: consoles, snacks, drinks and games. Can you find the easter eggs?">
+<meta property="og:image" content="https://donaldweatherly645-coder.github.io/calculator-generic/docs/preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Five themed calculators side by side">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Calculator · 48 fun skins">
+<meta name="twitter:description" content="A fun browser calculator with 48 themed skins: consoles, snacks, drinks and games. Can you find the easter eggs?">
+<meta name="twitter:image" content="https://donaldweatherly645-coder.github.io/calculator-generic/docs/preview.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Michroma&family=Rajdhani:wght@500;700&family=Cinzel:wght@400;700&family=Special+Elite&family=Fredoka:wght@500;700&family=VT323&family=Patrick+Hand&family=Lobster&display=swap" rel="stylesheet">
@@ -2698,6 +2714,178 @@
   .op:hover { background: var(--op); filter: brightness(1.08); }
   .op.active { background: var(--op-active); color: var(--op-active-text); box-shadow: inset 0 0 0 2px var(--op); }
   .zero { grid-column: span 2; }
+
+  /* ---------- Solid Gold: secret skin, unlocked by typing 999.9 ---------- */
+  body[data-skin="gold"] {
+    --bg: radial-gradient(circle at 50% 30%, #3a2c0a 0%, #120d02 70%);
+    --body: linear-gradient(145deg, #fff2b0 0%, #e8b923 30%, #b8860b 62%, #f7d65a 100%);
+    --screen: #1b1405;
+    --text: #ffd75e;
+    --muted: #b8933a;
+    --key: linear-gradient(180deg, #fff6c9 0%, #e9c048 100%);
+    --key-text: #4a3505;
+    --key-hover: #fff0a8;
+    --fn: linear-gradient(180deg, #d9a92c 0%, #a87a0f 100%);
+    --op: #1b1405;
+    --op-text: #ffd75e;
+    --op-active: #ffd75e;
+    --op-active-text: #1b1405;
+    --key-radius: 999px;
+    --key-shadow: 0 3px 0 #8a6408, inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    --body-radius: 30px;
+    --shadow: 0 0 60px rgba(255, 200, 60, 0.35), 0 20px 50px rgba(0, 0, 0, 0.6);
+  }
+  body[data-skin="gold"] .calc { position: relative; overflow: hidden; }
+  body[data-skin="gold"] .calc::after {
+    content: "";
+    position: absolute;
+    inset: -50%;
+    background: linear-gradient(115deg, transparent 45%, rgba(255, 255, 255, 0.55) 50%, transparent 55%);
+    animation: gold-shine 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes gold-shine { 0% { transform: translateX(-60%); } 40%, 100% { transform: translateX(60%); } }
+  body[data-skin="gold"] .screen { box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.8), 0 0 0 3px #8a6408; }
+  body[data-skin="gold"] .display { text-shadow: 0 0 10px rgba(255, 200, 60, 0.6); font-weight: 500; }
+  body[data-skin="gold"] .fn { color: #fff6c9; }
+  @media (prefers-reduced-motion: reduce) { body[data-skin="gold"] .calc::after { animation: none; display: none; } }
+
+  /* ---------- Extras bar: shuffle, copy, tape, sound, keys ---------- */
+  .extras {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+  }
+  .extras, .tape, .help-card, .toast {
+    background: rgba(18, 18, 24, 0.78);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .extras button, .tape button, .help-card button {
+    height: auto;
+    font: 500 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #ffffff;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 999px;
+    transition: background 0.15s, transform 0.12s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+  .extras button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    padding: 6px 0 5px;
+    border-radius: 18px;
+  }
+  .extras button span { font-size: 18px; line-height: 1.1; }
+  .extras button:hover, .tape button:hover, .help-card button:hover { background: rgba(255, 255, 255, 0.12); }
+  .extras button:active, .tape button:active { transform: scale(0.9); }
+  .extras button[aria-pressed="true"] { background: rgba(255, 255, 255, 0.18); }
+  .extras button:focus-visible, .tape button:focus-visible, .help-card button:focus-visible { outline: 2px solid #ffffff; outline-offset: 1px; }
+
+  /* History tape: past sums, newest first */
+  .tape { border-radius: 18px; padding: 10px 10px 8px; }
+  .tape[hidden] { display: none; }
+  .tape-head { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); }
+  .tape-head button { padding: 4px 10px; font-size: 12px; letter-spacing: 0; text-transform: none; color: rgba(255, 255, 255, 0.75); }
+  .tape-list { list-style: none; margin: 0; padding: 0; max-height: 210px; overflow-y: auto; }
+  .tape-list button {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    text-align: left;
+  }
+  .tape-list .sum { color: rgba(255, 255, 255, 0.6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tape-list .ans { font-weight: 700; white-space: nowrap; }
+  .tape-empty { padding: 10px 4px 6px; font-size: 14px; color: rgba(255, 255, 255, 0.55); }
+
+  /* Keyboard help */
+  .help {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.45);
+  }
+  .help[hidden] { display: none; }
+  .help-card { width: 100%; max-width: 320px; border-radius: 20px; padding: 18px 18px 12px; }
+  .help-card h2 { margin: 0 0 10px; font-size: 17px; }
+  .help-card dl { display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; margin: 0 0 12px; font-size: 14px; }
+  .help-card dt { text-align: right; white-space: nowrap; }
+  .help-card dd { margin: 0; color: rgba(255, 255, 255, 0.75); }
+  .help-card kbd { display: inline-block; min-width: 1.4em; padding: 1px 6px; border-radius: 6px; background: rgba(255, 255, 255, 0.14); font: 600 13px ui-monospace, Menlo, monospace; text-align: center; }
+  .help-card button { display: block; width: 100%; padding: 9px; background: rgba(255, 255, 255, 0.12); font-size: 14px; }
+
+  /* Little message at the bottom of the screen */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 60;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    transform: translate(-50%, 20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* Easter egg: 0.7734 turns the screen upside down to say hELLO */
+  .display.upside { animation: upside 3s ease-in-out; }
+  @keyframes upside { 15%, 85% { transform: rotate(180deg); } }
+
+  /* Easter egg: dividing by zero is Game Over */
+  .gameover-egg {
+    font-family: "Press Start 2P", monospace;
+    font-size: 15px;
+    line-height: 1.8;
+    text-align: center;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.88);
+    padding: 10px 14px;
+    border-radius: 6px;
+    animation: oneup 3s ease forwards;
+  }
+  .gameover-egg b { display: block; color: #ffd75e; font-size: 9px; font-weight: 400; }
+  .gameover-egg.soft { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 20px; font-weight: 800; }
+  .gameover-egg.soft b { font-size: 13px; font-weight: 500; }
+
+  /* Easter egg: 151 on Monster Dex, a wild monster pops out */
+  .monster-egg { display: flex; align-items: center; gap: 8px; font-family: "Press Start 2P", monospace; font-size: 8px; line-height: 1.6; color: #0f380f; background: #9bbc0f; padding: 8px 10px; border: 3px solid #0f380f; border-radius: 4px; animation: oneup 3s ease forwards; }
+  .monster-egg svg { width: 40px; height: 40px; animation: monster-hop 0.5s ease-in-out 4 alternate; }
+  @keyframes monster-hop { to { transform: translateY(-6px); } }
+
+  /* Easter egg: tap the 8-Bit Console screen 3 times to blow on the cartridge */
+  .screen.glitch { animation: glitch 0.9s steps(6); }
+  .screen.glitch .display { filter: hue-rotate(140deg) blur(0.6px); transform: skewX(14deg) translateX(-6px); }
+  @keyframes glitch {
+    0% { transform: translate(0); } 20% { transform: translate(-4px, 2px); } 40% { transform: translate(3px, -2px); }
+    60% { transform: translate(-2px, -1px); } 80% { transform: translate(4px, 1px); } 100% { transform: translate(0); }
+  }
+  .cart-egg { font-family: "Press Start 2P", monospace; font-size: 10px; line-height: 2; text-align: center; color: #ffffff; background: #111111; padding: 8px 12px; animation: oneup 2.6s ease forwards; }
+  .cart-egg b { display: block; color: #c8102e; font-size: 14px; }
+  @media (prefers-reduced-motion: reduce) {
+    .display.upside { animation-duration: 0.01s; }
+    .screen.glitch, .monster-egg svg { animation: none; }
+  }
 </style>
 </head>
 <body data-skin="modern">
@@ -3120,7 +3308,45 @@
         <button class="op" data-action="equals">=</button>
       </div>
     </main>
+
+    <div class="extras" role="toolbar" aria-label="Extras">
+      <button id="shuffleBtn" title="Random skin ( S )"><span aria-hidden="true">🎲</span>Shuffle</button>
+      <button id="copyBtn" title="Copy the answer ( C )"><span aria-hidden="true">📋</span>Copy</button>
+      <button id="tapeBtn" aria-pressed="false" aria-controls="tape" title="History tape ( T )"><span aria-hidden="true">🧾</span>Tape</button>
+      <button id="soundBtn" aria-pressed="false" title="Sound on or off ( M )"><span aria-hidden="true" id="soundIcon">🔇</span>Sound</button>
+      <button id="helpBtn" title="Keyboard keys ( ? )"><span aria-hidden="true">⌨️</span>Keys</button>
+    </div>
+
+    <section class="tape" id="tape" aria-label="History tape" hidden>
+      <div class="tape-head"><span>History tape</span><button id="tapeClear">Clear</button></div>
+      <ol class="tape-list" id="tapeList"></ol>
+      <div class="tape-empty" id="tapeEmpty">Your sums will show up here. Tap one to use the answer again.</div>
+    </section>
   </div>
+
+  <div class="help" id="help" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
+    <div class="help-card">
+      <h2 id="helpTitle">⌨️ Keyboard keys</h2>
+      <dl>
+        <dt><kbd>0</kbd>–<kbd>9</kbd></dt><dd>Numbers</dd>
+        <dt><kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd></dt><dd>Add, take away, times, divide</dd>
+        <dt><kbd>Enter</kbd></dt><dd>Equals</dd>
+        <dt><kbd>.</kbd></dt><dd>Decimal point</dd>
+        <dt><kbd>%</kbd></dt><dd>Percent</dd>
+        <dt><kbd>⌫</kbd></dt><dd>Delete last digit</dd>
+        <dt><kbd>Esc</kbd></dt><dd>Clear</dd>
+        <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Previous or next skin</dd>
+        <dt><kbd>S</kbd></dt><dd>Shuffle to a random skin</dd>
+        <dt><kbd>C</kbd></dt><dd>Copy the answer</dd>
+        <dt><kbd>T</kbd></dt><dd>Show the history tape</dd>
+        <dt><kbd>M</kbd></dt><dd>Sound on or off</dd>
+        <dt><kbd>?</kbd></dt><dd>Show these keys</dd>
+      </dl>
+      <button id="helpClose">Got it</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
   const displayEl = document.getElementById('display');
@@ -3232,7 +3458,9 @@
     // More number easter eggs: skin → the number that sets it off
     const egg = NUMBER_EGGS[document.body.dataset.skin];
     if (egg && state.current === egg.at && lastShown !== egg.at) showEgg(egg.html(), egg.ms);
+    const prevShown = lastShown;
     lastShown = state.current;
+    extraEggs(prevShown);
   }
 
   let lastShown = null;
@@ -3340,6 +3568,7 @@
     render();
     // Show the finished sum above the answer, e.g. "12 × 3 ="
     historyEl.textContent = `${withCommas(format(a))} ${SYMBOLS[op]} ${withCommas(format(b))} =`;
+    addToTape(a, op, b, state.current);
   }
 
   function clearAll() {
@@ -3383,6 +3612,7 @@
 
   function handle(btn) {
     const { digit, op, action } = btn.dataset;
+    playSound(btn);
     if (digit !== undefined) inputDigit(digit);
     else if (op) chooseOperator(op);
     else if (action === 'decimal') inputDecimal();
@@ -3512,7 +3742,7 @@
   }
 
   function setSkin(id, direction) {
-    const skin = SKINS[skinIndex(id)] || SKINS[0];
+    const skin = findSkin(id) || SKINS[0];
     const changed = document.body.dataset.skin !== skin.id;
     document.body.dataset.skin = skin.id;
 
@@ -3630,6 +3860,286 @@
     setTimeout(() => btn.classList.remove('pressed'), 100);
     handle(btn);
   });
+
+  // ---------- Secret skin: Solid Gold ----------
+  // Not in the skin menu. Type 999.9 (the purest gold) to unlock it, and again to go back.
+  const GOLD = { id: 'gold', cat: 'Secret', name: '★ Solid Gold', body: '#e8b923', screen: '#1b1405', dots: ['#fff6c9', '#fff6c9', '#1b1405', '#1b1405'] };
+  let goldUnlocked = false;
+  try { goldUnlocked = localStorage.getItem('calc-gold') === 'yes'; } catch {}
+  let skinBeforeGold = 'modern';
+
+  function findSkin(id) {
+    if (id === 'gold' && goldUnlocked) return GOLD;
+    return SKINS[skinIndex(id)];
+  }
+
+  function toggleGold() {
+    if (document.body.dataset.skin === 'gold') {
+      setSkin(skinBeforeGold, 'left');
+      return;
+    }
+    skinBeforeGold = document.body.dataset.skin;
+    const first = !goldUnlocked;
+    goldUnlocked = true;
+    try { localStorage.setItem('calc-gold', 'yes'); } catch {}
+    setSkin('gold', 'right');
+    toast(first ? '🏆 Secret skin unlocked: Solid Gold!' : '🏆 Solid Gold');
+  }
+
+  // ---------- More easter eggs ----------
+  // Monster Dex: 151, a wild monster appears.
+  NUMBER_EGGS.monsterdex = { at: '151', ms: 3000, html: () => '<div class="monster-egg">' +
+    '<svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path fill="#0f380f" d="M4 2h2v1H4zM10 2h2v1h-2zM3 3h1v2H3zM12 3h1v2h-1zM4 4h8v1H4zM3 5h10v6H3zM2 7h1v3H2zM13 7h1v3h-1zM4 11h8v2H4zM4 13h2v1H4zM10 13h2v1h-2z"/>' +
+    '<path fill="#9bbc0f" d="M5 6h2v2H5zM9 6h2v2H9zM6 9h4v1H6z"/><path fill="#0f380f" d="M6 7h1v1H6zM10 7h1v1h-1z"/></svg>' +
+    '<span>A WILD<br>MONSTER<br>APPEARED!</span></div>' };
+
+  // Dividing by zero: Game Over, worded to fit each kind of skin.
+  const GAME_OVER = {
+    'Classic':      ['Nope!', "Can't divide by zero", true],
+    'Consoles':     ['GAME OVER', 'PRESS START', false],
+    'Food & Drink': ['Sold out!', 'Zero portions to share', true],
+    'Games':        ['GAME OVER', 'CONTINUE? 9…', false],
+    'Secret':       ['GAME OVER', 'EVEN GOLD CANNOT', false],
+  };
+
+  function extraEggs(prev) {
+    const skin = document.body.dataset.skin;
+    const now = state.current;
+    if (now === prev) return;
+    if (now === '999.9') { setTimeout(toggleGold, 250); return; }
+    if (now === '0.7734') {
+      displayEl.classList.remove('upside');
+      void displayEl.offsetWidth;
+      displayEl.classList.add('upside');
+      setTimeout(() => displayEl.classList.remove('upside'), 3000);
+    }
+    if (now === 'Error' && skin !== 'ashenrealm') {
+      const cat = (findSkin(skin) || SKINS[0]).cat;
+      const [big, small, soft] = GAME_OVER[cat];
+      showEgg(`<div class="gameover-egg${soft ? ' soft' : ''}">${big}<b>${small}</b></div>`, 3000);
+      playTune([392, 330, 262, 196], 'square');
+    }
+  }
+
+  // 8-Bit Console: tap the screen 3 times quickly to blow on the cartridge.
+  let screenTaps = [];
+  document.querySelector('.screen').addEventListener('click', () => {
+    if (document.body.dataset.skin !== 'eightbit') return;
+    const t = Date.now();
+    screenTaps = screenTaps.filter(x => t - x < 1200).concat(t);
+    if (screenTaps.length < 3) return;
+    screenTaps = [];
+    const screen = document.querySelector('.screen');
+    if (screen.classList.contains('glitch') || screen.querySelector('.egg-fx')) return;
+    screen.classList.add('glitch');
+    playNoise(0.5, 'lowpass', 900, 0.25);
+    setTimeout(() => {
+      screen.classList.remove('glitch');
+      showEgg('<div class="cart-egg">*blows on cartridge*<b>IT WORKS!</b></div>', 2600);
+      playTune([523, 659, 784, 1047], 'square');
+    }, 900);
+  });
+
+  // ---------- Sounds ----------
+  // Every kind of skin gets its own click. Off until you turn it on.
+  let soundOn = false;
+  try { soundOn = localStorage.getItem('calc-sound') === 'on'; } catch {}
+  let audio = null;
+  const DRINKS = ['bluelager', 'silverpeak', 'neoncitrus', 'tropicalteal', 'midnightberry', 'classiccola', 'greencafe', 'bobatea'];
+
+  function ctx() {
+    if (!audio) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      audio = new AC();
+    }
+    if (audio.state === 'suspended') audio.resume();
+    return audio;
+  }
+
+  function tone(freq, type, length, volume, delay = 0) {
+    const ac = ctx();
+    if (!ac) return;
+    const t = ac.currentTime + delay;
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(volume, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + length);
+    osc.connect(gain).connect(ac.destination);
+    osc.start(t);
+    osc.stop(t + length + 0.02);
+  }
+
+  function playNoise(length, filterType, freq, volume) {
+    if (!soundOn) return;
+    const ac = ctx();
+    if (!ac) return;
+    const buffer = ac.createBuffer(1, Math.ceil(ac.sampleRate * length), ac.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    const src = ac.createBufferSource();
+    src.buffer = buffer;
+    const filter = ac.createBiquadFilter();
+    filter.type = filterType;
+    filter.frequency.value = freq;
+    const gain = ac.createGain();
+    const t = ac.currentTime;
+    gain.gain.setValueAtTime(volume, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + length);
+    src.connect(filter).connect(gain).connect(ac.destination);
+    src.start(t);
+  }
+
+  function playTune(notes, type) {
+    if (!soundOn) return;
+    notes.forEach((f, i) => tone(f, type, 0.14, 0.06, i * 0.13));
+  }
+
+  function playSound(btn) {
+    if (!soundOn) return;
+    const skin = findSkin(document.body.dataset.skin) || SKINS[0];
+    const isEquals = btn.dataset.action === 'equals';
+    const isOp = btn.dataset.op !== undefined || isEquals;
+    if (skin.id === 'gold') {
+      tone(isOp ? 1568 : 1319, 'sine', 0.35, 0.08);
+      tone(isOp ? 2349 : 1976, 'sine', 0.3, 0.04);
+    } else if (skin.cat === 'Consoles' || skin.cat === 'Games') {
+      if (isEquals) { playTune([660, 990], 'square'); return; }
+      tone(isOp ? 523 : 880 + Math.random() * 60, 'square', 0.06, 0.04);
+    } else if (skin.cat === 'Food & Drink') {
+      if (DRINKS.includes(skin.id)) playNoise(isEquals ? 0.45 : 0.14, 'highpass', 5000, 0.12);
+      else { playNoise(0.05, 'bandpass', 1400, 0.5); playNoise(0.04, 'bandpass', 900, 0.4); }
+    } else {
+      tone(isOp ? 1200 : 1800, 'sine', 0.03, 0.08);
+    }
+  }
+
+  const soundBtn = document.getElementById('soundBtn');
+  function showSound() {
+    soundBtn.setAttribute('aria-pressed', soundOn);
+    document.getElementById('soundIcon').textContent = soundOn ? '🔊' : '🔇';
+  }
+  function toggleSound() {
+    soundOn = !soundOn;
+    try { localStorage.setItem('calc-sound', soundOn ? 'on' : 'off'); } catch {}
+    showSound();
+    toast(soundOn ? '🔊 Sound on' : '🔇 Sound off');
+    if (soundOn) tone(1046, 'sine', 0.12, 0.06);
+  }
+  soundBtn.addEventListener('click', toggleSound);
+  showSound();
+
+  // ---------- History tape ----------
+  const tapeEl = document.getElementById('tape');
+  const tapeBtn = document.getElementById('tapeBtn');
+  const tapeList = document.getElementById('tapeList');
+  const tapeEmpty = document.getElementById('tapeEmpty');
+  let tape = [];
+  try { tape = JSON.parse(localStorage.getItem('calc-tape')) || []; } catch {}
+
+  function addToTape(a, op, b, answer) {
+    if (answer === 'Error') return;
+    tape.unshift({ sum: `${withCommas(format(a))} ${SYMBOLS[op]} ${withCommas(format(b))}`, answer });
+    tape = tape.slice(0, 30);
+    try { localStorage.setItem('calc-tape', JSON.stringify(tape)); } catch {}
+    drawTape();
+  }
+
+  function drawTape() {
+    tapeList.innerHTML = tape.map((row, i) =>
+      `<li><button data-i="${i}" title="Use ${withCommas(row.answer)}"><span class="sum">${row.sum} =</span><span class="ans">${withCommas(row.answer)}</span></button></li>`
+    ).join('');
+    tapeEmpty.hidden = tape.length > 0;
+  }
+
+  function toggleTape() {
+    tapeEl.hidden = !tapeEl.hidden;
+    tapeBtn.setAttribute('aria-pressed', !tapeEl.hidden);
+  }
+
+  tapeBtn.addEventListener('click', toggleTape);
+  tapeList.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    // Put that answer back on the screen, ready to use in the next sum.
+    state.current = tape[btn.dataset.i].answer;
+    state.fresh = false;
+    if (!state.operator) historyEl.textContent = '';
+    render();
+  });
+  document.getElementById('tapeClear').addEventListener('click', () => {
+    tape = [];
+    try { localStorage.removeItem('calc-tape'); } catch {}
+    drawTape();
+  });
+  drawTape();
+
+  // ---------- Shuffle, copy, help ----------
+  function shuffleSkin() {
+    const current = document.body.dataset.skin;
+    const others = SKINS.filter(s => s.id !== current);
+    setSkin(others[Math.floor(Math.random() * others.length)].id, 'right');
+  }
+  document.getElementById('shuffleBtn').addEventListener('click', shuffleSkin);
+
+  function copyAnswer() {
+    const text = state.current;
+    const done = () => toast(`📋 Copied ${withCommas(text)}`);
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, () => toast('Could not copy'));
+    } else {
+      const area = document.createElement('textarea');
+      area.value = text;
+      document.body.appendChild(area);
+      area.select();
+      try { document.execCommand('copy'); done(); } catch { toast('Could not copy'); }
+      area.remove();
+    }
+  }
+  document.getElementById('copyBtn').addEventListener('click', copyAnswer);
+
+  const helpEl = document.getElementById('help');
+  function openHelp() {
+    helpEl.hidden = false;
+    document.getElementById('helpClose').focus();
+  }
+  function closeHelp() {
+    helpEl.hidden = true;
+    document.getElementById('helpBtn').focus();
+  }
+  document.getElementById('helpBtn').addEventListener('click', openHelp);
+  document.getElementById('helpClose').addEventListener('click', closeHelp);
+  helpEl.addEventListener('click', e => { if (e.target === helpEl) closeHelp(); });
+
+  let toastTimer;
+  function toast(text) {
+    const el = document.getElementById('toast');
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  // Extra keys. This runs first, so Esc closes the help without clearing the sum.
+  window.addEventListener('keydown', e => {
+    if (!helpEl.hidden) {
+      if (e.key === 'Escape' || e.key === '?') { closeHelp(); e.preventDefault(); }
+      e.stopImmediatePropagation();
+      return;
+    }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target === skinSearch || skinMenu.classList.contains('open')) return;
+    const key = e.key.toLowerCase();
+    if (e.key === '?') openHelp();
+    else if (key === 's') shuffleSkin();
+    else if (key === 'c') copyAnswer();
+    else if (key === 't') toggleTape();
+    else if (key === 'm') toggleSound();
+    else return;
+    e.preventDefault();
+  }, true);
 
   let savedSkin = 'modern';
   try { savedSkin = localStorage.getItem('calc-skin') || 'modern'; } catch {}
