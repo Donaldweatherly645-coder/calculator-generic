@@ -3323,6 +3323,73 @@
   .paint-card .paint-row { display: flex; gap: 8px; justify-content: flex-end; }
   .paint-card button { padding: 6px 14px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
   .toast { white-space: normal; max-width: min(92vw, 380px); text-align: center; }
+  /* ---------- Games menu: a drop-down list of mini games ---------- */
+  .games { border-radius: 18px; overflow: hidden; background: rgba(18, 18, 24, 0.78); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.1); color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .games button { font-family: inherit; color: inherit; background: transparent; box-shadow: none; height: auto; border: 0; cursor: pointer; }
+  .games-toggle { width: 100%; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 18px; text-align: left; font-size: 15px; font-weight: 700; }
+  .games-toggle:hover { background: rgba(255, 255, 255, 0.06); }
+  .games-toggle:focus-visible { outline: 2px solid #ffffff; outline-offset: -2px; }
+  .games-toggle > span:first-child { font-size: 20px; }
+  .games-caret { font-size: 16px; opacity: 0.7; transition: transform 0.25s; }
+  .games-toggle[aria-expanded="true"] .games-caret { transform: rotate(180deg); }
+  .games-panel { padding: 0 8px 10px; }
+  .games-panel[hidden] { display: none; }
+  .game-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .games .game-pick { width: 100%; display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 2px 10px; padding: 10px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); text-align: left; }
+  .games .game-pick:hover { background: rgba(255, 255, 255, 0.12); }
+  .games .game-pick:focus-visible { outline: 2px solid #ffffff; outline-offset: 1px; }
+  .game-pick .gi { grid-row: 1 / 3; font-size: 26px; text-align: center; }
+  .game-pick .gn { font-size: 15px; font-weight: 700; }
+  .game-pick .gb { grid-column: 2; font-size: 13px; color: rgba(255, 255, 255, 0.7); }
+  .game-pick .gs { grid-row: 1 / 3; grid-column: 3; font-size: 12px; font-weight: 700; color: #ffd75e; text-align: right; white-space: nowrap; }
+  .games-soon { margin: 8px 4px 0; font-size: 12px; text-align: center; color: rgba(255, 255, 255, 0.5); }
+
+  /* Game window: opens on top of the calculator */
+  .game { position: fixed; inset: 0; z-index: 55; display: grid; place-items: center; padding: 16px; background: rgba(0, 0, 0, 0.55); }
+  .game[hidden] { display: none; }
+  .game-card { position: relative; width: 100%; max-width: 360px; max-height: calc(100dvh - 32px); overflow-y: auto; padding: 16px; border-radius: 22px; background: rgba(18, 18, 24, 0.94); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.12); color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; }
+  body.easy-read .game-card { font-family: "Atkinson Hyperlegible", Arial, sans-serif; letter-spacing: 0.03em; }
+  .game-card h2 { margin: 0 36px 4px; font-size: 19px; }
+  .game-card button { font-family: inherit; color: #ffffff; border: 0; cursor: pointer; height: auto; box-shadow: none; transition: background 0.15s, transform 0.12s cubic-bezier(0.3, 1.6, 0.5, 1); }
+  .game-card button:active { transform: scale(0.93); }
+  .game-card button:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+  .game-close { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px !important; border-radius: 50%; background: rgba(255, 255, 255, 0.12); font-size: 18px; }
+  .game-how { margin: 0 0 12px; font-size: 14px; line-height: 1.45; color: rgba(255, 255, 255, 0.75); }
+  .game-stats { display: flex; justify-content: center; gap: 16px; margin: 0 0 12px; font-size: 13px; font-weight: 700; color: #ffd75e; }
+  .game-msg { min-height: 1.4em; margin: 10px 0; font-size: 15px; font-weight: 700; }
+  .game-msg.good { color: #7ee787; }
+  .game-msg.bad { color: #ff9b8a; }
+  .game-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .game-btn { padding: 10px 16px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); font-size: 14px; font-weight: 600; }
+  .game-btn:hover { background: rgba(255, 255, 255, 0.22); }
+  .game-btn.big { padding: 12px 28px; font-size: 16px; background: #ff9f0a; color: #1a1000; font-weight: 800; }
+  .game-btn.big:hover { background: #ffb340; }
+  .game-btn:disabled { opacity: 0.35; cursor: default; }
+
+  /* Make 24 */
+  .m24-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 4px 0 10px; }
+  .m24-card { aspect-ratio: 3 / 4; display: grid; place-items: center; border-radius: 14px; background: #fff8e8 !important; color: #1a1a1a !important; font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35) !important; }
+  .m24-card.small { font-size: 20px; }
+  .m24-card.picked { background: #ffd75e !important; transform: translateY(-4px); }
+  .m24-card.gone { visibility: hidden; }
+  .m24-card.win { background: #7ee787 !important; }
+  .m24-ops { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+  .m24-op { padding: 10px 0; border-radius: 14px; background: rgba(255, 255, 255, 0.14); font-size: 24px; font-weight: 700; }
+  .m24-op.picked { background: #ff9f0a !important; color: #1a1000 !important; }
+
+  /* Speed Streak */
+  .ss-bar { height: 8px; margin: 0 0 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+  .ss-bar i { display: block; height: 100%; width: 100%; border-radius: inherit; background: #7ee787; }
+  .ss-bar i.low { background: #ff9b8a; }
+  .ss-sum { font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .ss-answer { min-height: 46px; margin: 6px auto 10px; max-width: 160px; padding: 6px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .ss-answer.good { background: rgba(126, 231, 135, 0.3); }
+  .ss-answer.bad { background: rgba(255, 155, 138, 0.3); }
+  .ss-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .ss-pad button { padding: 12px 0; border-radius: 14px; background: rgba(255, 255, 255, 0.14); font-size: 22px; font-weight: 700; }
+  .ss-pad button:hover { background: rgba(255, 255, 255, 0.22); }
+  .ss-level { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); }
+  @media (prefers-reduced-motion: reduce) { .m24-card.picked { transform: none; } .game-card button:active { transform: none; } }
 </style>
 </head>
 <body data-skin="modern">
@@ -3769,6 +3836,18 @@
       <div class="tape-empty" id="tapeEmpty">Your sums will show up here. Tap one to use the answer again.</div>
     </section>
 
+    <section class="games" id="games" aria-label="Games">
+      <button class="games-toggle" id="gamesToggle" aria-expanded="false" aria-controls="gamesPanel">
+        <span aria-hidden="true">🎮</span>
+        <span>Games</span>
+        <span class="games-caret" aria-hidden="true">▾</span>
+      </button>
+      <div class="games-panel" id="gamesPanel" hidden>
+        <ul class="game-list" id="gameList"></ul>
+        <p class="games-soon">More games coming soon.</p>
+      </div>
+    </section>
+
     <section class="eggs" id="eggs" aria-label="Egg hunt">
       <button class="eggs-toggle" id="eggsToggle" aria-expanded="false" aria-controls="eggsPanel">
         <span class="found" style="display:contents"><svg class="egg-svg" viewBox="0 0 40 48" aria-hidden="true"><path class="shell" d="M20 3C11 3 4 18 4 29a16 16 0 0 0 32 0C36 18 29 3 20 3Z"/><path class="spots" d="M9 30q11 5 22 0" fill="none" stroke="#fff3b0" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/><ellipse class="shine" cx="14" cy="18" rx="3.5" ry="6" fill="#fffbe6" opacity="0.85" transform="rotate(18 14 18)"/><text class="q" x="20" y="35" text-anchor="middle">?</text></svg></span>
@@ -3791,6 +3870,14 @@
         <linearGradient id="eggGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset="0.45" stop-color="#ffcc33"/><stop offset="1" stop-color="#c98a00"/></linearGradient>
       </defs>
     </svg>
+  </div>
+
+  <div class="game" id="game" role="dialog" aria-modal="true" aria-labelledby="gameTitle" hidden>
+    <div class="game-card">
+      <h2 id="gameTitle"></h2>
+      <button class="game-close" id="gameClose" aria-label="Close game">✕</button>
+      <div id="gameBody"></div>
+    </div>
   </div>
 
   <div class="help" id="help" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
@@ -4802,6 +4889,7 @@
       e.stopImmediatePropagation();
       return;
     }
+    if (!document.getElementById('game').hidden) return;  // the game window handles its own keys
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.target === skinSearch || skinMenu.classList.contains('open')) return;
     const key = e.key.toLowerCase();
@@ -5167,6 +5255,372 @@
     toast(`🎉 Daily solved! Streak: ${daily.streak} day${daily.streak === 1 ? '' : 's'}`);
   }
   document.getElementById('dailyBtn').addEventListener('click', () => toast(dailyInfo()));
+
+  // ---------- Games menu ----------
+  // To add a game: add a row to GAMES. A game that opens in the game window has
+  // open(body), and can have key(e) for the keyboard and stop() for when it closes.
+  // score() shows a little best score next to its name in the menu.
+  const gameEl = document.getElementById('game');
+  const gameBody = document.getElementById('gameBody');
+  const gamesToggle = document.getElementById('gamesToggle');
+  const gamesPanel = document.getElementById('gamesPanel');
+  const gameList = document.getElementById('gameList');
+  let currentGame = null;
+
+  function loadNum(key) {
+    try { return Number(localStorage.getItem(key)) || 0; } catch { return 0; }
+  }
+  function saveNum(key, n) {
+    try { localStorage.setItem(key, String(n)); } catch { toast('⚠️ Could not save on this device'); }
+  }
+
+  // Make 24: join four numbers with + − × ÷ until only 24 is left.
+  // Numbers are kept as fractions (n / d) so 8 ÷ 3 × 9 still comes out exact.
+  function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a || 1; }
+  function frac(n, d = 1) {
+    if (d < 0) { n = -n; d = -d; }
+    const g = gcd(n, d);
+    return { n: n / g, d: d / g };
+  }
+  function doOp(a, op, b) {
+    if (op === '+') return frac(a.n * b.d + b.n * a.d, a.d * b.d);
+    if (op === '−') return frac(a.n * b.d - b.n * a.d, a.d * b.d);
+    if (op === '×') return frac(a.n * b.n, a.d * b.d);
+    if (b.n === 0) return null;
+    return frac(a.n * b.d, a.d * b.n);
+  }
+  function fracText(f) { return f.d === 1 ? String(f.n) : `${f.n}/${f.d}`; }
+  // Finds one way to reach 24, as a list of steps [a, op, b], or null if there is none.
+  function solve24(nums) {
+    if (nums.length === 1) return nums[0].n === 24 && nums[0].d === 1 ? [] : null;
+    for (let i = 0; i < nums.length; i++) {
+      for (let j = 0; j < nums.length; j++) {
+        if (i === j) continue;
+        for (const op of ['+', '−', '×', '÷']) {
+          if ((op === '+' || op === '×') && j < i) continue;
+          const r = doOp(nums[i], op, nums[j]);
+          if (!r) continue;
+          const rest = nums.filter((_, k) => k !== i && k !== j).concat([r]);
+          const steps = solve24(rest);
+          if (steps) return [[nums[i], op, nums[j]], ...steps];
+        }
+      }
+    }
+    return null;
+  }
+
+  const make24 = {
+    open(body) {
+      this.body = body;
+      this.solved = loadNum('calc-24');
+      body.innerHTML = `
+        <p class="game-how">Use all four numbers once. Tap a number, then a sign, then another number. Keep going until you make <b>24</b>.</p>
+        <div class="game-stats"><span>Solved: <span data-solved></span></span></div>
+        <div class="m24-cards" data-cards></div>
+        <div class="m24-ops">${['+', '−', '×', '÷'].map(op => `<button class="m24-op" data-m24op="${op}" aria-label="${{ '+': 'plus', '−': 'minus', '×': 'times', '÷': 'divide' }[op]}">${op}</button>`).join('')}</div>
+        <div class="game-msg" data-msg aria-live="polite"></div>
+        <div class="game-row">
+          <button class="game-btn" data-undo>↩ Undo</button>
+          <button class="game-btn" data-hint>💡 Hint</button>
+          <button class="game-btn" data-new>🔀 New numbers</button>
+        </div>`;
+      body.querySelectorAll('[data-m24op]').forEach(b => b.addEventListener('click', () => this.pickOp(b.dataset.m24op)));
+      body.querySelector('[data-undo]').addEventListener('click', () => this.undo());
+      body.querySelector('[data-hint]').addEventListener('click', () => this.hint());
+      body.querySelector('[data-new]').addEventListener('click', () => this.deal());
+      this.deal();
+    },
+    deal() {
+      let nums;
+      do nums = Array.from({ length: 4 }, () => frac(1 + Math.floor(Math.random() * 9)));
+      while (!solve24(nums));
+      this.start = nums.map(f => f.n);
+      this.cards = nums;           // a slot becomes null once it has been used up
+      this.past = [];
+      this.pick = null;
+      this.op = null;
+      this.won = false;
+      this.say('');
+      this.draw();
+    },
+    draw() {
+      const box = this.body.querySelector('[data-cards]');
+      box.innerHTML = this.cards.map((c, i) => {
+        if (!c) return '<button class="m24-card gone" tabindex="-1" aria-hidden="true"></button>';
+        const text = fracText(c);
+        const cls = ['m24-card', text.length > 3 && 'small', this.pick === i && 'picked', this.won && 'win'].filter(Boolean).join(' ');
+        return `<button class="${cls}" data-card="${i}" aria-label="Number ${text}">${text}</button>`;
+      }).join('');
+      box.querySelectorAll('[data-card]').forEach(b => b.addEventListener('click', () => this.pickCard(Number(b.dataset.card))));
+      this.body.querySelectorAll('[data-m24op]').forEach(b => b.classList.toggle('picked', b.dataset.m24op === this.op));
+      this.body.querySelector('[data-solved]').textContent = this.solved;
+      this.body.querySelector('[data-undo]').disabled = !this.past.length || this.won;
+      this.body.querySelector('[data-hint]').disabled = this.won;
+      this.body.querySelector('[data-new]').textContent = this.won ? '▶ Next puzzle' : '🔀 New numbers';
+    },
+    say(text, kind = '') {
+      const el = this.body.querySelector('[data-msg]');
+      el.textContent = text;
+      el.className = 'game-msg' + (kind ? ' ' + kind : '');
+    },
+    pickCard(i) {
+      if (this.won || !this.cards[i]) return;
+      if (this.pick === null || this.pick === i) {
+        this.pick = this.pick === i ? null : i;
+        this.op = null;
+      } else if (!this.op) {
+        this.pick = i;
+      } else {
+        const r = doOp(this.cards[this.pick], this.op, this.cards[i]);
+        if (!r) { this.say("You can't divide by 0.", 'bad'); return; }
+        this.past.push(this.cards.slice());
+        this.cards[this.pick] = null;
+        this.cards[i] = r;
+        this.pick = null;
+        this.op = null;
+        this.check();
+      }
+      this.say(this.won ? this.body.querySelector('[data-msg]').textContent : '', this.won ? 'good' : '');
+      if (!this.won) this.checkLeft();
+      this.draw();
+    },
+    pickOp(op) {
+      if (this.won) return;
+      if (this.pick === null) { this.say('Tap a number first.'); return; }
+      this.op = this.op === op ? null : op;
+      this.say('');
+      this.draw();
+    },
+    check() {
+      const left = this.cards.filter(Boolean);
+      if (left.length !== 1 || left[0].n !== 24 || left[0].d !== 1) return;
+      this.won = true;
+      this.solved = loadNum('calc-24') + 1;  // read again in case another tab added some
+      saveNum('calc-24', this.solved);
+      this.say('🎉 You made 24!', 'good');
+      playTune([523, 659, 784, 1047], 'triangle');
+    },
+    checkLeft() {
+      const left = this.cards.filter(Boolean);
+      if (left.length === 1) this.say(`That makes ${fracText(left[0])}, not 24. Tap Undo.`, 'bad');
+    },
+    undo() {
+      if (!this.past.length || this.won) return;
+      this.cards = this.past.pop();
+      this.pick = null;
+      this.op = null;
+      this.say('');
+      this.draw();
+    },
+    hint() {
+      const steps = solve24(this.cards.filter(Boolean));
+      if (!steps) { this.say('No way to 24 from here. Tap Undo.', 'bad'); return; }
+      const [a, op, b] = steps[0];
+      this.say(`💡 Try ${fracText(a)} ${op} ${fracText(b)} first.`);
+    },
+    key(e) {
+      const ops = { '+': '+', '-': '−', '*': '×', 'x': '×', '/': '÷' };
+      if (e.key >= '1' && e.key <= '4') {
+        // 1–4 picks the cards that are still there, left to right
+        const live = this.cards.map((c, i) => c ? i : -1).filter(i => i >= 0);
+        const i = live[Number(e.key) - 1];
+        if (i !== undefined) this.pickCard(i);
+      } else if (ops[e.key.toLowerCase()]) this.pickOp(ops[e.key.toLowerCase()]);
+      else if (e.key === 'Backspace') this.undo();
+      else if (e.key === 'Enter' && this.won) this.deal();
+      else return false;
+      return true;
+    },
+  };
+
+  // Speed Streak: quick sums that get harder every 5 right answers. One miss ends the run.
+  const SS_LEVELS = ['Warm up', 'Easy', 'Medium', 'Hard', 'Super hard'];
+  const SS_TIME = [10, 10, 9, 9, 8];  // seconds for each sum, per level
+  function rnd(lo, hi) { return lo + Math.floor(Math.random() * (hi - lo + 1)); }
+  function speedSum(level) {
+    let a, b, op;
+    if (level === 0) { a = rnd(1, 5); b = rnd(1, 5); op = '+'; }
+    else if (level === 1) { op = Math.random() < 0.5 ? '+' : '−'; a = rnd(2, 12); b = rnd(1, 9); }
+    else if (level === 2) {
+      op = ['+', '−', '×'][rnd(0, 2)];
+      if (op === '×') { a = rnd(2, 5); b = rnd(2, 10); } else { a = rnd(10, 50); b = rnd(5, 30); }
+    } else {
+      const top = level === 3 ? 10 : 12;
+      op = ['+', '−', '×', '÷'][rnd(0, 3)];
+      if (op === '+' || op === '−') { a = rnd(15, level === 3 ? 60 : 99); b = rnd(8, level === 3 ? 40 : 99); }
+      else { a = rnd(2, top); b = rnd(2, top); }
+      if (op === '÷') a = a * b;
+    }
+    if (op === '−' && b > a) [a, b] = [b, a];
+    const ans = op === '+' ? a + b : op === '−' ? a - b : op === '×' ? a * b : a / b;
+    return { text: `${a} ${op} ${b}`, ans: String(ans) };
+  }
+
+  const speedStreak = {
+    open(body) {
+      this.body = body;
+      this.best = loadNum('calc-streak');
+      this.home();
+    },
+    home(note = '') {
+      this.stop();
+      this.body.innerHTML = `
+        ${note}
+        <p class="game-how">Answer each sum before the bar runs out. Every 5 right answers, the sums get harder. One miss and the run ends.</p>
+        <div class="game-stats"><span>Best streak: ${this.best}</span></div>
+        <div class="game-row"><button class="game-btn big" data-go>${note ? 'Play again' : 'Start'}</button></div>`;
+      const go = this.body.querySelector('[data-go]');
+      go.addEventListener('click', () => this.go());
+      go.focus();
+    },
+    go() {
+      this.run = (this.run || 0) + 1;  // delayed steps from an older run check this and stop
+      this.streak = 0;
+      this.body.innerHTML = `
+        <div class="game-stats"><span>Streak: <span data-streak>0</span></span><span>Best: ${this.best}</span></div>
+        <div class="ss-level" data-level></div>
+        <div class="ss-bar" aria-hidden="true"><i data-bar></i></div>
+        <div class="ss-sum" data-sum aria-live="polite"></div>
+        <div class="ss-answer" data-answer aria-label="Your answer"></div>
+        <div class="ss-pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button data-n="${n}">${n}</button>`).join('')}<button data-back aria-label="Delete">⌫</button><button data-n="0">0</button><button data-skip aria-label="Give up">🏳️</button></div>`;
+      this.body.querySelectorAll('[data-n]').forEach(b => b.addEventListener('click', () => this.type(b.dataset.n)));
+      this.body.querySelector('[data-back]').addEventListener('click', () => this.back());
+      this.body.querySelector('[data-skip]').addEventListener('click', () => this.end('You gave up on that one.'));
+      this.next();
+    },
+    next() {
+      const level = Math.min(SS_LEVELS.length - 1, Math.floor(this.streak / 5));
+      this.q = speedSum(level);
+      this.typed = '';
+      this.limit = SS_TIME[level] * 1000;
+      this.t0 = performance.now();
+      this.body.querySelector('[data-streak]').textContent = this.streak;
+      this.body.querySelector('[data-level]').textContent = `Level ${level + 1}: ${SS_LEVELS[level]}`;
+      this.body.querySelector('[data-sum]').textContent = `${this.q.text} = ?`;
+      this.showTyped();
+      cancelAnimationFrame(this.raf);
+      const tick = now => {
+        const left = 1 - (now - this.t0) / this.limit;
+        const bar = this.body.querySelector('[data-bar]');
+        if (!bar) return;
+        bar.style.width = Math.max(0, left * 100) + '%';
+        bar.classList.toggle('low', left < 0.3);
+        if (left <= 0) this.end("Time's up!");
+        else this.raf = requestAnimationFrame(tick);
+      };
+      this.raf = requestAnimationFrame(tick);
+    },
+    showTyped(kind = '') {
+      const el = this.body.querySelector('[data-answer]');
+      el.textContent = this.typed;
+      el.className = 'ss-answer' + (kind ? ' ' + kind : '');
+    },
+    type(d) {
+      if (!this.q || this.typed.length >= 4) return;
+      if (performance.now() - this.t0 >= this.limit) { this.end("Time's up!"); return; }
+      this.typed += d;
+      if (this.typed === this.q.ans) {
+        this.streak++;
+        this.showTyped('good');
+        this.q = null;
+        cancelAnimationFrame(this.raf);
+        const run = this.run;
+        setTimeout(() => { if (run === this.run && currentGame === this) this.next(); }, 250);
+      } else if (this.typed.length >= this.q.ans.length) {
+        this.showTyped('bad');
+        this.end(`Not quite. ${this.q.text} = ${this.q.ans}`);
+      } else this.showTyped();
+    },
+    back() {
+      if (!this.q) return;
+      this.typed = this.typed.slice(0, -1);
+      this.showTyped();
+    },
+    end(why) {
+      const q = this.q;
+      this.q = null;
+      cancelAnimationFrame(this.raf);
+      this.best = Math.max(this.best, loadNum('calc-streak'));  // another tab may have beaten it
+      const newBest = this.streak > this.best;
+      if (newBest) { this.best = this.streak; saveNum('calc-streak', this.best); playTune([523, 659, 784, 1047], 'triangle'); }
+      const answer = why.startsWith('Not') || !q ? '' : ` ${q.text} = ${q.ans}`;
+      const run = this.run;
+      setTimeout(() => {
+        if (run !== this.run || currentGame !== this) return;
+        this.home(`<div class="game-msg bad">${why}${answer}</div>
+          <div class="ss-sum">Streak: ${this.streak}</div>
+          ${newBest && this.streak ? '<div class="game-msg good">🏆 New best!</div>' : ''}`);
+      }, 600);
+    },
+    stop() { cancelAnimationFrame(this.raf); this.q = null; this.run = (this.run || 0) + 1; },
+    key(e) {
+      if (e.key >= '0' && e.key <= '9') this.type(e.key);
+      else if (e.key === 'Backspace') this.back();
+      else return false;
+      return true;
+    },
+  };
+
+  const GAMES = [
+    { id: 'make24', icon: '🃏', name: 'Make 24', blurb: 'Use four numbers to make 24.',
+      score: () => { const n = loadNum('calc-24'); return n ? `${n} solved` : ''; }, game: make24 },
+    { id: 'streak', icon: '⚡', name: 'Speed Streak', blurb: 'Quick sums that get harder.',
+      score: () => { const n = loadNum('calc-streak'); return n ? `Best ${n}` : ''; }, game: speedStreak },
+    { id: 'race', icon: '🏁', name: 'Race', blurb: 'Make a number on the calculator, fast.',
+      play: () => { if (!race) raceBtn.click(); } },
+    { id: 'daily', icon: '📅', name: 'Daily number', blurb: 'A new number to reach every day.',
+      play: () => document.getElementById('dailyBtn').click() },
+  ];
+
+  function drawGameList() {
+    gameList.innerHTML = GAMES.map(g => `<li><button class="game-pick" data-game="${g.id}">
+        <span class="gi" aria-hidden="true">${g.icon}</span><span class="gn">${g.name}</span>
+        <span class="gb">${g.blurb}</span><span class="gs">${g.score ? g.score() : ''}</span></button></li>`).join('');
+  }
+  gameList.addEventListener('click', e => {
+    const pick = e.target.closest('[data-game]');
+    if (!pick) return;
+    const g = GAMES.find(x => x.id === pick.dataset.game);
+    if (g.game) openGame(g);
+    else { g.play(); setGamesOpen(false); }
+  });
+  function setGamesOpen(open) {
+    gamesPanel.hidden = !open;
+    gamesToggle.setAttribute('aria-expanded', open);
+    if (open) drawGameList();
+  }
+  gamesToggle.addEventListener('click', () => setGamesOpen(gamesPanel.hidden));
+
+  function openGame(g) {
+    currentGame = g.game;
+    document.querySelector('.wrap').inert = true;  // the calculator can't be tabbed to or pressed
+    if (race) race.pausedAt = Date.now();         // a running Race waits while you play
+    document.getElementById('gameTitle').textContent = `${g.icon} ${g.name}`;
+    gameEl.hidden = false;
+    g.game.open(gameBody);
+    if (!gameBody.contains(document.activeElement)) document.getElementById('gameClose').focus();
+  }
+  function closeGame() {
+    if (!currentGame) return;
+    currentGame.stop?.();
+    currentGame = null;
+    gameEl.hidden = true;
+    document.querySelector('.wrap').inert = false;
+    if (race && race.pausedAt) { race.start += Date.now() - race.pausedAt; delete race.pausedAt; }
+    gameBody.innerHTML = '';
+    drawGameList();
+    gamesToggle.focus();
+  }
+  document.getElementById('gameClose').addEventListener('click', closeGame);
+  gameEl.addEventListener('click', e => { if (e.target === gameEl) closeGame(); });
+  // While a game is open, keys go to the game and not to the calculator underneath.
+  window.addEventListener('keydown', e => {
+    if (gameEl.hidden) return;
+    e.stopImmediatePropagation();
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'Escape') { closeGame(); e.preventDefault(); return; }
+    if (currentGame?.key?.(e)) e.preventDefault();
+  }, true);
 
   // Easy read: a friendlier font and bigger keys. Remembered on this device.
   let easyRead = false;
