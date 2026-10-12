@@ -5995,7 +5995,8 @@
       let sum;
       do sum = spaceSum(this.level, Math.min(3, this.wave - 1)); while (sum.text === this.last);
       this.last = sum.text;
-      this.rocks.push({ x, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
+      // each rock sways gently side to side as it falls, like a leaf
+      this.rocks.push({ x, x0: x, sway: 0.04 + Math.random() * 0.04, wob: 0.6 + Math.random() * 0.5, ph: Math.random() * 6.28, t: 0, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
       this.sinceSpawn = 0;
       this.pickTarget();
     },
@@ -6020,6 +6021,8 @@
         if (this.over) break;
         r.p += dt * speed;
         r.spin += dt * r.turn;
+        r.t += dt;
+        if (!this.calm) r.x = Math.min(0.95, Math.max(0.05, r.x0 + Math.sin(r.t * r.wob + r.ph) * r.sway));
         if (r.p >= 1) this.bonk(r);
       }
       const want = this.target ? this.target.x : 0.5;
@@ -6044,7 +6047,8 @@
       this.burst(r, [r.colour, '#ffffff', '#ffd75e'], 18);
       this.rocks = this.rocks.filter(x => x !== r);
       this.score++;
-      spTone(880, 'triangle', 0.12, 0.05); spTone(1320, 'triangle', 0.16, 0.04, 0.08);
+      // a little pop: a quick burst of noise with a bright blip on top (only when Sound is on)
+      playNoise(0.07, 'bandpass', 1600, 0.18); spTone(1046, 'sine', 0.06, 0.06); spTone(1568, 'sine', 0.09, 0.04, 0.05);
       if (this.score % 10 === 0) {
         this.wave++;
         this.say(`Wave ${this.wave}! You're doing great 🚀`);
