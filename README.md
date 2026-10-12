@@ -15,10 +15,12 @@ A fun browser calculator with a big collection of themed skins: classic styles, 
 
 Click **▶ Play now** above. Nothing to install.
 
-- 🎨 Pick a skin from the menu at the top, or press `[` and `]` to flip through them.
+- 🎨 Pick a skin from the menu at the top, or press `[` and `]` to flip through them. The 🎲 next to it picks one at random.
+- 🧰 The tools box under the calculator has Copy, Tape, Speak, Sound, Paint, Night, Easy and Keys.
 - ⌨️ Type numbers on your keyboard or click the buttons.
-- 🎮 Open **Games** under the calculator to play **Make 24** (use four numbers to make 24) or **Speed Streak** (quick sums that get harder). Your best scores are saved.
-- 🥚 Open **Egg hunt** under the calculator to see every easter egg, with a hint for each. Found eggs turn gold.
+- 🎮 Open **Games** to play **Make 24** (use four numbers to make 24), **Speed Streak** (quick sums that get harder), **Race** or the **Daily number**. Your best scores are saved.
+- 🥚 Open **Egg hunt** to see every easter egg, with a hint for each. Found eggs turn gold.
+- 🖥️ On a big screen, Games sits on the left of the calculator and Egg hunt on the right. On a phone they stack underneath.
 - 📱 Put it on your phone: open the site, then tap **Share → Add to Home Screen** (iPhone) or **⋮ → Install app** (Android). It works offline too.
 
 ## Skins
