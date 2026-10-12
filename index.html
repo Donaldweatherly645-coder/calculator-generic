@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- viewport-fit=cover lets the background reach behind the phone's status bar and home bar -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Calculator · 48 fun skins</title>
 <meta name="description" content="A fun browser calculator with 48 themed skins: consoles, snacks, drinks and games. Can you find the easter eggs?">
 <meta name="theme-color" content="#0d0f17">
@@ -12,7 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Calculator">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>">
 <!-- Share preview: the title, text and picture shown when the link is sent in a message or posted online -->
 <meta property="og:type" content="website">
@@ -2389,15 +2390,21 @@
   .pixelcraft-hearts i { width: 11px; height: 10px; background: #e3242b; clip-path: polygon(0 20%, 20% 0, 40% 0, 50% 20%, 60% 0, 80% 0, 100% 20%, 100% 50%, 50% 100%, 0 50%); box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.5); }
 
   * { box-sizing: border-box; }
+  /* The page edge colour (set from the skin by syncEdges). Phones show it in the
+     status bar, the home bar and when you pull the page past its ends. */
+  html { background-color: #0d0f17; min-height: 100%; }
   body {
     margin: 0;
     min-height: 100vh;
+    min-height: 100dvh;
     display: grid;
     place-items: center;
     background: var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     padding: 16px;
+    /* Keep everything clear of the notch, the island and the home bar. */
+    padding: calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
     transition: background 0.3s;
   }
   /* ---------- Page layout ----------
@@ -3362,6 +3369,7 @@
   .sticker-book .egg-row:not(.found) .egg-svg { filter: grayscale(1) brightness(0.5); }
   .sticker-book .egg-row:not(.found) .egg-name { font-size: 0; }
   .sticker-book .egg-row:not(.found) .egg-name::after { content: "?"; font-size: 14px; }
+  html.light-top body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: calc(env(safe-area-inset-top) + 8px); background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0)); pointer-events: none; z-index: 9100; }
   body.night::after { content: ""; position: fixed; inset: 0; background: rgba(20, 10, 50, 0.3); pointer-events: none; z-index: 9000; }
   body.night .calc { filter: brightness(0.9) saturate(0.9); }
   .paint-card { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 9500; width: min(92vw, 320px); padding: 14px; border-radius: 20px; display: grid; gap: 8px; background: rgba(18, 18, 24, 0.94); color: #ffffff; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -5195,9 +5203,41 @@
   function applyPaint() {
     Object.values(PAINT_VARS).forEach(v => document.body.style.removeProperty(v));
     const mine = paintStore[document.body.dataset.skin];
-    if (!mine) return;
-    Object.entries(PAINT_VARS).forEach(([k, v]) => { if (mine[k]) document.body.style.setProperty(v, mine[k]); });
+    if (mine) Object.entries(PAINT_VARS).forEach(([k, v]) => { if (mine[k]) document.body.style.setProperty(v, mine[k]); });
+    syncEdges();
   }
+  // Paints the page edges (status bar, home bar, pull-past-the-end area) in the skin's
+  // background colour, so phones never show white bars. Gradients use their last colour.
+  function syncEdges() {
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    // Use the bottom layer of the background (the base colour or main gradient), not the
+    // small sparkles and glows drawn on top of it. Its first colour is the top of the screen.
+    const bg = getComputedStyle(document.body).getPropertyValue('--bg');
+    let depth = 0, start = 0;
+    [...bg].forEach((ch, i) => {
+      if (ch === '(') depth++;
+      else if (ch === ')') depth--;
+      else if (ch === ',' && depth === 0) start = i + 1;
+    });
+    const colours = bg.slice(start).match(/#[0-9a-f]{3,8}\b|rgba?\([^)]*\)/gi);
+    const edge = colours ? colours[colours.length - 1] : '#0d0f17';
+    document.documentElement.style.backgroundColor = edge;
+    if (themeMeta) themeMeta.setAttribute('content', edge);
+    // The phone's clock is drawn in white, so light skins get a soft shade behind it.
+    document.documentElement.classList.toggle('light-top', colours ? isLight(colours[0]) : false);
+  }
+  function isLight(colour) {
+    let r, g, b;
+    if (colour[0] === '#') {
+      const hex = colour.length < 6 ? colour.slice(1, 4).replace(/./g, '$&$&') : colour.slice(1, 7);
+      [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
+    } else {
+      [r, g, b] = colour.match(/[\d.]+/g).map(Number);
+    }
+    return 0.299 * r + 0.587 * g + 0.114 * b > 160;
+  }
+  // The default skin switches between light and dark with the phone's setting.
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncEdges);
   const paintBtn = document.getElementById('paintBtn');
   function closePaint() {
     document.querySelector('.paint-card')?.remove();
