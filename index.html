@@ -1696,7 +1696,7 @@
     font-family: "Patrick Hand", "Comic Sans MS", cursive;
   }
   body[data-skin="chalkboard"] .chalkboard-top { display: flex; }
-  body[data-skin="chalkboard"] .wrap { gap: 28px; }
+  body[data-skin="chalkboard"] .wrap { row-gap: 28px; }
   body[data-skin="chalkboard"] .screen { border-bottom: 2px dashed rgba(244, 241, 232, 0.4); border-radius: 0; }
   body[data-skin="chalkboard"] .display, body[data-skin="chalkboard"] .keys button { text-shadow: 0 0 2px rgba(255, 255, 255, 0.6); filter: url(#chalk); }
   body[data-skin="chalkboard"] .display { font-weight: 400; }
@@ -2400,14 +2400,41 @@
     padding: 16px;
     transition: background 0.3s;
   }
+  /* ---------- Page layout ----------
+     Phones: one column, in this order: skin bar, calculator, tools, tape, games, egg hunt.
+     Wide screens: the calculator stays in the middle, Games on the left, Egg hunt on the right. */
   .wrap {
     position: relative;
     z-index: 1;
     width: 100%;
     max-width: 340px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 14px;
+  }
+  @media (min-width: 960px) {
+    .wrap {
+      max-width: 1020px;
+      grid-template-columns: minmax(0, 1fr) 340px minmax(0, 1fr);
+      grid-template-areas:
+        ".     top   ."
+        "games calc  eggs"
+        "games tools eggs"
+        "games tape  eggs"
+        "games .     eggs";
+      grid-template-rows: auto auto auto auto 1fr;
+      column-gap: 36px;
+      align-items: start;
+    }
+    .toolbar { grid-area: top; }
+    .calc { grid-area: calc; }
+    .extras { grid-area: tools; }
+    .tape { grid-area: tape; }
+    .games { grid-area: games; }
+    .eggs { grid-area: eggs; }
+    /* The side panels line up with the top of the calculator and keep long lists scrollable. */
+    .games-panel, .eggs-panel { max-height: calc(100vh - 160px); overflow-y: auto; }
   }
 
   /* ---------- Toolbar: skin switcher + flip ----------
@@ -2418,9 +2445,10 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
-  .picker, .flip-btn, .skin-menu {
+  .picker, .round-btn, .skin-menu {
     background: rgba(18, 18, 24, 0.78);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
@@ -2428,6 +2456,8 @@
     color: #ffffff;
   }
   .picker {
+    flex: 1;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 2px;
@@ -2446,6 +2476,7 @@
   .toolbar button:hover { background: rgba(255, 255, 255, 0.12); }
   .toolbar button:active { transform: scale(0.9); }
   .nav-btn {
+    flex-shrink: 0;
     width: 34px;
     height: 34px !important;
     display: grid;
@@ -2455,32 +2486,45 @@
     padding: 0 0 3px;
   }
   .current {
+    flex: 1;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 10px;
-    min-width: 176px;
     padding: 3px 12px 3px 4px;
   }
   .current-name {
     flex: 1;
+    min-width: 0;
     overflow: hidden;
+    text-overflow: ellipsis;
     text-align: left;
     white-space: nowrap;
     font-weight: 600;
   }
-  .current-name span { display: inline-block; }
+  .current-name span { display: block; overflow: hidden; text-overflow: ellipsis; }
   .current-name .from-right { animation: name-from-right 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
   .current-name .from-left { animation: name-from-left 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
   @keyframes name-from-right { from { transform: translateX(18px); opacity: 0; } }
   @keyframes name-from-left { from { transform: translateX(-18px); opacity: 0; } }
   .caret { opacity: 0.75; flex-shrink: 0; transition: transform 0.25s; }
   .current[aria-expanded="true"] .caret { transform: rotate(180deg); }
-  .flip-btn {
-    display: none;
-    margin-left: auto;
-    padding: 9px 14px;
+  /* Round buttons beside the skin picker: shuffle, and Flip on the Retro skin */
+  .toolbar .round-btn {
+    flex-shrink: 0;
+    width: 47px;   /* same height as the skin picker */
+    height: 47px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    font-size: 19px;
+    line-height: 1;
   }
-  body[data-skin="retro"] .flip-btn { display: inline-block; }
+  .toolbar .round-btn { background: rgba(18, 18, 24, 0.78); }
+  .toolbar .round-btn:hover { background: rgba(48, 48, 60, 0.88); }
+  .round-btn[aria-pressed="true"] { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 0 0 2px #ffffff; }
+  .flip-btn { font-size: 22px !important; font-weight: 700 !important; }
+  body:not([data-skin="retro"]) .flip-btn { display: none; }
 
   /* Mini calculator preview used in the switcher and the grid */
   .mini {
@@ -2760,9 +2804,9 @@
   /* ---------- Extras bar: shuffle, copy, tape, sound, keys ---------- */
   .extras {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 2px;
-    padding: 6px 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    padding: 6px;
     border-radius: 22px;  /* a soft box, not a full pill, so the ends never cut into the buttons */
   }
   .extras, .tape, .help-card, .toast {
@@ -2787,19 +2831,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1px;
-    padding: 6px 2px 5px;
+    justify-content: center;
+    gap: 2px;
+    min-height: 52px;
+    padding: 6px 2px;
     border-radius: 16px;
     font-size: 12px;
     white-space: nowrap;
   }
-  .extras button span { font-size: 18px; line-height: 1.1; }
-  .extras-2 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  /* Very narrow phones: smaller labels so "Shuffle" still fits its box */
-  @media (max-width: 340px) {
-    .extras button { font-size: 11px; }
-    .extras button span { font-size: 16px; }
-  }
+  .extras button span { font-size: 19px; line-height: 1.1; }
   .extras button:hover, .tape button:hover, .help-card button:hover { background: rgba(255, 255, 255, 0.12); }
   .extras button:active, .tape button:active { transform: scale(0.9); }
   .extras button[aria-pressed="true"] { background: rgba(255, 255, 255, 0.18); }
@@ -3313,7 +3353,6 @@
   body.easy-read .history { font-size: 1.05em; }
   .new-egg { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; text-align: center; padding: 12px; font: 700 20px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #ffffff; background: rgba(0, 0, 0, 0.55); pointer-events: none; }
   .new-egg b { display: block; margin-top: 6px; font-size: 13px; font-weight: 500; opacity: 0.85; }
-  .extras-2 { margin-top: 6px; }
   .sticker-toggle { align-self: flex-end; margin: 0 0 6px auto; padding: 6px 12px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.12); color: #ffffff; font: 600 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; cursor: pointer; }
   .sticker-toggle[aria-pressed="true"] { background: #ffe08a; color: #3a2a00; }
   .egg-list.sticker-book, .sticker-book .egg-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; list-style: none; padding: 0; }
@@ -3332,9 +3371,9 @@
   .paint-card button { padding: 6px 14px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
   .toast { white-space: normal; max-width: min(92vw, 380px); text-align: center; }
   /* ---------- Games menu: a drop-down list of mini games ---------- */
-  .games { margin: 6px 0; border-radius: 18px; overflow: hidden; background: rgba(18, 18, 24, 0.78); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.1); color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .games { border-radius: 18px; overflow: hidden; background: rgba(18, 18, 24, 0.78); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.1); color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
   .games button { font-family: inherit; color: inherit; background: transparent; box-shadow: none; height: auto; border: 0; cursor: pointer; }
-  .games-toggle { width: 100%; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 18px; text-align: left; font-size: 15px; font-weight: 700; }
+  .games-toggle { min-height: 57px; /* same height as the Egg hunt bar */ width: 100%; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 18px; text-align: left; font-size: 15px; font-weight: 700; }
   .games-toggle:hover { background: rgba(255, 255, 255, 0.06); }
   .games-toggle:focus-visible { outline: 2px solid #ffffff; outline-offset: -2px; }
   .games-toggle > span:first-child { font-size: 20px; }
@@ -3412,7 +3451,8 @@
         </button>
         <button class="nav-btn" id="nextSkin" aria-label="Next skin" title="Next skin ( ] )">›</button>
       </div>
-      <button class="flip-btn" id="flip" aria-pressed="false">Flip ↻</button>
+      <button class="round-btn" id="shuffleBtn" aria-label="Shuffle to a random skin" title="Random skin ( S )"><span aria-hidden="true">🎲</span></button>
+      <button class="round-btn flip-btn" id="flip" aria-pressed="false" aria-label="Flip" title="Flip the calculator"><span aria-hidden="true">↻</span></button>
       <div class="skin-menu" id="skinMenu" role="dialog" aria-label="Choose a skin">
         <input class="skin-search" id="skinSearch" type="search" autocomplete="off" spellcheck="false">
         <div class="skin-cats" id="skinCats" role="group" aria-label="Categories"></div>
@@ -3821,6 +3861,28 @@
       </div>
     </main>
 
+    <div class="extras" role="toolbar" aria-label="Tools">
+      <button id="copyBtn" title="Copy the answer ( C )"><span aria-hidden="true">📋</span>Copy</button>
+      <button id="tapeBtn" aria-pressed="false" aria-controls="tape" title="History tape ( T )"><span aria-hidden="true">🧾</span>Tape</button>
+      <button id="speakBtn" aria-pressed="false" title="Say each answer out loud"><span aria-hidden="true">🗣️</span>Speak</button>
+      <button id="soundBtn" aria-pressed="false" title="Sound on or off ( M )"><span aria-hidden="true" id="soundIcon">🔇</span>Sound</button>
+      <button id="paintBtn" aria-expanded="false" title="Change this skin's colours"><span aria-hidden="true">🎨</span>Paint</button>
+      <button id="nightBtn" aria-pressed="false" title="Dim the calculator for night"><span aria-hidden="true">🌙</span>Night</button>
+      <button id="easyBtn" aria-pressed="false" title="Easy-read font and bigger keys"><span aria-hidden="true">Aa</span>Easy</button>
+      <button id="helpBtn" title="Keyboard keys ( ? )"><span aria-hidden="true">⌨️</span>Keys</button>
+    </div>
+    <!-- Race and Daily are started from the Games list; these hidden buttons keep their switches. -->
+    <div hidden>
+      <button id="dailyBtn" tabindex="-1">Daily</button>
+      <button id="raceBtn" aria-pressed="false" tabindex="-1">Race</button>
+    </div>
+
+    <section class="tape" id="tape" aria-label="History tape" hidden>
+      <div class="tape-head"><span>History tape</span><button id="tapeClear">Clear</button></div>
+      <ol class="tape-list" id="tapeList"></ol>
+      <div class="tape-empty" id="tapeEmpty">Your sums will show up here. Tap one to use the answer again.</div>
+    </section>
+
     <section class="games" id="games" aria-label="Games">
       <button class="games-toggle" id="gamesToggle" aria-expanded="false" aria-controls="gamesPanel">
         <span aria-hidden="true">🎮</span>
@@ -3832,30 +3894,6 @@
         <p class="games-soon">More games coming soon.</p>
       </div>
     </section>
-
-    <div class="extras" role="toolbar" aria-label="Extras">
-      <button id="shuffleBtn" title="Random skin ( S )"><span aria-hidden="true">🎲</span>Shuffle</button>
-      <button id="copyBtn" title="Copy the answer ( C )"><span aria-hidden="true">📋</span>Copy</button>
-      <button id="tapeBtn" aria-pressed="false" aria-controls="tape" title="History tape ( T )"><span aria-hidden="true">🧾</span>Tape</button>
-      <button id="soundBtn" aria-pressed="false" title="Sound on or off ( M )"><span aria-hidden="true" id="soundIcon">🔇</span>Sound</button>
-      <button id="dailyBtn" title="Daily number"><span aria-hidden="true">📅</span>Daily</button>
-      <button id="easyBtn" aria-pressed="false" title="Easy-read font and bigger keys"><span aria-hidden="true">Aa</span>Easy</button>
-      <button id="helpBtn" title="Keyboard keys ( ? )"><span aria-hidden="true">⌨️</span>Keys</button>
-    </div>
-
-    <div class="extras extras-2" role="toolbar" aria-label="More toys">
-      <button id="nightBtn" aria-pressed="false" title="Dim the calculator for night"><span aria-hidden="true">🌙</span>Night</button>
-      <button id="speakBtn" aria-pressed="false" title="Say each answer out loud"><span aria-hidden="true">🗣️</span>Speak</button>
-      <button id="paintBtn" aria-expanded="false" title="Change this skin's colours"><span aria-hidden="true">🎨</span>Paint</button>
-      <button id="raceBtn" aria-pressed="false" title="Make a number as fast as you can"><span aria-hidden="true">🏁</span>Race</button>
-    </div>
-
-    <section class="tape" id="tape" aria-label="History tape" hidden>
-      <div class="tape-head"><span>History tape</span><button id="tapeClear">Clear</button></div>
-      <ol class="tape-list" id="tapeList"></ol>
-      <div class="tape-empty" id="tapeEmpty">Your sums will show up here. Tap one to use the answer again.</div>
-    </section>
-
 
     <section class="eggs" id="eggs" aria-label="Egg hunt">
       <button class="eggs-toggle" id="eggsToggle" aria-expanded="false" aria-controls="eggsPanel">
@@ -5196,11 +5234,13 @@
       race = null;
       raceBtn.setAttribute('aria-pressed', false);
       toast('Race off');
+      refreshGames();
       return;
     }
     race = { target: 10 + Math.floor(Math.random() * 90), start: Date.now() };
     raceBtn.setAttribute('aria-pressed', true);
     toast(`🏁 Make ${race.target} on the screen. Go!`);
+    refreshGames();
   });
   function checkRace(value) {
     if (!race || value !== race.target) return;
@@ -5212,6 +5252,7 @@
     toast(`🏁 Done in ${secs.toFixed(1)}s. Best: ${raceBest.toFixed(1)}s`);
     race = null;
     raceBtn.setAttribute('aria-pressed', false);
+    refreshGames();
   }
 
   // Sticker book: show the egg hunt as stickers.
@@ -5576,7 +5617,8 @@
     { id: 'streak', icon: '⚡', name: 'Speed Streak', blurb: 'Quick sums that get harder.',
       score: () => { const n = loadNum('calc-streak'); return n ? `Best ${n}` : ''; }, game: speedStreak },
     { id: 'race', icon: '🏁', name: 'Race', blurb: 'Make a number on the calculator, fast.',
-      play: () => { if (!race) raceBtn.click(); } },
+      score: () => race ? 'Running · tap to stop' : (raceBest ? `Best ${raceBest.toFixed(1)}s` : ''),
+      play: () => raceBtn.click() },
     { id: 'daily', icon: '📅', name: 'Daily number', blurb: 'A new number to reach every day.',
       play: () => document.getElementById('dailyBtn').click() },
   ];
@@ -5591,8 +5633,10 @@
     if (!pick) return;
     const g = GAMES.find(x => x.id === pick.dataset.game);
     if (g.game) openGame(g);
-    else { g.play(); setGamesOpen(false); }
+    else { g.play(); setGamesOpen(false); gamesToggle.focus(); }
   });
+  // Keep the Race row ("Running" or best time) up to date while the list is showing.
+  function refreshGames() { if (!gamesPanel.hidden) drawGameList(); }
   function setGamesOpen(open) {
     gamesPanel.hidden = !open;
     gamesToggle.setAttribute('aria-expanded', open);
