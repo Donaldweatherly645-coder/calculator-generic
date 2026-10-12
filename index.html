@@ -5395,7 +5395,7 @@
       const left = this.cards.filter(Boolean);
       if (left.length !== 1 || left[0].n !== 24 || left[0].d !== 1) return;
       this.won = true;
-      this.solved++;
+      this.solved = loadNum('calc-24') + 1;  // read again in case another tab added some
       saveNum('calc-24', this.solved);
       this.say('🎉 You made 24!', 'good');
       playTune([523, 659, 784, 1047], 'triangle');
@@ -5474,6 +5474,7 @@
       go.focus();
     },
     go() {
+      this.run = (this.run || 0) + 1;  // delayed steps from an older run check this and stop
       this.streak = 0;
       this.body.innerHTML = `
         <div class="game-stats"><span>Streak: <span data-streak>0</span></span><span>Best: ${this.best}</span></div>
@@ -5516,13 +5517,15 @@
     },
     type(d) {
       if (!this.q || this.typed.length >= 4) return;
+      if (performance.now() - this.t0 >= this.limit) { this.end("Time's up!"); return; }
       this.typed += d;
       if (this.typed === this.q.ans) {
         this.streak++;
         this.showTyped('good');
         this.q = null;
         cancelAnimationFrame(this.raf);
-        setTimeout(() => { if (currentGame === this && this.body.querySelector('[data-sum]')) this.next(); }, 250);
+        const run = this.run;
+        setTimeout(() => { if (run === this.run && currentGame === this) this.next(); }, 250);
       } else if (this.typed.length >= this.q.ans.length) {
         this.showTyped('bad');
         this.end(`Not quite. ${this.q.text} = ${this.q.ans}`);
@@ -5537,17 +5540,19 @@
       const q = this.q;
       this.q = null;
       cancelAnimationFrame(this.raf);
+      this.best = Math.max(this.best, loadNum('calc-streak'));  // another tab may have beaten it
       const newBest = this.streak > this.best;
       if (newBest) { this.best = this.streak; saveNum('calc-streak', this.best); playTune([523, 659, 784, 1047], 'triangle'); }
       const answer = why.startsWith('Not') || !q ? '' : ` ${q.text} = ${q.ans}`;
+      const run = this.run;
       setTimeout(() => {
-        if (currentGame !== this) return;
+        if (run !== this.run || currentGame !== this) return;
         this.home(`<div class="game-msg bad">${why}${answer}</div>
           <div class="ss-sum">Streak: ${this.streak}</div>
           ${newBest && this.streak ? '<div class="game-msg good">🏆 New best!</div>' : ''}`);
       }, 600);
     },
-    stop() { cancelAnimationFrame(this.raf); this.q = null; },
+    stop() { cancelAnimationFrame(this.raf); this.q = null; this.run = (this.run || 0) + 1; },
     key(e) {
       if (e.key >= '0' && e.key <= '9') this.type(e.key);
       else if (e.key === 'Backspace') this.back();
@@ -5588,6 +5593,8 @@
 
   function openGame(g) {
     currentGame = g.game;
+    document.querySelector('.wrap').inert = true;  // the calculator can't be tabbed to or pressed
+    if (race) race.pausedAt = Date.now();         // a running Race waits while you play
     document.getElementById('gameTitle').textContent = `${g.icon} ${g.name}`;
     gameEl.hidden = false;
     g.game.open(gameBody);
@@ -5598,6 +5605,8 @@
     currentGame.stop?.();
     currentGame = null;
     gameEl.hidden = true;
+    document.querySelector('.wrap').inert = false;
+    if (race && race.pausedAt) { race.start += Date.now() - race.pausedAt; delete race.pausedAt; }
     gameBody.innerHTML = '';
     drawGameList();
     gamesToggle.focus();
