@@ -3460,7 +3460,7 @@
   .sp-sky { position: relative; }
   .sp-sky canvas { display: block; width: 100%; height: clamp(170px, calc(100dvh - 440px), 360px); border-radius: 16px; background: #0d1240; touch-action: manipulation; }
   .sp-hud { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; }
-  .sp-hud .sp-shields { letter-spacing: 2px; }
+  .sp-hud .sp-lives { letter-spacing: 2px; }
   .sp-sum { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
   .sp-answer { min-width: 76px; min-height: 46px; padding: 2px 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.12); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25); }
   .sp-answer.good { background: rgba(126, 231, 135, 0.35); }
@@ -5869,28 +5869,40 @@
 
   // Space Sums: friendly space rocks float down towards your ship. Answer the sum on the
   // rock with the yellow ring and the ship zaps it. Made for young players: slow rocks,
-  // big numbers, no clock on a sum, and a little hint after two tries.
-  // fall = seconds a rock takes to reach the ship, most = rocks at once,
-  // gap = seconds between new rocks, shields = bumps before the game ends.
+  // big numbers, no clock on a sum, and a little hint after two tries. Three bumps and
+  // the game is over. The longer you last, the faster rocks come, and every wave
+  // (10 zaps) the sums get a little bigger and an extra rock can join in.
+  // fall = seconds a rock takes to reach the ship at the start, most = rocks at once at the
+  // start, gap = seconds between new rocks, ramp = how much faster per second you last,
+  // top = the fastest it gets (2 = twice the starting speed).
+  const SP_LIVES = 3;
   const SP_LEVELS = {
-    easy: { icon: '🌱', name: 'Easy', eg: '1 + 1,  2 + 3', fall: 30, most: 1, gap: 1.2, shields: 5 },
-    medium: { icon: '🚀', name: 'Medium', eg: '8 + 7,  12 − 5', fall: 24, most: 2, gap: 8, shields: 4 },
-    hard: { icon: '🌟', name: 'Hard', eg: '6 × 7,  45 − 18', fall: 20, most: 3, gap: 7, shields: 3 },
+    easy: { icon: '🌱', name: 'Easy', eg: '3 + 5,  9 − 4', fall: 24, most: 1, gap: 6, ramp: 0.006, top: 1.8 },
+    medium: { icon: '🚀', name: 'Medium', eg: '14 + 9,  6 × 4', fall: 19, most: 2, gap: 6, ramp: 0.009, top: 2.1 },
+    hard: { icon: '🌟', name: 'Hard', eg: '8 × 12,  73 − 38', fall: 15, most: 3, gap: 5, ramp: 0.012, top: 2.4 },
   };
   const SP_ROCKS = ['#ff9f43', '#ff7eb6', '#4ecdc4', '#b197fc', '#ffd166', '#74c0fc'];
   const SP_CHEERS = ['Zap! ⭐', 'Great job!', 'You got it!', 'Super!', 'Boom! 🎉', 'Nice one!'];
   const spTone = (...args) => { if (soundOn) tone(...args); };  // only when Sound is on
-  function spaceSum(level) {
+  // step goes 0 to 3 as the waves go by, so the sums grow a little at a time.
+  function spaceSum(level, step = 0) {
     let a, b, op;
-    if (level === 'easy') { a = rnd(1, 5); b = rnd(1, 5); op = '+'; }
-    else if (level === 'medium') {
-      op = Math.random() < 0.5 ? '+' : '−';
-      if (op === '+') { a = rnd(2, 12); b = rnd(1, 8); } else { a = rnd(5, 20); b = rnd(1, 9); }
+    if (level === 'easy') {
+      op = step >= 1 && Math.random() < 0.4 ? '−' : '+';
+      if (op === '+') { a = rnd(1, [6, 8, 9, 10][step]); b = rnd(1, [5, 5, 6, 9][step]); }
+      else { a = rnd(3, [10, 10, 12, 15][step]); b = rnd(1, Math.min(9, a)); }
+    } else if (level === 'medium') {
+      op = ['+', '−', '×'][rnd(0, step >= 1 ? 2 : 1)];
+      if (op === '+') { a = rnd(6, 15 + step * 5); b = rnd(3, 9 + step * 3); }
+      else if (op === '−') { a = rnd(10, 20 + step * 5); b = rnd(2, 9 + step * 3); }
+      else { a = rnd(2, step >= 2 ? 10 : 5); b = rnd(2, 10); }
     } else {
       op = ['+', '−', '×', '÷'][rnd(0, 3)];
-      if (op === '+') { a = rnd(12, 60); b = rnd(5, 39); }
-      else if (op === '−') { a = rnd(20, 90); b = rnd(5, 45); }
-      else { a = rnd(2, 10); b = rnd(2, 10); if (op === '÷') a *= b; }
+      const top = step >= 2 ? 12 : 10;
+      if (op === '+') { a = rnd(15, 60 + step * 15); b = rnd(8, 40 + step * 15); }
+      else if (op === '−') { a = rnd(30, 99); b = rnd(10, 50 + step * 10); }
+      else if (op === '×' && step >= 3 && Math.random() < 0.4) { a = rnd(11, 15); b = rnd(2, 5); }
+      else { a = rnd(3, top); b = rnd(3, top); if (op === '÷') a *= b; }
     }
     if (op === '−' && b > a) [a, b] = [b, a];
     const ans = op === '+' ? a + b : op === '−' ? a - b : op === '×' ? a * b : a / b;
@@ -5910,7 +5922,7 @@
       this.halt();
       this.body.innerHTML = `
         ${note}
-        <p class="game-how">Space rocks are floating towards your ship! Answer the sum on the rock with the yellow ring, and your ship zaps it. 🚀</p>
+        <p class="game-how">Space rocks are floating towards your ship! Answer the sum on the rock with the yellow ring, and your ship zaps it. You have 3 lives ❤️, and the rocks get faster the longer you last. 🚀</p>
         <div class="sp-levels">${Object.entries(SP_LEVELS).map(([id, l]) => `
           <button class="sp-pick ${id}" data-level="${id}"><span class="si" aria-hidden="true">${l.icon}</span><span>${l.name}</span>
             <small>${l.eg}</small><span class="sb">${this.best(id) ? '🏆 ' + this.best(id) : ''}</span></button>`).join('')}</div>`;
@@ -5920,12 +5932,12 @@
     go(level) {
       this.halt();
       const L = SP_LEVELS[level];
-      Object.assign(this, { level, L, score: 0, wave: 1, shields: L.shields, rocks: [], bits: [], beam: null,
+      Object.assign(this, { level, L, score: 0, wave: 1, lives: SP_LIVES, alive: 0, rocks: [], bits: [], beam: null,
         hurt: 0, typed: '', misses: 0, target: null, sinceSpawn: L.gap, paused: false, over: false, last: '' });
       this.body.innerHTML = `
         <div class="sp-play">
           <div>
-            <div class="sp-hud"><span>⭐ <span data-score>0</span></span><span data-wave></span><span class="sp-shields" data-shields></span></div>
+            <div class="sp-hud"><span>⭐ <span data-score>0</span></span><span data-wave></span><span class="sp-lives" data-lives></span></div>
             <div class="sp-sky"><canvas data-sky aria-hidden="true"></canvas></div>
           </div>
           <div>
@@ -5981,7 +5993,7 @@
         if (this.rocks.every(r => r.p > 0.4 || Math.abs(r.x - x) > 0.25)) break;
       }
       let sum;
-      do sum = spaceSum(this.level); while (sum.text === this.last);
+      do sum = spaceSum(this.level, Math.min(3, this.wave - 1)); while (sum.text === this.last);
       this.last = sum.text;
       this.rocks.push({ x, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
       this.sinceSpawn = 0;
@@ -5997,10 +6009,13 @@
     },
     update(dt) {
       const L = this.L;
-      const speed = Math.min(1.4, 1 + (this.wave - 1) * 0.08) / L.fall;
+      this.alive += dt;
+      const fast = Math.min(L.top, 1 + this.alive * L.ramp);  // speeds up the longer you last
+      const speed = fast / L.fall;
+      const most = L.most + Math.floor((this.wave - 1) / 2);  // one more rock every 2 waves
       this.sinceSpawn += dt;
-      if ((this.rocks.length === 0 && this.sinceSpawn >= Math.min(L.gap, 1.2)) ||
-          (this.rocks.length < L.most && this.sinceSpawn >= L.gap)) this.spawn();
+      if ((this.rocks.length === 0 && this.sinceSpawn >= 1.2) ||
+          (this.rocks.length < most && this.sinceSpawn >= L.gap / fast)) this.spawn();
       for (const r of [...this.rocks]) {
         if (this.over) break;
         r.p += dt * speed;
@@ -6042,12 +6057,13 @@
       if (this.over) return;
       this.burst(r, ['#c9c9d6', '#8d8da3'], 10);
       this.rocks = this.rocks.filter(x => x !== r);
-      this.shields--;
+      this.lives--;
       this.hurt = 0.8;
       spTone(196, 'sine', 0.25, 0.06);
       this.drawHud();
-      if (this.shields <= 0) { this.end(); return; }
-      this.say(r === this.target ? `Bonk! It was ${r.sum.text} = ${r.sum.ans}` : 'Bonk! A shield took the bump.');
+      if (this.lives <= 0) { this.end(); return; }
+      const left = `${this.lives} ${this.lives === 1 ? 'life' : 'lives'} left`;
+      this.say(r === this.target ? `Bonk! ${r.sum.text} = ${r.sum.ans}. ${left}` : `Bonk! ${left}`);
       this.pickTarget();
     },
     end() {
@@ -6069,15 +6085,16 @@
       const $ = s => this.body.querySelector(s);
       $('[data-score]').textContent = this.score;
       $('[data-wave]').textContent = `Wave ${this.wave}`;
-      const sh = $('[data-shields]');
-      sh.textContent = '🛡️'.repeat(Math.max(0, this.shields));
-      sh.setAttribute('aria-label', `${this.shields} shields left`);
+      const lives = Math.max(0, this.lives);
+      const el = $('[data-lives]');
+      el.textContent = '❤️'.repeat(lives) + '🤍'.repeat(SP_LIVES - lives);
+      el.setAttribute('aria-label', `${lives} ${lives === 1 ? 'life' : 'lives'} left`);
     },
     showSum() {
       const t = this.target;
       this.body.querySelector('[data-sum]').textContent = t ? t.sum.text : '…';
       // Easy shows dots to count on: 2 + 3 is ●● + ●●●
-      this.body.querySelector('[data-dots]').textContent = t && this.level === 'easy' ? `${'●'.repeat(t.sum.a)}  +  ${'●'.repeat(t.sum.b)}` : '';
+      this.body.querySelector('[data-dots]').textContent = t && this.level === 'easy' ? `${'●'.repeat(t.sum.a)}  ${t.sum.op}  ${'●'.repeat(t.sum.b)}` : '';
       this.showTyped();
     },
     showTyped(kind = '') {
