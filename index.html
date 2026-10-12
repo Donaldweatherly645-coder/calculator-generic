@@ -6101,9 +6101,9 @@
       this.showTyped('bad');
       spTone(330, 'sine', 0.12, 0.04);
       this.say(this.misses >= 2 ? `Psst… it's ${t.sum.ans}` : 'Oops! Try again 🙂');
-      const run = this.run;
-      setTimeout(() => {
-        if (run !== this.run || this.target !== t) return;
+      const run = this.run, wrong = this.typed;
+      setTimeout(() => {  // clear the wrong answer, unless the player has already fixed it
+        if (run !== this.run || this.target !== t || this.typed !== wrong) return;
         this.typed = '';
         this.showTyped();
       }, 500);
