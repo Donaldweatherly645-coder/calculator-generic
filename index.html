@@ -3444,6 +3444,42 @@
   .ss-pad button { padding: 12px 0; border-radius: 14px; background: rgba(255, 255, 255, 0.14); font-size: 22px; font-weight: 700; }
   .ss-pad button:hover { background: rgba(255, 255, 255, 0.22); }
   .ss-level { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); }
+  /* Space Sums: a bigger game window, a space picture on top and a number pad below.
+     Phones turned sideways put the picture and the pad side by side. */
+  .game-card.sp-card { max-width: 520px; padding: 14px; }
+  .sp-levels { display: grid; gap: 10px; margin: 4px 0 6px; }
+  .game-card .sp-pick { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 2px 12px; padding: 12px 14px; border-radius: 18px; text-align: left; font-size: 18px; font-weight: 800; }
+  .sp-pick .si { grid-row: 1 / 3; font-size: 32px; text-align: center; }
+  .sp-pick small { grid-column: 2; font-size: 14px; font-weight: 600; opacity: 0.85; }
+  .sp-pick .sb { grid-row: 1 / 3; grid-column: 3; font-size: 13px; font-weight: 700; }
+  .game-card .sp-pick.easy { background: #7ee787; color: #0b2a10; }
+  .game-card .sp-pick.medium { background: #5ec8ff; color: #062236; }
+  .game-card .sp-pick.hard { background: #ffd75e; color: #2e2200; }
+  .game-card .sp-pick:hover { filter: brightness(1.08); }
+  .sp-play { display: grid; gap: 10px; }
+  .sp-sky { position: relative; }
+  .sp-sky canvas { display: block; width: 100%; height: clamp(170px, calc(100dvh - 440px), 360px); border-radius: 16px; background: #0d1240; touch-action: manipulation; }
+  .sp-hud { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; }
+  .sp-hud .sp-shields { letter-spacing: 2px; }
+  .sp-sum { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .sp-answer { min-width: 76px; min-height: 46px; padding: 2px 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.12); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25); }
+  .sp-answer.good { background: rgba(126, 231, 135, 0.35); }
+  .sp-answer.bad { background: rgba(255, 155, 138, 0.35); }
+  .sp-dots { min-height: 22px; font-size: 18px; letter-spacing: 2px; color: #ffd75e; }
+  .sp-say { min-height: 1.3em; font-size: 16px; font-weight: 700; color: #ffd75e; }
+  .sp-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .game-card .sp-pad button { padding: 12px 0; border-radius: 16px; background: rgba(255, 255, 255, 0.16); font-size: 26px; font-weight: 800; }
+  .game-card .sp-pad button:hover { background: rgba(255, 255, 255, 0.26); }
+  @media (max-height: 640px) {
+    .sp-sum { font-size: 28px; }
+    .sp-answer { min-height: 38px; }
+    .game-card .sp-pad button { padding: 7px 0; font-size: 22px; }
+  }
+  @media (orientation: landscape) and (max-height: 600px) {
+    .game-card.sp-card { max-width: 860px; }
+    .sp-play { grid-template-columns: 1.25fr 1fr; align-items: center; }
+    .sp-sky canvas { height: calc(100dvh - 130px); min-height: 160px; }
+  }
   @media (prefers-reduced-motion: reduce) { .m24-card.picked { transform: none; } .game-card button:active { transform: none; } }
 
   /* ---------- Waves: an animated background, like a classic console's wave menu ----------
@@ -5831,11 +5867,397 @@
     },
   };
 
+  // Space Sums: friendly space rocks float down towards your ship. Answer the sum on the
+  // rock with the yellow ring and the ship zaps it. Made for young players: slow rocks,
+  // big numbers, no clock on a sum, and a little hint after two tries.
+  // fall = seconds a rock takes to reach the ship, most = rocks at once,
+  // gap = seconds between new rocks, shields = bumps before the game ends.
+  const SP_LEVELS = {
+    easy: { icon: '🌱', name: 'Easy', eg: '1 + 1,  2 + 3', fall: 30, most: 1, gap: 1.2, shields: 5 },
+    medium: { icon: '🚀', name: 'Medium', eg: '8 + 7,  12 − 5', fall: 24, most: 2, gap: 8, shields: 4 },
+    hard: { icon: '🌟', name: 'Hard', eg: '6 × 7,  45 − 18', fall: 20, most: 3, gap: 7, shields: 3 },
+  };
+  const SP_ROCKS = ['#ff9f43', '#ff7eb6', '#4ecdc4', '#b197fc', '#ffd166', '#74c0fc'];
+  const SP_CHEERS = ['Zap! ⭐', 'Great job!', 'You got it!', 'Super!', 'Boom! 🎉', 'Nice one!'];
+  const spTone = (...args) => { if (soundOn) tone(...args); };  // only when Sound is on
+  function spaceSum(level) {
+    let a, b, op;
+    if (level === 'easy') { a = rnd(1, 5); b = rnd(1, 5); op = '+'; }
+    else if (level === 'medium') {
+      op = Math.random() < 0.5 ? '+' : '−';
+      if (op === '+') { a = rnd(2, 12); b = rnd(1, 8); } else { a = rnd(5, 20); b = rnd(1, 9); }
+    } else {
+      op = ['+', '−', '×', '÷'][rnd(0, 3)];
+      if (op === '+') { a = rnd(12, 60); b = rnd(5, 39); }
+      else if (op === '−') { a = rnd(20, 90); b = rnd(5, 45); }
+      else { a = rnd(2, 10); b = rnd(2, 10); if (op === '÷') a *= b; }
+    }
+    if (op === '−' && b > a) [a, b] = [b, a];
+    const ans = op === '+' ? a + b : op === '−' ? a - b : op === '×' ? a * b : a / b;
+    return { a, b, op, text: `${a} ${op} ${b}`, ans: String(ans) };
+  }
+
+  const spaceSums = {
+    calm: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    open(body) {
+      this.body = body;
+      this.card = body.closest('.game-card');
+      this.card.classList.add('sp-card');
+      this.home();
+    },
+    best(level) { return loadNum('calc-space-' + level); },
+    home(note = '') {
+      this.halt();
+      this.body.innerHTML = `
+        ${note}
+        <p class="game-how">Space rocks are floating towards your ship! Answer the sum on the rock with the yellow ring, and your ship zaps it. 🚀</p>
+        <div class="sp-levels">${Object.entries(SP_LEVELS).map(([id, l]) => `
+          <button class="sp-pick ${id}" data-level="${id}"><span class="si" aria-hidden="true">${l.icon}</span><span>${l.name}</span>
+            <small>${l.eg}</small><span class="sb">${this.best(id) ? '🏆 ' + this.best(id) : ''}</span></button>`).join('')}</div>`;
+      this.body.querySelectorAll('[data-level]').forEach(b => b.addEventListener('click', () => this.go(b.dataset.level)));
+      this.body.querySelector(`[data-level="${this.level || 'easy'}"]`).focus();
+    },
+    go(level) {
+      this.halt();
+      const L = SP_LEVELS[level];
+      Object.assign(this, { level, L, score: 0, wave: 1, shields: L.shields, rocks: [], bits: [], beam: null,
+        hurt: 0, typed: '', misses: 0, target: null, sinceSpawn: L.gap, paused: false, over: false, last: '' });
+      this.body.innerHTML = `
+        <div class="sp-play">
+          <div>
+            <div class="sp-hud"><span>⭐ <span data-score>0</span></span><span data-wave></span><span class="sp-shields" data-shields></span></div>
+            <div class="sp-sky"><canvas data-sky aria-hidden="true"></canvas></div>
+          </div>
+          <div>
+            <div class="sp-sum"><span data-sum aria-live="polite"></span><span aria-hidden="true">=</span><span class="sp-answer" data-answer aria-label="Your answer"></span></div>
+            <div class="sp-dots" data-dots aria-hidden="true"></div>
+            <div class="sp-say" data-say aria-live="polite"></div>
+            <div class="sp-pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button data-n="${n}">${n}</button>`).join('')}<button data-back aria-label="Delete">⌫</button><button data-n="0">0</button><button data-pause aria-label="Pause">⏸️</button></div>
+          </div>
+        </div>`;
+      const $ = s => this.body.querySelector(s);
+      this.body.querySelectorAll('[data-n]').forEach(b => b.addEventListener('click', () => this.type(b.dataset.n)));
+      $('[data-back]').addEventListener('click', () => this.back());
+      $('[data-pause]').addEventListener('click', () => this.pause());
+      this.canvas = $('[data-sky]');
+      this.g = this.canvas.getContext('2d');
+      this.font = getComputedStyle(this.card).fontFamily;
+      this.sizeSky();
+      this.watch = new ResizeObserver(() => this.sizeSky());
+      this.watch.observe(this.canvas);
+      this.stars = Array.from({ length: 70 }, () => ({ x: Math.random(), y: Math.random(), r: 0.5 + Math.random() * 1.5, tw: Math.random() * 6 }));
+      this.shipX = 0.5;
+      this.drawHud();
+      this.showSum();
+      this.t = performance.now();
+      const run = this.run;
+      const frame = now => {
+        if (run !== this.run) return;
+        const dt = Math.min(0.05, (now - this.t) / 1000);
+        this.t = now;
+        if (!this.paused && !this.over) this.update(dt);
+        this.draw(now / 1000);
+        this.raf = requestAnimationFrame(frame);
+      };
+      this.raf = requestAnimationFrame(frame);
+    },
+    sizeSky() {
+      const box = this.canvas.getBoundingClientRect();
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      this.W = box.width || 300;
+      this.H = box.height || 300;
+      this.canvas.width = Math.round(this.W * dpr);
+      this.canvas.height = Math.round(this.H * dpr);
+      this.g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    },
+    // Rocks keep their place as fractions (x across, p = how far down), so resizing is safe.
+    rockR() { return Math.max(24, Math.min(44, this.W * 0.085)); },
+    shipTop() { return this.H - 64; },
+    rockAt(r) { return { x: 18 + r.x * (this.W - 36), y: -this.rockR() + r.p * this.shipTop() }; },
+    spawn() {
+      let x = 0.5;
+      for (let i = 0; i < 12; i++) {  // try not to drop a rock on top of another one
+        x = 0.1 + Math.random() * 0.8;
+        if (this.rocks.every(r => r.p > 0.4 || Math.abs(r.x - x) > 0.25)) break;
+      }
+      let sum;
+      do sum = spaceSum(this.level); while (sum.text === this.last);
+      this.last = sum.text;
+      this.rocks.push({ x, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
+      this.sinceSpawn = 0;
+      this.pickTarget();
+    },
+    // The ringed rock is always the one nearest the ship.
+    pickTarget() {
+      if (this.target && this.rocks.includes(this.target)) return;
+      this.target = this.rocks.reduce((a, r) => (!a || r.p > a.p ? r : a), null);
+      this.typed = '';
+      this.misses = 0;
+      this.showSum();
+    },
+    update(dt) {
+      const L = this.L;
+      const speed = Math.min(1.4, 1 + (this.wave - 1) * 0.08) / L.fall;
+      this.sinceSpawn += dt;
+      if ((this.rocks.length === 0 && this.sinceSpawn >= Math.min(L.gap, 1.2)) ||
+          (this.rocks.length < L.most && this.sinceSpawn >= L.gap)) this.spawn();
+      for (const r of [...this.rocks]) {
+        if (this.over) break;
+        r.p += dt * speed;
+        r.spin += dt * r.turn;
+        if (r.p >= 1) this.bonk(r);
+      }
+      const want = this.target ? this.target.x : 0.5;
+      this.shipX += (want - this.shipX) * Math.min(1, dt * 3);
+      if (!this.calm) for (const s of this.stars) s.y = (s.y + dt * 0.015) % 1;
+      for (const b of this.bits) { b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt; }
+      this.bits = this.bits.filter(b => b.life > 0);
+      if (this.beam && (this.beam.life -= dt) <= 0) this.beam = null;
+      this.hurt = Math.max(0, this.hurt - dt);
+    },
+    burst(r, colours, n) {
+      const at = this.rockAt(r);
+      for (let i = 0; i < n; i++) {
+        const a = Math.random() * Math.PI * 2, v = 30 + Math.random() * 60;
+        this.bits.push({ x: at.x, y: at.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.8 + Math.random() * 0.4,
+          size: 3 + Math.random() * 4, colour: colours[i % colours.length] });
+      }
+    },
+    zap() {
+      const r = this.target;
+      this.beam = { at: this.rockAt(r), life: 0.4 };
+      this.burst(r, [r.colour, '#ffffff', '#ffd75e'], 18);
+      this.rocks = this.rocks.filter(x => x !== r);
+      this.score++;
+      spTone(880, 'triangle', 0.12, 0.05); spTone(1320, 'triangle', 0.16, 0.04, 0.08);
+      if (this.score % 10 === 0) {
+        this.wave++;
+        this.say(`Wave ${this.wave}! You're doing great 🚀`);
+        playTune([523, 659, 784], 'triangle');
+      } else this.say(SP_CHEERS[rnd(0, SP_CHEERS.length - 1)]);
+      this.drawHud();
+      this.pickTarget();
+    },
+    bonk(r) {
+      if (this.over) return;
+      this.burst(r, ['#c9c9d6', '#8d8da3'], 10);
+      this.rocks = this.rocks.filter(x => x !== r);
+      this.shields--;
+      this.hurt = 0.8;
+      spTone(196, 'sine', 0.25, 0.06);
+      this.drawHud();
+      if (this.shields <= 0) { this.end(); return; }
+      this.say(r === this.target ? `Bonk! It was ${r.sum.text} = ${r.sum.ans}` : 'Bonk! A shield took the bump.');
+      this.pickTarget();
+    },
+    end() {
+      this.over = true;
+      this.target = null;
+      this.showSum();
+      const old = this.best(this.level);
+      const newBest = this.score > old;
+      if (newBest) { saveNum('calc-space-' + this.level, this.score); playTune([523, 659, 784, 1047], 'triangle'); }
+      const run = this.run;
+      setTimeout(() => {
+        if (run !== this.run || currentGame !== this) return;
+        this.home(`<div class="game-msg good">${this.score ? 'Great flying, space pilot! 🚀' : 'Good try! Have another go. 🙂'}</div>
+          <div class="ss-sum">⭐ ${this.score}</div>
+          ${newBest ? '<div class="game-msg good">🏆 New best!</div>' : ''}`);
+      }, 1400);
+    },
+    drawHud() {
+      const $ = s => this.body.querySelector(s);
+      $('[data-score]').textContent = this.score;
+      $('[data-wave]').textContent = `Wave ${this.wave}`;
+      const sh = $('[data-shields]');
+      sh.textContent = '🛡️'.repeat(Math.max(0, this.shields));
+      sh.setAttribute('aria-label', `${this.shields} shields left`);
+    },
+    showSum() {
+      const t = this.target;
+      this.body.querySelector('[data-sum]').textContent = t ? t.sum.text : '…';
+      // Easy shows dots to count on: 2 + 3 is ●● + ●●●
+      this.body.querySelector('[data-dots]').textContent = t && this.level === 'easy' ? `${'●'.repeat(t.sum.a)}  +  ${'●'.repeat(t.sum.b)}` : '';
+      this.showTyped();
+    },
+    showTyped(kind = '') {
+      const el = this.body.querySelector('[data-answer]');
+      el.textContent = this.typed;
+      el.className = 'sp-answer' + (kind ? ' ' + kind : '');
+    },
+    say(text) {
+      const el = this.body.querySelector('[data-say]');
+      el.textContent = text;
+      clearTimeout(this.sayTimer);
+      this.sayTimer = setTimeout(() => { if (el.textContent === text) el.textContent = ''; }, 2500);
+    },
+    type(d) {
+      const t = this.target;
+      if (!t || this.paused || this.over || this.typed.length >= 3) return;
+      this.typed += d;
+      if (this.typed === t.sum.ans) { this.showTyped('good'); this.zap(); return; }
+      if (t.sum.ans.startsWith(this.typed)) { this.showTyped(); return; }
+      this.misses++;
+      this.showTyped('bad');
+      spTone(330, 'sine', 0.12, 0.04);
+      this.say(this.misses >= 2 ? `Psst… it's ${t.sum.ans}` : 'Oops! Try again 🙂');
+      const run = this.run, wrong = this.typed;
+      setTimeout(() => {  // clear the wrong answer, unless the player has already fixed it
+        if (run !== this.run || this.target !== t || this.typed !== wrong) return;
+        this.typed = '';
+        this.showTyped();
+      }, 500);
+    },
+    back() {
+      if (!this.target || this.paused) return;
+      this.typed = this.typed.slice(0, -1);
+      this.showTyped();
+    },
+    pause() {
+      if (this.over) return;
+      this.paused = !this.paused;
+      const b = this.body.querySelector('[data-pause]');
+      b.textContent = this.paused ? '▶️' : '⏸️';
+      b.setAttribute('aria-label', this.paused ? 'Play' : 'Pause');
+      this.say(this.paused ? 'Paused' : '');
+    },
+    draw(time) {
+      const g = this.g, W = this.W, H = this.H;
+      const sky = g.createLinearGradient(0, 0, 0, H);
+      sky.addColorStop(0, '#1b2a8a');
+      sky.addColorStop(1, '#4b2585');
+      g.fillStyle = sky;
+      g.fillRect(0, 0, W, H);
+      // a ringed planet in the corner, just for fun
+      g.fillStyle = '#ff9fc9';
+      g.beginPath(); g.arc(W - 46, 46, 22, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = '#ffe28a'; g.lineWidth = 4;
+      g.beginPath(); g.ellipse(W - 46, 46, 38, 9, -0.35, 0, Math.PI * 2); g.stroke();
+      for (const s of this.stars) {
+        g.globalAlpha = this.calm ? 0.8 : 0.55 + 0.45 * Math.sin(time * 1.2 + s.tw);
+        g.fillStyle = '#ffffff';
+        g.beginPath(); g.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2); g.fill();
+      }
+      g.globalAlpha = 1;
+      const R = this.rockR();
+      for (const r of this.rocks) this.drawRock(r, R, time);
+      if (this.beam) {
+        g.save();
+        g.globalAlpha = Math.min(1, this.beam.life / 0.25);
+        g.strokeStyle = '#7ee787'; g.lineCap = 'round';
+        g.shadowColor = '#7ee787'; g.shadowBlur = 16;
+        g.lineWidth = 8;
+        g.beginPath(); g.moveTo(18 + this.shipX * (W - 36), this.shipTop()); g.lineTo(this.beam.at.x, this.beam.at.y); g.stroke();
+        g.strokeStyle = '#ffffff'; g.lineWidth = 3; g.stroke();
+        g.restore();
+      }
+      for (const b of this.bits) {
+        g.globalAlpha = Math.max(0, Math.min(1, b.life));
+        g.fillStyle = b.colour;
+        g.beginPath(); g.arc(b.x, b.y, b.size, 0, Math.PI * 2); g.fill();
+      }
+      g.globalAlpha = 1;
+      this.drawShip(18 + this.shipX * (W - 36), this.shipTop(), time);
+      if (this.paused) {
+        g.fillStyle = 'rgba(0, 0, 0, 0.45)'; g.fillRect(0, 0, W, H);
+        g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = `800 28px ${this.font}`; g.fillText('Paused', W / 2, H / 2);
+      }
+    },
+    drawRock(r, R, time) {
+      const g = this.g, at = this.rockAt(r);
+      g.save();
+      g.translate(at.x, at.y);
+      if (r === this.target) {  // a slowly turning dashed ring marks the rock to answer
+        g.save();
+        g.rotate(this.calm ? 0 : time * 0.8);
+        g.setLineDash([10, 8]);
+        g.strokeStyle = '#ffd75e'; g.lineWidth = 4;
+        g.beginPath(); g.arc(0, 0, R + 9, 0, Math.PI * 2); g.stroke();
+        g.restore();
+      }
+      g.save();
+      g.rotate(r.spin);
+      g.fillStyle = r.colour;
+      g.strokeStyle = 'rgba(0, 0, 0, 0.25)'; g.lineWidth = 3;
+      g.beginPath();  // a lumpy round rock
+      for (let i = 0; i <= 10; i++) {
+        const a = (i / 10) * Math.PI * 2, k = R * (i % 2 ? 0.94 : 1.02);
+        i ? g.lineTo(Math.cos(a) * k, Math.sin(a) * k) : g.moveTo(Math.cos(a) * k, Math.sin(a) * k);
+      }
+      g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = 'rgba(0, 0, 0, 0.12)';
+      for (const [cx, cy, cr] of [[-0.45, -0.4, 0.18], [0.5, 0.25, 0.14], [-0.1, 0.55, 0.11]]) {
+        g.beginPath(); g.arc(cx * R, cy * R, cr * R, 0, Math.PI * 2); g.fill();
+      }
+      g.restore();
+      // a friendly face, always the right way up
+      g.fillStyle = '#2b2140';
+      g.beginPath(); g.arc(-R * 0.28, -R * 0.12, R * 0.09, 0, Math.PI * 2); g.arc(R * 0.28, -R * 0.12, R * 0.09, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = '#2b2140'; g.lineWidth = 2.5; g.lineCap = 'round';
+      g.beginPath(); g.arc(0, R * 0.08, R * 0.24, 0.2 * Math.PI, 0.8 * Math.PI); g.stroke();
+      if (r === this.target) {  // the sum, on a white label under the rock
+        const size = Math.max(16, Math.min(22, R * 0.6));
+        g.font = `800 ${size}px ${this.font}`;
+        const w = g.measureText(r.sum.text).width + 18, h = size + 12, y = R + 14;
+        g.fillStyle = '#ffffff';
+        g.beginPath(); g.roundRect ? g.roundRect(-w / 2, y, w, h, h / 2) : g.rect(-w / 2, y, w, h); g.fill();
+        g.fillStyle = '#1a1a2e'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(r.sum.text, 0, y + h / 2 + 1);
+      }
+      g.restore();
+    },
+    drawShip(x, top, time) {
+      const g = this.g;
+      g.save();
+      g.translate(x, top);
+      if (this.hurt > 0) {  // a soft bubble shield when a rock bumps in
+        g.globalAlpha = this.hurt / 0.8 * 0.7;
+        g.fillStyle = '#74c0fc';
+        g.beginPath(); g.arc(0, 30, 44, 0, Math.PI * 2); g.fill();
+        g.globalAlpha = 1;
+      }
+      const flick = this.calm || this.paused ? 0 : Math.sin(time * 12) * 2;
+      g.fillStyle = '#ffb347';
+      g.beginPath(); g.moveTo(-8, 52); g.quadraticCurveTo(0, 66 + flick, 8, 52); g.fill();
+      g.fillStyle = '#ff6b6b';  // fins
+      g.beginPath(); g.moveTo(-14, 30); g.lineTo(-26, 54); g.lineTo(-12, 50); g.fill();
+      g.beginPath(); g.moveTo(14, 30); g.lineTo(26, 54); g.lineTo(12, 50); g.fill();
+      g.fillStyle = '#f4f6ff';  // body
+      g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(18, 14, 15, 52); g.lineTo(-15, 52); g.quadraticCurveTo(-18, 14, 0, 0); g.fill();
+      g.fillStyle = '#ff6b6b';
+      g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(9, 6, 11, 13); g.lineTo(-11, 13); g.quadraticCurveTo(-9, 6, 0, 0); g.fill();
+      g.fillStyle = '#4dabf7'; g.strokeStyle = '#1c4f80'; g.lineWidth = 2.5;
+      g.beginPath(); g.arc(0, 28, 7, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.restore();
+    },
+    halt() {
+      cancelAnimationFrame(this.raf);
+      this.watch?.disconnect();
+      this.watch = null;
+      clearTimeout(this.sayTimer);
+      this.run = (this.run || 0) + 1;
+      this.over = true;
+      this.target = null;
+    },
+    stop() { this.halt(); this.card?.classList.remove('sp-card'); },
+    key(e) {
+      if (!this.canvas || !this.body.contains(this.canvas)) return false;
+      if (e.key >= '0' && e.key <= '9') this.type(e.key);
+      else if (e.key === 'Backspace') this.back();
+      else if (e.key === 'p' || e.key === 'P') this.pause();
+      else return false;
+      return true;
+    },
+  };
+
   const GAMES = [
     { id: 'make24', icon: '🃏', name: 'Make 24', blurb: 'Use four numbers to make 24.',
       score: () => { const n = loadNum('calc-24'); return n ? `${n} solved` : ''; }, game: make24 },
     { id: 'streak', icon: '⚡', name: 'Speed Streak', blurb: 'Quick sums that get harder.',
       score: () => { const n = loadNum('calc-streak'); return n ? `Best ${n}` : ''; }, game: speedStreak },
+    { id: 'space', icon: '🚀', name: 'Space Sums', blurb: 'Zap space rocks with right answers.',
+      score: () => { const n = Math.max(...Object.keys(SP_LEVELS).map(l => loadNum('calc-space-' + l))); return n ? `Best ${n}` : ''; }, game: spaceSums },
     { id: 'race', icon: '🏁', name: 'Race', blurb: 'Make a number on the calculator, fast.',
       score: () => race ? 'Running · tap to stop' : (raceBest ? `Best ${raceBest.toFixed(1)}s` : ''),
       play: () => raceBtn.click() },
