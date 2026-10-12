@@ -5870,8 +5870,8 @@
   // Space Sums: friendly space rocks float down towards your ship. Answer the sum on the
   // rock with the yellow ring and the ship zaps it. Made for young players: slow rocks,
   // big numbers, no clock on a sum, and a little hint after two tries. Three bumps and
-  // the game is over. The longer you last, the faster rocks come, and every wave
-  // (10 zaps) the sums get a little bigger and an extra rock can join in.
+  // the game is over. The longer you last, the faster rocks come. For the first few waves
+  // (10 zaps each) the sums get a little bigger, and every 2 waves an extra rock can join in.
   // fall = seconds a rock takes to reach the ship at the start, most = rocks at once at the
   // start, gap = seconds between new rocks, ramp = how much faster per second you last,
   // top = the fastest it gets (2 = twice the starting speed).
@@ -6015,7 +6015,7 @@
       const speed = fast / L.fall;
       const most = L.most + Math.floor((this.wave - 1) / 2);  // one more rock every 2 waves
       this.sinceSpawn += dt;
-      if ((this.rocks.length === 0 && this.sinceSpawn >= 1.2) ||
+      if ((this.rocks.length === 0 && this.sinceSpawn >= 1.2 / fast) ||
           (this.rocks.length < most && this.sinceSpawn >= L.gap / fast)) this.spawn();
       for (const r of [...this.rocks]) {
         if (this.over) break;
