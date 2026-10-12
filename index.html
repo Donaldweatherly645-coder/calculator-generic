@@ -5268,7 +5268,15 @@
   });
   window.addEventListener('resize', () => { if (wavesOn) applyWaves(); });
   document.addEventListener('visibilitychange', () => { if (wavesOn) applyWaves(); });  // rests while the tab is hidden
-  stillMotion.addEventListener?.('change', () => { if (wavesOn) applyWaves(); });
+  const onMotionChange = () => { if (wavesOn) applyWaves(); };
+  if (stillMotion.addEventListener) stillMotion.addEventListener('change', onMotionChange);
+  else stillMotion.addListener?.(onMotionChange);  // older Safari
+  // Keep other open tabs in step when the setting changes in one of them.
+  window.addEventListener('storage', (e) => {
+    if (e.key !== 'calc-waves') return;
+    wavesOn = e.newValue === 'on';
+    applyWaves();
+  });
   applyWaves();
 
   // Speak: read each answer out loud. Off until you turn it on.
