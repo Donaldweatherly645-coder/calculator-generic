@@ -3439,7 +3439,8 @@
   @media (prefers-reduced-motion: reduce) { .m24-card.picked { transform: none; } .game-card button:active { transform: none; } }
 
   /* ---------- Waves: an animated background, like a classic console's wave menu ----------
-     A canvas fixed behind everything. Off until you turn it on with the 〰 button. */
+     A canvas fixed behind everything. The round button beside 🎲 switches between the skin's
+     still background (🖼️) and the animated waves (〰). Still is the default. */
   .waves-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; display: none; }
   body.waves { background: var(--waves-sky, #06205a); }
   body.waves .waves-bg { display: block; }
@@ -3465,7 +3466,7 @@
         <button class="nav-btn" id="nextSkin" aria-label="Next skin" title="Next skin ( ] )">›</button>
       </div>
       <button class="round-btn" id="shuffleBtn" aria-label="Shuffle to a random skin" title="Random skin ( S )"><span aria-hidden="true">🎲</span></button>
-      <button class="round-btn" id="wavesBtn" aria-pressed="false" aria-label="Wave background" title="Wave background on or off"><span aria-hidden="true">〰</span></button>
+      <button class="round-btn" id="wavesBtn" aria-pressed="false" aria-label="Animated background" title="Background: still or animated"><span aria-hidden="true" id="wavesIcon">🖼️</span></button>
       <button class="round-btn flip-btn" id="flip" aria-pressed="false" aria-label="Flip" title="Flip the calculator"><span aria-hidden="true">↻</span></button>
       <div class="skin-menu" id="skinMenu" role="dialog" aria-label="Choose a skin">
         <input class="skin-search" id="skinSearch" type="search" autocomplete="off" spellcheck="false">
@@ -5278,6 +5279,8 @@
   function applyWaves() {
     document.body.classList.toggle('waves', wavesOn);
     wavesBtn.setAttribute('aria-pressed', wavesOn);
+    // The button shows which background you have now: 🖼️ still, 〰 animated.
+    document.getElementById('wavesIcon').textContent = wavesOn ? '〰' : '🖼️';
     cancelAnimationFrame(wavesFrame);
     wavesFrame = 0;
     if (!wavesOn) return;
@@ -5291,9 +5294,13 @@
     wavesOn = !wavesOn;
     try { localStorage.setItem('calc-waves', wavesOn ? 'on' : 'off'); } catch {}
     applyWaves();
-    toast(wavesOn ? '〰 Wave background on' : 'Wave background off');
+    toast(wavesOn ? '〰 Animated background' : '🖼️ Still background');
   });
-  window.addEventListener('resize', () => { if (wavesOn) applyWaves(); });
+  // Redraw to fit when the window changes size or a phone turns sideways.
+  const refitWaves = () => { if (wavesOn) applyWaves(); };
+  window.addEventListener('resize', refitWaves);
+  window.addEventListener('orientationchange', refitWaves);
+  window.visualViewport?.addEventListener('resize', refitWaves);
   document.addEventListener('visibilitychange', () => { if (wavesOn) applyWaves(); });  // rests while the tab is hidden
   const onMotionChange = () => { if (wavesOn) applyWaves(); };
   if (stillMotion.addEventListener) stillMotion.addEventListener('change', onMotionChange);
