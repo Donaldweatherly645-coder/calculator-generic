@@ -1,6 +1,6 @@
 // Service worker: keeps a copy of the calculator on the phone so it works offline.
 // Online: always fetch the newest version (and save it). Offline: use the saved copy.
-const CACHE = 'calc-v3';
+const CACHE = 'calc-v4';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
