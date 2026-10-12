@@ -2053,7 +2053,7 @@
   }
   body[data-skin="woodpanel"] .woodpanel-top { display: flex; }
   body[data-skin="woodpanel"] .screen { border-radius: 4px; box-shadow: inset 0 0 0 2px #2a2a2a, inset 0 0 20px rgba(255, 138, 42, 0.1); }
-  body[data-skin="woodpanel"] .display { font-family: "Press Start 2P", monospace; font-size: 22px !important; line-height: 1.6; text-shadow: 0 0 6px rgba(255, 138, 42, 0.6); }
+  body[data-skin="woodpanel"] .display { font-family: "Press Start 2P", monospace; line-height: 1.6; text-shadow: 0 0 6px rgba(255, 138, 42, 0.6); }
   body[data-skin="woodpanel"] .history { font-family: "Press Start 2P", monospace; font-size: 9px; }
   body[data-skin="woodpanel"] .fn { color: #1a1a1a; font-size: 15px; font-weight: 800; }
   body[data-skin="woodpanel"] .op, body[data-skin="woodpanel"] .fn { box-shadow: inset 0 1px 0 #ffffff, 0 3px 0 #000000; }
@@ -4026,7 +4026,20 @@
     displayEl.innerHTML = `<div class="led" aria-hidden="true">${html}</div>`;
     displayEl.setAttribute('aria-label', text);
     displayEl.style.fontSize = cells.length > 12 ? '30px' : cells.length > 9 ? '40px' : '52px';
+    fitDisplay();
   }
+
+  // Shrink the number a bit at a time until it fits inside the screen.
+  function fitDisplay() {
+    let size = parseFloat(displayEl.style.fontSize);
+    while (displayEl.scrollWidth > displayEl.clientWidth && size > 10) {
+      size -= 1;
+      displayEl.style.fontSize = size + 'px';
+    }
+  }
+  window.addEventListener('resize', () => render());
+  // Skin fonts load late and can be wider, so fit again once they arrive.
+  if (document.fonts) document.fonts.addEventListener('loadingdone', () => render());
 
   function render() {
     const died = document.body.dataset.skin === 'ashenrealm' && state.current === 'Error';
@@ -4042,6 +4055,7 @@
       const len = text.length;
       const sizes = PIXEL_FONT_SKINS.includes(document.body.dataset.skin) ? [13, 17, 22] : [28, 36, 48];
       displayEl.style.fontSize = (len > 14 ? sizes[0] : len > 10 ? sizes[1] : sizes[2]) + 'px';
+      fitDisplay();
     }
 
     historyEl.textContent = state.operator
@@ -4068,7 +4082,7 @@
   }
 
   let lastShown = null;
-  const PIXEL_FONT_SKINS = ['monsterdex', 'pocketbrick', 'mazemuncher', 'pixelcraft'];
+  const PIXEL_FONT_SKINS = ['monsterdex', 'pocketbrick', 'mazemuncher', 'pixelcraft', 'woodpanel'];
 
   function dropshipDrop() {
     const screen = document.querySelector('.screen');
