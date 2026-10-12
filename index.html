@@ -3303,6 +3303,25 @@
   body.easy-read .keys button { font-family: "Atkinson Hyperlegible", Arial, sans-serif !important; font-weight: 700; font-size: 1.15em; }
   body.easy-read .keys button, body.easy-read .extras button { text-shadow: none; }
   body.easy-read .history { font-size: 1.05em; }
+  .new-egg { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; text-align: center; padding: 12px; font: 700 20px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #ffffff; background: rgba(0, 0, 0, 0.55); pointer-events: none; }
+  .new-egg b { display: block; margin-top: 6px; font-size: 13px; font-weight: 500; opacity: 0.85; }
+  .extras-2 { margin-top: 6px; }
+  .sticker-toggle { align-self: flex-end; margin: 0 0 6px auto; padding: 6px 12px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.12); color: #ffffff; font: 600 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; cursor: pointer; }
+  .sticker-toggle[aria-pressed="true"] { background: #ffe08a; color: #3a2a00; }
+  .egg-list.sticker-book, .sticker-book .egg-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; list-style: none; padding: 0; }
+  .sticker-book .egg-row { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 8px 4px; border-radius: 16px; border: 2px dashed rgba(255, 255, 255, 0.25); }
+  .sticker-book .egg-row.found { border: 2px solid #ffe08a; background: rgba(255, 224, 138, 0.1); }
+  .sticker-book .egg-hint, .sticker-book .egg-more-btn, .sticker-book .egg-more, .sticker-book .egg-skin, .sticker-book .egg-tick { display: none; }
+  .sticker-book .egg-row:not(.found) .egg-svg { filter: grayscale(1) brightness(0.5); }
+  .sticker-book .egg-row:not(.found) .egg-name { font-size: 0; }
+  .sticker-book .egg-row:not(.found) .egg-name::after { content: "?"; font-size: 14px; }
+  body.night::after { content: ""; position: fixed; inset: 0; background: rgba(20, 10, 50, 0.3); pointer-events: none; z-index: 9000; }
+  body.night .calc { filter: brightness(0.9) saturate(0.9); }
+  .paint-card { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 9500; width: min(92vw, 320px); padding: 14px; border-radius: 20px; display: grid; gap: 8px; background: rgba(18, 18, 24, 0.94); color: #ffffff; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .paint-card label { display: flex; justify-content: space-between; align-items: center; }
+  .paint-card input[type="color"] { width: 56px; height: 32px; border: 0; background: none; padding: 0; cursor: pointer; }
+  .paint-card .paint-row { display: flex; gap: 8px; justify-content: flex-end; }
+  .paint-card button { padding: 6px 14px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
 </style>
 </head>
 <body data-skin="modern">
@@ -3736,6 +3755,13 @@
       <button id="helpBtn" title="Keyboard keys ( ? )"><span aria-hidden="true">⌨️</span>Keys</button>
     </div>
 
+    <div class="extras extras-2" role="toolbar" aria-label="More toys">
+      <button id="nightBtn" aria-pressed="false" title="Dim the calculator for night"><span aria-hidden="true">🌙</span>Night</button>
+      <button id="speakBtn" aria-pressed="false" title="Say each answer out loud"><span aria-hidden="true">🗣️</span>Speak</button>
+      <button id="paintBtn" aria-expanded="false" title="Change this skin's colours"><span aria-hidden="true">🎨</span>Paint</button>
+      <button id="raceBtn" aria-pressed="false" title="Make a number as fast as you can"><span aria-hidden="true">🏁</span>Race</button>
+    </div>
+
     <section class="tape" id="tape" aria-label="History tape" hidden>
       <div class="tape-head"><span>History tape</span><button id="tapeClear">Clear</button></div>
       <ol class="tape-list" id="tapeList"></ol>
@@ -3751,6 +3777,7 @@
         <span class="eggs-bar" aria-hidden="true"><i id="eggsBar"></i></span>
       </button>
       <div class="eggs-panel" id="eggsPanel" hidden>
+        <button class="sticker-toggle" id="stickerBtn" aria-pressed="false">🏷️ Sticker book</button>
         <div id="eggList"></div>
         <p class="eggs-secret" id="eggsSecret" hidden>✨ You found them all! But one more secret is hidden… it's worth its weight in gold.</p>
         <button class="eggs-reset" id="eggsReset">Start the hunt again</button>
@@ -4013,6 +4040,32 @@
     historyEl.textContent = `${withCommas(format(a))} ${SYMBOLS[op]} ${withCommas(format(b))} =`;
     addToTape(a, op, b, state.current);
     checkDaily(Number(state.current));
+    sumEggs(state.current);
+    speakResult(state.current);
+    checkRace(Number(state.current));
+  }
+
+  // Eggs that fire only when = gives the number (not while typing).
+  function sumEggs(value) {
+    const skin = document.body.dataset.skin;
+    if (value === '144') {
+      showEgg('<div class="new-egg">🥚 That’s gross!<b>144 is a gross</b></div>', 2800);
+      eggFound('gross');
+    }
+    if (value === '9000' && skin === 'turbo16') {
+      showEgg('<div class="new-egg">⚡ POWER LEVEL RISING ⚡</div>', 2800);
+      playTune([330, 440, 550, 660], 'square');
+      eggFound('powerup');
+    }
+    if (value === '1.21' && skin === 'synthwave') {
+      showEgg('<div class="new-egg">⏱ TIME JUMP!<b>Flux capacitor not included</b></div>', 2800);
+      eggFound('timejump');
+    }
+    if (value === '100' && skin === 'eightbit') {
+      showEgg('<div class="new-egg">1-UP!<b>EXTRA LIFE</b></div>', 2600);
+      playTune([523, 659, 784, 1047], 'square');
+      eggFound('oneup');
+    }
   }
 
   function clearAll() {
@@ -4201,6 +4254,7 @@
     const skin = findSkin(id) || SKINS[0];
     const changed = document.body.dataset.skin !== skin.id;
     document.body.dataset.skin = skin.id;
+    applyPaint();
 
     // Update the switcher: preview, name (sliding in from the side you moved to)
     currentMini.innerHTML = miniHTML(skin);
@@ -4440,6 +4494,10 @@
   let fogTimer;
   const screenEl = document.querySelector('.screen');
   const HOLD_EGGS = {
+    ashenrealm: () => {
+      showEgg('<div class="new-egg">🔥 Campfire<b>Rested</b></div>', 2800);
+      eggFound('campfire');
+    },
     foggy2: () => {
       showEgg('<div class="fog-egg"><span>…kssshhhh…<b>something is near</b></span></div>', 3400);
       playNoise(1.6, 'bandpass', 1800, 0.18);
@@ -4492,6 +4550,10 @@
       setTimeout(() => displayEl.classList.remove('upside'), 3000);
       eggFound('hello');
     }
+    if (now === '404') {
+      showEgg('<div class="new-egg">Number not found<b>404</b></div>', 2800);
+      eggFound('notfound');
+    }
     if (now === 'Error' && skin !== 'ashenrealm') {
       const cat = (findSkin(skin) || SKINS[0]).cat;
       const [big, small, soft] = GAME_OVER[cat];
@@ -4520,6 +4582,35 @@
       playTune([523, 659, 784, 1047], 'square');
     }, 900);
   });
+
+  // Nap time: leave the calculator alone for a minute.
+  let idleTimer = null;
+  function resetIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      showEgg('<div class="new-egg">zzz<b>still here…</b></div>', 3000);
+      eggFound('nap');
+    }, 60000);
+  }
+  ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, resetIdle, { passive: true }));
+  resetIdle();
+
+  // Bubble rush: shake the phone while the Boba Tea skin is on.
+  let lastShake = 0;
+  window.addEventListener('devicemotion', e => {
+    if (document.body.dataset.skin !== 'bobatea') return;
+    const a = e.accelerationIncludingGravity;
+    if (!a) return;
+    const force = Math.hypot(a.x || 0, a.y || 0, a.z || 0);
+    if (Math.abs(force - 9.8) < 14 || Date.now() - lastShake < 1500) return;
+    lastShake = Date.now();
+    showEgg('<div class="new-egg">🧋 Bubble rush!<b>Extra pearls</b></div>', 2800);
+    eggFound('bubbles');
+  });
+  // iPhones ask before sharing motion, so ask on the first tap.
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    document.addEventListener('pointerdown', () => DeviceMotionEvent.requestPermission().catch(() => {}), { once: true });
+  }
 
   // ---------- Sounds ----------
   // Every kind of skin gets its own click. Off until you turn it on.
@@ -4792,6 +4883,22 @@
       more: 'How many degrees is the corner of a square?' },
     { id: 'greenmachine', name: 'Full Spin',             skin: 'greenmachine',  hint: 'Spin all the way round.',
       more: 'How many degrees are in one full turn?' },
+    { id: 'notfound',     name: 'Number Not Found',       skin: null,            hint: 'Some pages go missing. Look for the error code.',
+      more: 'Think of the error code every web browser knows.' },
+    { id: 'gross',        name: 'That’s Gross',          skin: null,            hint: 'Some groups of things are much bigger than a dozen.',
+      more: 'Count the eggs in a dozen dozen.' },
+    { id: 'powerup',      name: 'Power Level Rising',    skin: 'turbo16',       hint: 'Turbo machines love big, round numbers.',
+      more: 'Keep the console running until the power spikes.' },
+    { id: 'timejump',     name: 'Time Jump',             skin: 'synthwave',     hint: 'Some numbers belong to the future.',
+      more: 'Check the sum that takes you a little way forward in time.' },
+    { id: 'oneup',        name: 'Extra Life',            skin: 'eightbit',      hint: 'Collect enough coins and you earn a bonus life.',
+      more: 'Tally a hundred coins on the console.' },
+    { id: 'nap',          name: 'Nap Time',              skin: null,            hint: 'Some calculators like to rest.',
+      more: 'Take a breather and see what happens.' },
+    { id: 'bubbles',      name: 'Bubble Rush',           skin: 'bobatea',       hint: 'Some drinks like a good shake.',
+      more: 'Give your phone a wiggle, not a whack.' },
+    { id: 'campfire',     name: 'Campfire',              skin: 'ashenrealm',    hint: 'A quiet place is a good place to rest.',
+      more: 'Press and hold the screen, and keep still.' },
   ];
   const eggsEl = document.getElementById('eggs');
   const eggsToggle = document.getElementById('eggsToggle');
@@ -4892,6 +4999,138 @@
     updateEggs();
   });
   buildEggs();
+
+  // Night mode: dimmer after 8pm and before 6am, unless you choose.
+  const nightBtn = document.getElementById('nightBtn');
+  let nightOn = null;
+  try { nightOn = localStorage.getItem('calc-night'); } catch {}
+  nightOn = nightOn ? nightOn === 'on' : (new Date().getHours() >= 20 || new Date().getHours() < 6);
+  function applyNight() {
+    document.body.classList.toggle('night', nightOn);
+    nightBtn.setAttribute('aria-pressed', nightOn);
+  }
+  nightBtn.addEventListener('click', () => {
+    nightOn = !nightOn;
+    try { localStorage.setItem('calc-night', nightOn ? 'on' : 'off'); } catch {}
+    applyNight();
+    toast(nightOn ? '🌙 Night mode on' : '☀️ Night mode off');
+  });
+  applyNight();
+
+  // Speak: read each answer out loud. Off until you turn it on.
+  const speakBtn = document.getElementById('speakBtn');
+  let speakOn = false;
+  try { speakOn = localStorage.getItem('calc-speak') === 'on'; } catch {}
+  speakBtn.setAttribute('aria-pressed', speakOn);
+  speakBtn.addEventListener('click', () => {
+    speakOn = !speakOn;
+    try { localStorage.setItem('calc-speak', speakOn ? 'on' : 'off'); } catch {}
+    speakBtn.setAttribute('aria-pressed', speakOn);
+    toast(speakOn ? '🗣️ Speak on' : 'Speak off');
+  });
+  function speakResult(value) {
+    if (!speakOn || !('speechSynthesis' in window)) return;
+    const text = value === 'Error' ? "Can't divide by zero" : value;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+  }
+
+  // Paint: change the body, screen and key colours of the skin you are on. Saved per skin.
+  let paintStore = {};
+  try { paintStore = JSON.parse(localStorage.getItem('calc-paint')) || {}; } catch {}
+  const PAINT_VARS = { body: '--body', screen: '--screen', key: '--key' };
+  function savePaint() {
+    try { localStorage.setItem('calc-paint', JSON.stringify(paintStore)); } catch {}
+  }
+  function applyPaint() {
+    Object.values(PAINT_VARS).forEach(v => document.body.style.removeProperty(v));
+    const mine = paintStore[document.body.dataset.skin];
+    if (!mine) return;
+    Object.entries(PAINT_VARS).forEach(([k, v]) => { if (mine[k]) document.body.style.setProperty(v, mine[k]); });
+  }
+  const paintBtn = document.getElementById('paintBtn');
+  function closePaint() {
+    document.querySelector('.paint-card')?.remove();
+    paintBtn.setAttribute('aria-expanded', false);
+  }
+  function currentColour(cssVar) {
+    const raw = getComputedStyle(document.body).getPropertyValue(cssVar).trim();
+    return /^#[0-9a-f]{6}$/i.test(raw) ? raw : '#777777';
+  }
+  paintBtn.addEventListener('click', () => {
+    if (document.querySelector('.paint-card')) { closePaint(); return; }
+    const card = document.createElement('div');
+    card.className = 'paint-card';
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-label', 'Paint this skin');
+    card.innerHTML = Object.entries(PAINT_VARS).map(([k, v]) =>
+      `<label>${k[0].toUpperCase() + k.slice(1)} <input type="color" data-key="${k}" value="${currentColour(v)}"></label>`
+    ).join('') +
+      '<div class="paint-row"><button data-reset>Reset</button><button data-close>Done</button></div>';
+    document.body.appendChild(card);
+    paintBtn.setAttribute('aria-expanded', true);
+    card.addEventListener('input', e => {
+      const k = e.target.dataset.key;
+      const skin = document.body.dataset.skin;
+      paintStore[skin] = { ...(paintStore[skin] || {}), [k]: e.target.value };
+      savePaint();
+      applyPaint();
+    });
+    card.addEventListener('click', e => {
+      if (e.target.dataset.close !== undefined) closePaint();
+      if (e.target.dataset.reset !== undefined) {
+        delete paintStore[document.body.dataset.skin];
+        savePaint();
+        applyPaint();
+        closePaint();
+        toast('Colours reset');
+      }
+    });
+  });
+
+  // Race: make the target number as fast as you can. Best time is saved on this device.
+  const raceBtn = document.getElementById('raceBtn');
+  let race = null;
+  let raceBest = null;
+  try { raceBest = JSON.parse(localStorage.getItem('calc-race')); } catch {}
+  raceBtn.addEventListener('click', () => {
+    if (race) {
+      race = null;
+      raceBtn.setAttribute('aria-pressed', false);
+      toast('Race off');
+      return;
+    }
+    race = { target: 10 + Math.floor(Math.random() * 90), start: Date.now() };
+    raceBtn.setAttribute('aria-pressed', true);
+    toast(`🏁 Make ${race.target} on the screen. Go!`);
+  });
+  function checkRace(value) {
+    if (!race || value !== race.target) return;
+    const secs = (Date.now() - race.start) / 1000;
+    if (raceBest === null || secs < raceBest) {
+      raceBest = secs;
+      try { localStorage.setItem('calc-race', JSON.stringify(raceBest)); } catch {}
+    }
+    toast(`🏁 Done in ${secs.toFixed(1)}s. Best: ${raceBest.toFixed(1)}s`);
+    race = null;
+    raceBtn.setAttribute('aria-pressed', false);
+  }
+
+  // Sticker book: show the egg hunt as stickers.
+  const stickerBtn = document.getElementById('stickerBtn');
+  let stickers = false;
+  try { stickers = localStorage.getItem('calc-sticker') === 'on'; } catch {}
+  function applyStickers() {
+    eggList.querySelector('.egg-list')?.classList.toggle('sticker-book', stickers);
+    stickerBtn.setAttribute('aria-pressed', stickers);
+    stickerBtn.textContent = stickers ? '📋 List view' : '🏷️ Sticker book';
+  }
+  stickerBtn.addEventListener('click', () => {
+    stickers = !stickers;
+    try { localStorage.setItem('calc-sticker', stickers ? 'on' : 'off'); } catch {}
+    applyStickers();
+  });
+  applyStickers();
 
   // Daily number: one target per day. Reach it on the screen with a sum, then press =.
   let daily = {};
