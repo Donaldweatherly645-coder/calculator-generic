@@ -2795,6 +2795,11 @@
   }
   .extras button span { font-size: 18px; line-height: 1.1; }
   .extras-2 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  /* Very narrow phones: smaller labels so "Shuffle" still fits its box */
+  @media (max-width: 340px) {
+    .extras button { font-size: 11px; }
+    .extras button span { font-size: 16px; }
+  }
   .extras button:hover, .tape button:hover, .help-card button:hover { background: rgba(255, 255, 255, 0.12); }
   .extras button:active, .tape button:active { transform: scale(0.9); }
   .extras button[aria-pressed="true"] { background: rgba(255, 255, 255, 0.18); }
