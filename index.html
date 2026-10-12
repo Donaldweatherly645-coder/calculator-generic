@@ -5242,8 +5242,12 @@
       c.fill();
     }
   }
+  let wavesLast = 0;
   function loopWaves(time) {
-    drawWaves(time);
+    if (time - wavesLast >= 33) {  // about 30 frames a second is plenty for slow waves
+      wavesLast = time;
+      drawWaves(time);
+    }
     wavesFrame = requestAnimationFrame(loopWaves);
   }
   function applyWaves() {
