@@ -3441,7 +3441,7 @@
   /* ---------- Waves: an animated background, like a classic console's wave menu ----------
      A canvas fixed behind everything. Off until you turn it on with the 〰 button. */
   .waves-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; display: none; }
-  body.waves { background: #06205a; }
+  body.waves { background: var(--waves-sky, #06205a); }
   body.waves .waves-bg { display: block; }
   /* Small phones: slimmer round buttons so the skin name still fits beside 🎲, 〰 and ↻ */
   @media (max-width: 359px) {
@@ -5168,7 +5168,8 @@
   applyNight();
 
   // Waves: an animated wave-and-glow background behind the calculator. Off until you turn it on.
-  // Soft light ribbons drift across a deep blue sky with a few floating sparkles.
+  // Soft light ribbons drift across a sky with a few floating sparkles. The colours come from
+  // the skin: the sky is a deep shade of the calculator's body, the ribbons glow in its accent.
   // With "reduce motion" switched on in your device settings it draws one still picture instead.
   const wavesBtn = document.getElementById('wavesBtn');
   const wavesBg = document.getElementById('wavesBg');
@@ -5189,6 +5190,30 @@
     x: Math.random(), y: 0.35 + Math.random() * 0.45, r: 0.6 + Math.random() * 1.6,
     drift: 0.004 + Math.random() * 0.01, phase: Math.random() * 6.28,
   }));
+  // Colour helpers: hex to hue/saturation/lightness and back.
+  function hexToHsl(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = (n >> 16) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, d = max - min;
+    if (!d) return [0, 0, l];
+    const sat = d / (1 - Math.abs(2 * l - 1));
+    const hue = max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    return [hue * 60, sat, l];
+  }
+  const hsl = (h, sat, l, a = 1) => `hsla(${h.toFixed(0)}, ${(sat * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${a})`;
+  let wavesPal = null;
+  function wavesPalette() {
+    const skin = findSkin(document.body.dataset.skin) || SKINS[0];
+    let [h, sat, l] = hexToHsl(skin.body);
+    const [ah, asat] = hexToHsl(skin.dots[3]);
+    // White, black and grey bodies have no colour of their own, so borrow the accent's.
+    if (sat < 0.15 || l < 0.08 || l > 0.92) [h, sat] = [ah, Math.max(asat * 0.6, 0.25)];
+    sat = Math.min(sat, 0.75);
+    return {
+      top: hsl(h, sat, 0.10), mid: hsl(h, sat, 0.22), bottom: hsl(h, sat, 0.36),
+      glow: (a) => hsl(ah, Math.min(asat, 0.9), 0.82, a),  // a pale tint of the accent
+    };
+  }
   function sizeWaves() {
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);  // keeps it light on phones
     wavesW = wavesBg.clientWidth;
@@ -5206,9 +5231,9 @@
     const t = time / 1000;
     const c = wavesCtx;
     const sky = c.createLinearGradient(0, 0, 0, wavesH);
-    sky.addColorStop(0, '#031542');
-    sky.addColorStop(0.55, '#0b3a8f');
-    sky.addColorStop(1, '#1a5fc4');
+    sky.addColorStop(0, wavesPal.top);
+    sky.addColorStop(0.55, wavesPal.mid);
+    sky.addColorStop(1, wavesPal.bottom);
     c.fillStyle = sky;
     c.fillRect(0, 0, wavesW, wavesH);
     const step = Math.max(8, wavesW / 90);
@@ -5221,12 +5246,12 @@
         c.lineTo(x, waveY(rb, x, t, 0.35) + thick);
       }
       c.closePath();
-      c.fillStyle = `rgba(255, 255, 255, ${rb.alpha})`;
+      c.fillStyle = wavesPal.glow(rb.alpha);
       c.fill();
       // The glowing top edge: a wide faint line under a thin bright one.
       c.beginPath();
       for (let x = 0; x <= wavesW + step; x += step) c.lineTo(x, waveY(rb, x, t, 0));
-      c.strokeStyle = `rgba(190, 225, 255, ${rb.alpha * 1.2})`;
+      c.strokeStyle = wavesPal.glow(rb.alpha * 1.6);
       c.lineWidth = 6;
       c.stroke();
       c.strokeStyle = `rgba(255, 255, 255, ${rb.alpha * 3})`;
@@ -5256,6 +5281,8 @@
     cancelAnimationFrame(wavesFrame);
     wavesFrame = 0;
     if (!wavesOn) return;
+    wavesPal = wavesPalette();
+    document.body.style.setProperty('--waves-sky', wavesPal.top);
     sizeWaves();
     if (stillMotion.matches || document.hidden) drawWaves(8000);
     else wavesFrame = requestAnimationFrame(loopWaves);
@@ -5271,6 +5298,8 @@
   const onMotionChange = () => { if (wavesOn) applyWaves(); };
   if (stillMotion.addEventListener) stillMotion.addEventListener('change', onMotionChange);
   else stillMotion.addListener?.(onMotionChange);  // older Safari
+  // A new skin brings new colours.
+  new MutationObserver(() => { if (wavesOn) applyWaves(); }).observe(document.body, { attributes: true, attributeFilter: ['data-skin'] });
   // Keep other open tabs in step when the setting changes in one of them.
   window.addEventListener('storage', (e) => {
     if (e.key !== 'calc-waves') return;
