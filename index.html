@@ -29,7 +29,7 @@
 <meta name="twitter:image" content="https://donaldweatherly645-coder.github.io/calculator-generic/docs/preview.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Michroma&family=Rajdhani:wght@500;700&family=Cinzel:wght@400;700&family=Special+Elite&family=Fredoka:wght@500;700&family=VT323&family=Patrick+Hand&family=Lobster&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Michroma&family=Rajdhani:wght@500;700&family=Cinzel:wght@400;700&family=Special+Elite&family=Fredoka:wght@500;700&family=VT323&family=Patrick+Hand&family=Lobster&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
   /* ---------- Modern skin (default) ---------- */
   :root {
@@ -3066,6 +3066,243 @@
     .display.upside { animation-duration: 0.01s; }
     .screen.glitch, .monster-egg svg { animation: none; }
   }
+  body[data-skin="spookypumpkin"] {
+    --bg: linear-gradient(180deg,#2a0f3a,#0d0418);
+    --body: #ff7a18;
+    --screen: #1b0f05;
+    --text: #ffb347;
+    --muted: #a77a55;
+    --key: #3a2a1e;
+    --key-text: #ffb347;
+    --key-hover: rgba(255, 255, 255, 0.35);
+    --fn: #5b2e6e;
+    --op: #ff7a18;
+    --op-text: #1b0f05;
+    --op-active: #1b0f05;
+    --op-active-text: #ff7a18;
+    --key-radius: 14px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 2px 0 rgba(0, 0, 0, 0.2);
+    --body-radius: 28px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  }
+  body[data-skin="autumnleaves"] {
+    --bg: linear-gradient(180deg,#e9b872,#b35a2a);
+    --body: #9c4a1e;
+    --screen: #f6e7c8;
+    --text: #3b1d0c;
+    --muted: #7a5a40;
+    --key: #c9733a;
+    --key-text: #fff4df;
+    --key-hover: rgba(255, 255, 255, 0.35);
+    --fn: #8a4b25;
+    --op: #6b2d12;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #6b2d12;
+    --key-radius: 14px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 2px 0 rgba(0, 0, 0, 0.2);
+    --body-radius: 28px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  }
+  body[data-skin="snowglobe"] {
+    --bg: radial-gradient(circle at 50% 30%,#ffffff,#7fb8e6);
+    --body: #bfe6ff;
+    --screen: #eaf6ff;
+    --text: #1d3a57;
+    --muted: #5f7d96;
+    --key: #ffffff;
+    --key-text: #2b4f72;
+    --key-hover: rgba(255, 255, 255, 0.35);
+    --fn: #a8d4f0;
+    --op: #e04f6b;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #e04f6b;
+    --key-radius: 14px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 2px 0 rgba(0, 0, 0, 0.2);
+    --body-radius: 28px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  }
+  body[data-skin="wintermint"] {
+    --bg: linear-gradient(180deg,#d9f7ef,#8fd6c2);
+    --body: #a7e3d2;
+    --screen: #0e2a2a;
+    --text: #9ff5e0;
+    --muted: #6fa39a;
+    --key: #ffffff;
+    --key-text: #0e4d48;
+    --key-hover: rgba(255, 255, 255, 0.35);
+    --fn: #7fcbb9;
+    --op: #2aa897;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #2aa897;
+    --key-radius: 14px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 2px 0 rgba(0, 0, 0, 0.2);
+    --body-radius: 28px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  }
+  body[data-skin="springbloom"] {
+    --bg: linear-gradient(180deg,#c6f2b0,#ffd1e6);
+    --body: #ffb6d5;
+    --screen: #fff4f8;
+    --text: #6b1f47;
+    --muted: #9a6a84;
+    --key: #ffffff;
+    --key-text: #8a2b5c;
+    --key-hover: rgba(255, 255, 255, 0.35);
+    --fn: #b7e7a0;
+    --op: #ff7eb6;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #ff7eb6;
+    --key-radius: 14px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 2px 0 rgba(0, 0, 0, 0.2);
+    --body-radius: 28px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  }
+  body[data-skin="gardenparty"] {
+    --bg: repeating-linear-gradient(90deg,#5fa36b 0 24px,#4c8d59 24px 48px);
+    --body: #3f7d4e;
+    --screen: #f9f6e8;
+    --text: #2f5a3a;
+    --muted: #6a8a70;
+    --key: #fffbe9;
+    --key-text: #2e5a39;
+    --key-hover: rgba(255, 255, 255, 0.35);
+    --fn: #a7d9a0;
+    --op: #e56b8e;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #e56b8e;
+    --key-radius: 14px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 2px 0 rgba(0, 0, 0, 0.2);
+    --body-radius: 28px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  }
+  body[data-skin="beachday"] {
+    --bg: linear-gradient(180deg,#56cfe1 0 60%,#f4d58d 60%);
+    --body: #ffd166;
+    --screen: #073b4c;
+    --text: #bff6ff;
+    --muted: #7fb8c4;
+    --key: #ffffff;
+    --key-text: #0b5a6e;
+    --key-hover: rgba(255, 255, 255, 0.35);
+    --fn: #06d6a0;
+    --op: #ef476f;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #ef476f;
+    --key-radius: 14px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 2px 0 rgba(0, 0, 0, 0.2);
+    --body-radius: 28px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  }
+  body[data-skin="summersunset"] {
+    --bg: linear-gradient(180deg,#ffb36b,#ff5e7e 55%,#5b2a86);
+    --body: #ff5e5b;
+    --screen: #2b0f2e;
+    --text: #ffd6a5;
+    --muted: #c9908c;
+    --key: #ffd6a5;
+    --key-text: #4a1d3d;
+    --key-hover: rgba(255, 255, 255, 0.35);
+    --fn: #ff9a8b;
+    --op: #5b2a86;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #5b2a86;
+    --key-radius: 14px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 2px 0 rgba(0, 0, 0, 0.2);
+    --body-radius: 28px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  }
+  body[data-skin="harvestmoon"] {
+    --bg: radial-gradient(circle at 70% 25%,#ffd27a 0 60px,transparent 61px),linear-gradient(180deg,#2c2250,#120c28);
+    --body: #2c2250;
+    --screen: #0d0a1f;
+    --text: #ffe9a8;
+    --muted: #9a8fc4;
+    --key: #3b2f6b;
+    --key-text: #ffe9a8;
+    --key-hover: rgba(255, 255, 255, 0.35);
+    --fn: #5d4e9a;
+    --op: #ffb341;
+    --op-text: #2c2250;
+    --op-active: #2c2250;
+    --op-active-text: #ffb341;
+    --key-radius: 14px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 2px 0 rgba(0, 0, 0, 0.2);
+    --body-radius: 28px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  }
+  body[data-skin="icecave"] {
+    --bg: linear-gradient(180deg,#bfe9ff,#4f7fa8);
+    --body: #5b8fb9;
+    --screen: #0a1f2e;
+    --text: #bfeaff;
+    --muted: #6f9cbb;
+    --key: #dff4ff;
+    --key-text: #1a3d57;
+    --key-hover: rgba(255, 255, 255, 0.35);
+    --fn: #9ad9f5;
+    --op: #2f80c4;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #2f80c4;
+    --key-radius: 14px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 2px 0 rgba(0, 0, 0, 0.2);
+    --body-radius: 28px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  }
+  body[data-skin="rainyday"] {
+    --bg: linear-gradient(180deg,#8796a6,#3e4b59);
+    --body: #5c6b7a;
+    --screen: #1f2a36;
+    --text: #d7e3ee;
+    --muted: #9aa8b6;
+    --key: #a9b6c4;
+    --key-text: #1c2630;
+    --key-hover: rgba(255, 255, 255, 0.35);
+    --fn: #6f7f90;
+    --op: #4c8bb8;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #4c8bb8;
+    --key-radius: 14px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 2px 0 rgba(0, 0, 0, 0.2);
+    --body-radius: 28px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  }
+  body[data-skin="fireworks"] {
+    --bg: radial-gradient(circle at 30% 30%,#ff4d6d 0 40px,transparent 41px),radial-gradient(circle at 70% 20%,#ffd166 0 36px,transparent 37px),#05050f;
+    --body: #0b0b1f;
+    --screen: #05050f;
+    --text: #ffd166;
+    --muted: #7b7ba8;
+    --key: #1d1d3a;
+    --key-text: #ffd166;
+    --key-hover: rgba(255, 255, 255, 0.35);
+    --fn: #3d3d6e;
+    --op: #ff4d6d;
+    --op-text: #ffffff;
+    --op-active: #ffffff;
+    --op-active-text: #ff4d6d;
+    --key-radius: 14px;
+    --key-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 2px 0 rgba(0, 0, 0, 0.2);
+    --body-radius: 28px;
+    --shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+  }
+  /* Easy read: a friendlier, more spaced-out font for everything on the calculator */
+  body.easy-read .calc, body.easy-read .extras, body.easy-read .tape, body.easy-read .toast {
+    font-family: "Atkinson Hyperlegible", Arial, sans-serif !important;
+    letter-spacing: 0.04em;
+    word-spacing: 0.1em;
+  }
+  body.easy-read .keys button { font-family: "Atkinson Hyperlegible", Arial, sans-serif !important; font-weight: 700; font-size: 1.15em; }
+  body.easy-read .keys button, body.easy-read .extras button { text-shadow: none; }
+  body.easy-read .history { font-size: 1.05em; }
 </style>
 </head>
 <body data-skin="modern">
@@ -3494,6 +3731,8 @@
       <button id="copyBtn" title="Copy the answer ( C )"><span aria-hidden="true">📋</span>Copy</button>
       <button id="tapeBtn" aria-pressed="false" aria-controls="tape" title="History tape ( T )"><span aria-hidden="true">🧾</span>Tape</button>
       <button id="soundBtn" aria-pressed="false" title="Sound on or off ( M )"><span aria-hidden="true" id="soundIcon">🔇</span>Sound</button>
+      <button id="dailyBtn" title="Daily number"><span aria-hidden="true">📅</span>Daily</button>
+      <button id="easyBtn" aria-pressed="false" title="Easy-read font and bigger keys"><span aria-hidden="true">Aa</span>Easy</button>
       <button id="helpBtn" title="Keyboard keys ( ? )"><span aria-hidden="true">⌨️</span>Keys</button>
     </div>
 
@@ -3773,6 +4012,7 @@
     // Show the finished sum above the answer, e.g. "12 × 3 ="
     historyEl.textContent = `${withCommas(format(a))} ${SYMBOLS[op]} ${withCommas(format(b))} =`;
     addToTape(a, op, b, state.current);
+    checkDaily(Number(state.current));
   }
 
   function clearAll() {
@@ -3836,7 +4076,7 @@
   // To add a skin: add its CSS block above, then one line here.
   // Keep each category at 12 skins or fewer.
   // body / screen / dots are just the colours for its little preview.
-  const CATEGORIES = ['Classic', 'Consoles', 'Food & Drink', 'Games'];
+  const CATEGORIES = ['Classic', 'Consoles', 'Food & Drink', 'Games', 'Seasons'];
   const SKINS = [
     { id: 'modern',        cat: 'Classic',      name: 'Modern',        body: '#ffffff', screen: '#e8eaee', dots: ['#e4e6eb', '#e4e6eb', '#ff9f0a', '#ff9f0a'] },
     { id: 'retro',         cat: 'Classic',      name: 'Retro',         body: '#26221f', screen: '#2a0806', dots: ['#e9e2d0', '#7d756b', '#c8642a', '#ff2a14'] },
@@ -3886,6 +4126,18 @@
     { id: 'foggy4',        cat: 'Games',        name: 'Foggy Town 4',  body: '#553b26', screen: '#10130f', dots: ['#2c2a20', '#474331', '#5b1f15', '#a8894a'] },
     { id: 'mazemuncher',   cat: 'Games',        name: 'Maze Muncher',  body: '#000000', screen: '#2121de', dots: ['#000000', '#2121de', '#ffd800', '#ffd800'] },
     { id: 'pixelcraft',    cat: 'Games',        name: 'Pixel Craft',   body: '#866043', screen: '#6aa84f', dots: ['#8b8b8b', '#6f6f6f', '#5b8c3a', '#5b8c3a'] },
+    { id: 'spookypumpkin', cat: 'Seasons', name: 'Spooky Pumpkin', body: '#ff7a18', screen: '#1b0f05', dots: ['#3a2a1e', '#ffb347', '#ff7a18', '#ff7a18'] },
+    { id: 'autumnleaves', cat: 'Seasons', name: 'Autumn Leaves', body: '#9c4a1e', screen: '#f6e7c8', dots: ['#c9733a', '#fff4df', '#6b2d12', '#6b2d12'] },
+    { id: 'snowglobe', cat: 'Seasons', name: 'Snow Globe', body: '#bfe6ff', screen: '#eaf6ff', dots: ['#ffffff', '#2b4f72', '#e04f6b', '#e04f6b'] },
+    { id: 'wintermint', cat: 'Seasons', name: 'Winter Mint', body: '#a7e3d2', screen: '#0e2a2a', dots: ['#ffffff', '#0e4d48', '#2aa897', '#2aa897'] },
+    { id: 'springbloom', cat: 'Seasons', name: 'Spring Bloom', body: '#ffb6d5', screen: '#fff4f8', dots: ['#ffffff', '#8a2b5c', '#ff7eb6', '#ff7eb6'] },
+    { id: 'gardenparty', cat: 'Seasons', name: 'Garden Party', body: '#3f7d4e', screen: '#f9f6e8', dots: ['#fffbe9', '#2e5a39', '#e56b8e', '#e56b8e'] },
+    { id: 'beachday', cat: 'Seasons', name: 'Beach Day', body: '#ffd166', screen: '#073b4c', dots: ['#ffffff', '#0b5a6e', '#ef476f', '#ef476f'] },
+    { id: 'summersunset', cat: 'Seasons', name: 'Summer Sunset', body: '#ff5e5b', screen: '#2b0f2e', dots: ['#ffd6a5', '#4a1d3d', '#5b2a86', '#5b2a86'] },
+    { id: 'harvestmoon', cat: 'Seasons', name: 'Harvest Moon', body: '#2c2250', screen: '#0d0a1f', dots: ['#3b2f6b', '#ffe9a8', '#ffb341', '#ffb341'] },
+    { id: 'icecave', cat: 'Seasons', name: 'Ice Cave', body: '#5b8fb9', screen: '#0a1f2e', dots: ['#dff4ff', '#1a3d57', '#2f80c4', '#2f80c4'] },
+    { id: 'rainyday', cat: 'Seasons', name: 'Rainy Day', body: '#5c6b7a', screen: '#1f2a36', dots: ['#a9b6c4', '#1c2630', '#4c8bb8', '#4c8bb8'] },
+    { id: 'fireworks', cat: 'Seasons', name: 'Fireworks Night', body: '#0b0b1f', screen: '#05050f', dots: ['#1d1d3a', '#ffd166', '#ff4d6d', '#ff4d6d'] },
   ];
 
   const skinMenu = document.getElementById('skinMenu');
@@ -4224,6 +4476,7 @@
     'Consoles':     ['GAME OVER', 'PRESS START', false],
     'Food & Drink': ['Sold out!', 'Zero portions to share', true],
     'Games':        ['GAME OVER', 'CONTINUE? 9…', false],
+    'Seasons':      ['Whoops!', 'Zero is not a season', true],
     'Secret':       ['GAME OVER', 'EVEN GOLD CANNOT', false],
   };
 
@@ -4640,9 +4893,70 @@
   });
   buildEggs();
 
-  let savedSkin = 'modern';
-  try { savedSkin = localStorage.getItem('calc-skin') || 'modern'; } catch {}
-  setSkin(savedSkin);
+  // Daily number: one target per day. Reach it on the screen with a sum, then press =.
+  let daily = {};
+  try { daily = JSON.parse(localStorage.getItem('calc-daily')) || {}; } catch {}
+  function saveDaily() {
+    try { localStorage.setItem('calc-daily', JSON.stringify(daily)); } catch {}
+  }
+  function dayKey(offset = 0) {
+    const d = new Date(Date.now() - offset * 86400000);
+    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  }
+  function dailyTarget(key) {
+    let h = 0;
+    for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return 10 + (h % 90);  // a number from 10 to 99
+  }
+  function dailyInfo() {
+    const today = dayKey();
+    const streak = daily.streak || 0;
+    if (daily.last === today) return `✅ Done today! Streak: ${streak} day${streak === 1 ? '' : 's'}`;
+    return `📅 Today's number is ${dailyTarget(today)}. Reach it with a sum, then press =. Streak: ${streak}`;
+  }
+  function checkDaily(value) {
+    const today = dayKey();
+    if (daily.last === today || value !== dailyTarget(today)) return;
+    daily.streak = daily.last === dayKey(1) ? (daily.streak || 0) + 1 : 1;
+    daily.last = today;
+    saveDaily();
+    toast(`🎉 Daily solved! Streak: ${daily.streak} day${daily.streak === 1 ? '' : 's'}`);
+  }
+  document.getElementById('dailyBtn').addEventListener('click', () => toast(dailyInfo()));
+
+  // Easy read: a friendlier font and bigger keys. Remembered on this device.
+  let easyRead = false;
+  try { easyRead = localStorage.getItem('calc-easy') === 'on'; } catch {}
+  const easyBtn = document.getElementById('easyBtn');
+  function applyEasy() {
+    document.body.classList.toggle('easy-read', easyRead);
+    easyBtn.setAttribute('aria-pressed', easyRead);
+  }
+  easyBtn.addEventListener('click', () => {
+    easyRead = !easyRead;
+    try { localStorage.setItem('calc-easy', easyRead ? 'on' : 'off'); } catch {}
+    applyEasy();
+    toast(easyRead ? '🔤 Easy read on' : 'Easy read off');
+  });
+  applyEasy();
+
+  // Dress-up days: until you pick a skin yourself, the calculator wears a seasonal one.
+  function seasonalSkin() {
+    const d = new Date();
+    const m = d.getMonth() + 1;
+    const day = d.getDate();
+    if ((m === 10 && day >= 20) || (m === 11 && day <= 2)) return 'spookypumpkin';
+    if (m === 12 || (m === 1 && day <= 5)) return 'snowglobe';
+    if (m >= 3 && m <= 5) return 'springbloom';
+    if (m >= 6 && m <= 8) return 'beachday';
+    if ((m === 9) || (m === 10 && day < 20) || (m === 11)) return 'autumnleaves';
+    return null;
+  }
+
+  let savedSkin = null;
+  try { savedSkin = localStorage.getItem('calc-skin'); } catch {}
+  setSkin(savedSkin || seasonalSkin() || 'modern');
+  if (!savedSkin) { try { localStorage.removeItem('calc-skin'); } catch {} }  // a seasonal pick is not a saved choice
 
   // Phone install: save a copy for offline use (only works on a real website, not a file).
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
