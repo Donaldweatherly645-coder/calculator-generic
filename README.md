@@ -17,6 +17,7 @@ Click **▶ Play now** above. Nothing to install.
 
 - 🎨 Pick a skin from the menu at the top, or press `[` and `]` to flip through them.
 - ⌨️ Type numbers on your keyboard or click the buttons.
+- 🎮 Open **Games** under the calculator to play **Make 24** (use four numbers to make 24) or **Speed Streak** (quick sums that get harder). Your best scores are saved.
 - 🥚 Open **Egg hunt** under the calculator to see every easter egg, with a hint for each. Found eggs turn gold.
 - 📱 Put it on your phone: open the site, then tap **Share → Add to Home Screen** (iPhone) or **⋮ → Install app** (Android). It works offline too.
 
