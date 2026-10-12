@@ -2979,7 +2979,48 @@
   .eggs-reset { display: block; margin: 8px auto 0; padding: 4px 10px; border-radius: 999px; font-size: 12px; color: rgba(255, 255, 255, 0.5) !important; }
   .eggs-reset:hover { background: rgba(255, 255, 255, 0.1) !important; }
 
+  /* ---------- New easter eggs (round 2) ---------- */
+  .screen.egg { overflow: hidden; }
+  .answer-egg { text-align: center; font: 800 22px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; letter-spacing: 0.06em; color: #ffffff; background: #1c1f26; padding: 10px 16px; border-radius: 14px; animation: oneup 3s ease forwards; }
+  .answer-egg b { display: block; margin-top: 4px; font-size: 12px; font-weight: 500; letter-spacing: 0; color: #ff9f0a; }
+  .neon-egg { font: 700 24px "Rajdhani", sans-serif; letter-spacing: 0.12em; text-align: center; color: #fcee0a; text-shadow: 3px 0 #00f0ff, -3px 0 #ff2a6d; animation: neon-glitch 2.8s steps(1) forwards; }
+  .neon-egg b { display: block; font-size: 13px; color: #00f0ff; text-shadow: none; }
+  @keyframes neon-glitch { 0% { transform: translateX(-6px) skewX(20deg); opacity: 1; } 8% { transform: translateX(5px); } 16%, 85% { transform: none; } 50% { transform: translateX(-2px) skewX(-8deg); } 54% { transform: none; } 100% { opacity: 0; } }
+  .pi-egg { display: flex; align-items: center; gap: 10px; font: 700 34px "VT323", monospace; color: #1d2416; animation: oneup 3s ease forwards; }
+  .pi-egg svg { width: 64px; height: 64px; }
+  .pi-egg circle { fill: none; stroke: #1d2416; stroke-width: 3; stroke-dasharray: 176; stroke-dashoffset: 176; animation: pi-draw 1.6s ease-out 0.3s forwards; }
+  @keyframes pi-draw { to { stroke-dashoffset: 0; } }
+  .turbo-egg { position: absolute; inset: 0; display: grid; place-items: center; font: italic 900 34px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #ffffff; text-shadow: 0 0 12px #ff2b2b; background: repeating-linear-gradient(170deg, transparent 0 14px, rgba(255, 43, 43, 0.5) 14px 17px); background-size: 200% 200%; animation: turbo-streak 0.35s linear 7, oneup 2.6s ease forwards; }
+  @keyframes turbo-streak { to { background-position: -120px 0; } }
+  .trident-egg { display: flex; align-items: center; gap: 10px; font: 700 15px "Michroma", sans-serif; color: #ffffff; text-align: center; animation: oneup 3s ease forwards; }
+  .trident-egg i { font-style: normal; font-size: 46px; color: #ffd400; display: inline-block; animation: trident-spin 1.2s ease-in-out 2; }
+  @keyframes trident-spin { 50% { transform: rotateY(180deg) scale(1.2); } }
+  .gem-egg { display: flex; align-items: center; gap: 10px; font: 12px/1.8 "Press Start 2P", monospace; color: #ffffff; background: rgba(0, 0, 0, 0.75); padding: 8px 12px; animation: oneup 3s ease forwards; }
+  .gem-egg svg { width: 40px; height: 40px; animation: monster-hop 0.4s ease-in-out 4 alternate; }
+  .crack { position: absolute; inset: 0; pointer-events: none; z-index: 2; background: linear-gradient(135deg, transparent 47%, rgba(0, 0, 0, 0.5) 48% 50%, transparent 51%), linear-gradient(45deg, transparent 60%, rgba(0, 0, 0, 0.45) 61% 62%, transparent 63%); }
+  .lucky-egg { text-align: center; font: 700 26px "Cinzel", serif; color: #fff2b0; text-shadow: 0 0 14px #ffcc33, 0 2px 0 #7a5200; animation: lucky 3s ease forwards; }
+  .lucky-egg b { display: block; font-size: 12px; letter-spacing: 0.2em; color: #ffffff; }
+  @keyframes lucky { 0% { transform: scale(0.3); opacity: 0; } 15% { transform: scale(1.15); opacity: 1; } 25%, 85% { transform: none; opacity: 1; } 100% { transform: translateY(-16px); opacity: 0; } }
+  .fog-egg { position: absolute; inset: 0; display: grid; place-items: center; font: 20px "Special Elite", monospace; color: #ececec; background: radial-gradient(circle at 20% 50%, rgba(220, 220, 220, 0.85), transparent 60%), radial-gradient(circle at 80% 40%, rgba(200, 200, 200, 0.8), transparent 55%), #555555; animation: fog-in 3.4s ease forwards; }
+  .fog-egg b { display: block; font-size: 12px; font-weight: 400; color: #b40000; text-align: center; }
+  @keyframes fog-in { 0% { opacity: 0; background-position: -60px 0, 60px 0, 0 0; } 20%, 80% { opacity: 1; } 100% { opacity: 0; background-position: 40px 0, -40px 0, 0 0; } }
+  .frost-egg { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font: 800 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #ffffff; text-shadow: 0 0 10px #6fd3ff; background: radial-gradient(circle, rgba(170, 225, 255, 0.35), rgba(30, 90, 160, 0.9)); box-shadow: inset 0 0 30px #e6f7ff; animation: oneup 3s ease forwards; }
+  .frost-egg b { display: block; font-size: 12px; font-weight: 500; }
+  .hot-egg { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font: 900 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff4c2; text-shadow: 0 0 10px #ff3d00; background: linear-gradient(0deg, #ff3d00, #a80000 60%, #3a0000); animation: hot-shake 0.12s linear 12, oneup 2.8s ease forwards; }
+  .hot-egg b { display: block; font-size: 12px; font-weight: 600; }
+  @keyframes hot-shake { 25% { transform: translate(2px, -1px); } 75% { transform: translate(-2px, 1px); } }
+
+  /* Achievements: trophies in the Egg hunt list */
+  .eggs-group { margin: 12px 4px 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); }
+  .eggs-group:first-child { margin-top: 2px; }
+  .trophy-svg { grid-row: 1 / 3; width: 32px; height: 34px; justify-self: center; }
+  .trophy-svg path { fill: rgba(255, 255, 255, 0.06); stroke: rgba(255, 255, 255, 0.35); stroke-width: 2; stroke-dasharray: 4 3; stroke-linejoin: round; }
+  .found .trophy-svg path { fill: url(#eggGold); stroke: #9a6a00; stroke-dasharray: none; }
+  .egg-row.just-found .trophy-svg { animation: egg-wobble 0.9s ease-in-out; }
+
   @media (prefers-reduced-motion: reduce) {
+    .turbo-egg, .hot-egg, .neon-egg, .trident-egg i { animation: oneup 3s ease forwards; }
+    .pi-egg circle { animation: none; stroke-dashoffset: 0; }
     .eggs-bar i, .eggs.bump .eggs-toggle, .egg-row.just-found, .egg-row.just-found .egg-svg, .sparkle { animation: none; }
     .egg-row.just-found::after { display: none; }
     .display.upside { animation-duration: 0.01s; }
@@ -3431,7 +3472,7 @@
         <span class="eggs-bar" aria-hidden="true"><i id="eggsBar"></i></span>
       </button>
       <div class="eggs-panel" id="eggsPanel" hidden>
-        <ol class="egg-list" id="eggList"></ol>
+        <div id="eggList"></div>
         <p class="eggs-secret" id="eggsSecret" hidden>✨ You found them all! But one more secret is hidden… it's worth its weight in gold.</p>
         <button class="eggs-reset" id="eggsReset">Start the hunt again</button>
       </div>
@@ -3692,6 +3733,7 @@
     // Show the finished sum above the answer, e.g. "12 × 3 ="
     historyEl.textContent = `${withCommas(format(a))} ${SYMBOLS[op]} ${withCommas(format(b))} =`;
     addToTape(a, op, b, state.current);
+    if (state.current !== 'Error') trackSum();
   }
 
   function clearAll() {
@@ -3742,7 +3784,7 @@
     else if (action === 'clear') clear();
     else if (action === 'sign') toggleSign();
     else if (action === 'percent') percent();
-    else if (action === 'equals') { equals(); return; }
+    else if (action === 'equals') { equals(); turboCheck(); return; }
     render();
   }
 
@@ -3893,6 +3935,7 @@
 
     try { localStorage.setItem('calc-skin', skin.id); } catch {}
     render();
+    trackSkinVisit(skin);
   }
 
   function cycleSkin(step) {
@@ -4012,6 +4055,74 @@
     setSkin('gold', 'right');
     toast(first ? '🏆 Secret skin unlocked: Solid Gold!' : '🏆 Solid Gold');
   }
+
+  // ---------- Even more easter eggs (each one is on the Egg hunt list) ----------
+  // Modern: the answer to everything.
+  NUMBER_EGGS.modern = { at: '42', ms: 3000, html: () => '<div class="answer-egg">DON’T PANIC<b>You found the answer to everything.</b></div>' };
+  // Cyberpunk: the year of the neon city.
+  NUMBER_EGGS.cyberpunk = { at: '2077', ms: 2800, html: () => '<div class="neon-egg">WELCOME TO<br>NEON CITY<b>// YEAR 2077 //</b></div>' };
+  // Graphing: pi draws a circle.
+  NUMBER_EGGS.graphing = { at: '3.14159', ms: 3000, html: () => '<div class="pi-egg"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28"/></svg>π</div>' };
+  // Trident 64: its own number.
+  NUMBER_EGGS.trident64 = { at: '64', ms: 3000, html: () => '<div class="trident-egg"><i>Ψ</i><span>64-BIT<br>POWER!</span></div>' };
+  // Crystal Saga VII: lucky sevens.
+  NUMBER_EGGS.crystal7 = { at: '777', ms: 3000, html: () => '<div class="lucky-egg">LEVEL UP!<b>LUCKY SEVENS</b></div>' };
+  // Silver Peak: −40, where both kinds of thermometer agree.
+  NUMBER_EGGS.silverpeak = { at: '-40', ms: 3000, html: () => '<div class="frost-egg">❄ STAY FROSTY ❄<b>−40° is −40° either way</b></div>' };
+  // Rooster Sauce: a million on the heat scale.
+  NUMBER_EGGS.roostersauce = { at: '1000000', ms: 2800, html: () => '<div class="hot-egg">🔥 TOO HOT! 🔥<b>One million heat units</b></div>' };
+
+  // Turbo 16: hammer the equals button for a turbo boost.
+  let equalsTaps = [];
+  function turboCheck() {
+    if (document.body.dataset.skin !== 'turbo16') return;
+    const t = Date.now();
+    equalsTaps = equalsTaps.filter(x => t - x < 1500).concat(t);
+    if (equalsTaps.length < 5) return;
+    equalsTaps = [];
+    showEgg('<div class="turbo-egg">TURBO!</div>', 2600);
+    playTune([523, 659, 784, 1047, 1319], 'sawtooth');
+    eggFound('turbo16');
+  }
+
+  // Pixel Craft: tap the screen 4 times to mine it and find a gem.
+  let mineTaps = [];
+  document.querySelector('.screen').addEventListener('click', () => {
+    if (document.body.dataset.skin !== 'pixelcraft') return;
+    const screen = document.querySelector('.screen');
+    if (screen.querySelector('.egg-fx')) return;
+    const t = Date.now();
+    mineTaps = mineTaps.filter(x => t - x < 1500).concat(t);
+    playNoise(0.06, 'lowpass', 600, 0.2);
+    if (mineTaps.length === 2 && !screen.querySelector('.crack')) {
+      const crack = document.createElement('div');
+      crack.className = 'crack';
+      screen.appendChild(crack);
+      screen.classList.add('egg');
+      setTimeout(() => { crack.remove(); if (!screen.querySelector('.egg-fx')) screen.classList.remove('egg'); }, 1600);
+    }
+    if (mineTaps.length < 4) return;
+    mineTaps = [];
+    screen.querySelector('.crack')?.remove();
+    showEgg('<div class="gem-egg"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path fill="#0e6f6a" d="M5 2h6v1H5zM3 4h10v1H3zM2 5h1v3H2zM13 5h1v3h-1zM3 8h1v2H3zM12 8h1v2h-1zM4 10h1v2H4zM11 10h1v2h-1zM6 12h4v2H6z"/><path fill="#4aedd9" d="M4 3h8v1H4zM3 5h10v3H3zM4 8h8v2H4zM5 10h6v2H5z"/><path fill="#d6fffa" d="M5 5h2v1H5zM4 6h1v1H4z"/></svg><span>DIAMONDS!</span></div>', 3000);
+    playTune([1047, 1319, 1568], 'square');
+    eggFound('pixelcraft');
+  });
+
+  // Foggy Town 2: press and hold the screen. Something is out there…
+  let fogTimer;
+  const screenEl = document.querySelector('.screen');
+  screenEl.addEventListener('pointerdown', () => {
+    if (document.body.dataset.skin !== 'foggy2') return;
+    clearTimeout(fogTimer);
+    fogTimer = setTimeout(() => {
+      showEgg('<div class="fog-egg"><span>…kssshhhh…<b>something is near</b></span></div>', 3400);
+      playNoise(1.6, 'bandpass', 1800, 0.18);
+      eggFound('foggy2');
+    }, 1500);
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => screenEl.addEventListener(ev, () => clearTimeout(fogTimer)));
+  screenEl.addEventListener('contextmenu', e => { if (document.body.dataset.skin === 'foggy2') e.preventDefault(); });
 
   // ---------- More easter eggs ----------
   // Monster Dex: 151, a wild monster appears.
@@ -4187,6 +4298,7 @@
   function toggleTape() {
     tapeEl.hidden = !tapeEl.hidden;
     tapeBtn.setAttribute('aria-pressed', !tapeEl.hidden);
+    trackTape();
   }
 
   tapeBtn.addEventListener('click', toggleTape);
@@ -4211,6 +4323,7 @@
     const current = document.body.dataset.skin;
     const others = SKINS.filter(s => s.id !== current);
     setSkin(others[Math.floor(Math.random() * others.length)].id, 'right');
+    trackShuffle();
   }
   document.getElementById('shuffleBtn').addEventListener('click', shuffleSkin);
 
@@ -4272,62 +4385,96 @@
   }, true);
 
   // ---------- Egg hunt ----------
-  // Every easter egg, with a hint that points the way without giving the answer.
+  // Every easter egg and achievement, with a hint that points the way without giving the answer.
   // (The gold skin stays a secret, so it is not on this list.)
   const EGGS = [
-    { id: 'flip',        name: 'Upside-Down Word',      skin: 'retro',       hint: 'Type the model number printed on the case, then turn the calculator over.' },
-    { id: 'died',        name: 'You Died',              skin: 'ashenrealm',  hint: 'This world is harsh. Try a sum that no one can win.' },
-    { id: 'gameover',    name: 'Game Over',             skin: null,          hint: 'Some sums break every calculator. Try one on any other skin.' },
-    { id: 'ringworld',   name: 'Dropship Drop-off',     skin: 'ringworld',   hint: 'Call in the famous dropship by its number.' },
-    { id: 'terminal',    name: 'Access Granted',        skin: 'terminal',    hint: 'Hackers spell “elite” with numbers.' },
-    { id: 'classiccola', name: 'Fizz!',                 skin: 'classiccola', hint: 'Type the year the very first cola was poured.' },
-    { id: 'mazemuncher', name: 'Broken Level',          skin: 'mazemuncher', hint: 'Reach the level that broke the arcade game.' },
-    { id: 'super16',     name: 'Cheat Code',            skin: 'super16',     hint: 'Enter the most famous cheat code in gaming. You need a keyboard.' },
-    { id: 'hello',       name: 'Say Hello',             skin: null,          hint: 'Old school trick: a number that reads as a greeting when turned upside down.' },
-    { id: 'monsterdex',  name: 'Wild Monster',          skin: 'monsterdex',  hint: 'Type how many monsters were in the very first Dex.' },
-    { id: 'eightbit',    name: 'Blow on the Cartridge', skin: 'eightbit',    hint: 'Old games glitched. Give the screen a few quick taps.' },
+    { id: 'flip',        name: 'Upside-Down Word',      skin: 'retro',        hint: 'Some words still make sense when turned around.' },
+    { id: 'died',        name: 'You Died',              skin: 'ashenrealm',   hint: 'Ask this world for something it cannot give.' },
+    { id: 'gameover',    name: 'Game Over',             skin: null,           hint: 'Every calculator has a few sums it cannot handle.' },
+    { id: 'ringworld',   name: 'Dropship Drop-off',     skin: 'ringworld',    hint: 'Every dropship has a call sign. Who is listening?' },
+    { id: 'terminal',    name: 'Access Granted',        skin: 'terminal',     hint: 'Some letters look a lot like digits on a screen.' },
+    { id: 'classiccola', name: 'Fizz!',                 skin: 'classiccola',  hint: 'This drink has been around a very long time.' },
+    { id: 'mazemuncher', name: 'Broken Level',          skin: 'mazemuncher',  hint: 'Some numbers keep doubling until something breaks.' },
+    { id: 'super16',     name: 'Cheat Code',            skin: 'super16',      hint: 'Gamers know a famous code. Needs a keyboard, not a phone.' },
+    { id: 'hello',       name: 'Say Hello',             skin: null,           hint: 'Old calculators could spell words, if you held them right.' },
+    { id: 'monsterdex',  name: 'Wild Monster',          skin: 'monsterdex',   hint: 'Count them all, starting with the first lot.' },
+    { id: 'eightbit',    name: 'Blow on the Cartridge', skin: 'eightbit',     hint: 'Old games glitched when someone gave them a nudge.' },
+    { id: 'modern',      name: 'Don’t Panic',           skin: 'modern',       hint: 'Deep thought needed: the answer to everything.' },
+    { id: 'cyberpunk',   name: 'Neon City',             skin: 'cyberpunk',    hint: 'This bright city lives in the future.' },
+    { id: 'graphing',    name: 'Round and Round',       skin: 'graphing',     hint: 'A number that never ends, and goes round.' },
+    { id: 'turbo16',     name: 'Turbo Boost',           skin: 'turbo16',      hint: 'Fast fingers get a bonus.' },
+    { id: 'trident64',   name: '64-Bit Power',          skin: 'trident64',    hint: 'Its name holds a clue to its power.' },
+    { id: 'pixelcraft',  name: 'Diamonds!',             skin: 'pixelcraft',   hint: 'Dig deep into the stone for something shiny.' },
+    { id: 'crystal7',    name: 'Lucky Sevens',          skin: 'crystal7',     hint: 'Lucky numbers can power up a hero.' },
+    { id: 'foggy2',      name: 'Something Is Near',     skin: 'foggy2',       hint: 'Stay very still and listen to the fog.' },
+    { id: 'silverpeak',  name: 'Stay Frosty',           skin: 'silverpeak',   hint: 'So cold that two thermometers agree.' },
+    { id: 'roostersauce', name: 'Too Hot!',             skin: 'roostersauce', hint: 'Turn the heat way, way up.' },
   ];
+  // Achievements: rewards for playing, not one secret code.
+  const GOALS = [
+    { id: 'goal-eggs5',    name: 'Egg Hunter',   hint: 'A small basket is a good start.' },
+    { id: 'goal-eggsall',  name: 'Egg Master',   hint: 'Leave no shell unturned.' },
+    { id: 'goal-tour',     name: 'Grand Tour',   hint: 'Every family of machines is worth a visit.' },
+    { id: 'goal-sums',     name: 'Maths Club',   hint: 'Lots of machines, lots of maths.' },
+    { id: 'goal-tape',     name: 'Paper Trail',  hint: 'Some machines remember what you did.' },
+    { id: 'goal-shuffle',  name: 'Lucky Dip',    hint: 'Let luck pick your look, again and again.' },
+  ];
+  const ALL_EGGS = [...EGGS, ...GOALS];
   const eggsEl = document.getElementById('eggs');
   const eggsToggle = document.getElementById('eggsToggle');
   const eggsPanel = document.getElementById('eggsPanel');
   const eggList = document.getElementById('eggList');
   let foundEggs = [];
   try { foundEggs = JSON.parse(localStorage.getItem('calc-eggs')) || []; } catch {}
+  // What counts toward the achievements: categories visited, skins with a sum done, shuffles
+  let stats = { cats: [], sumSkins: [], shuffles: 0 };
+  try { stats = { ...stats, ...JSON.parse(localStorage.getItem('calc-stats')) }; } catch {}
 
   function eggIcon() {
     return '<svg class="egg-svg" viewBox="0 0 40 48" aria-hidden="true"><path class="shell" d="M20 3C11 3 4 18 4 29a16 16 0 0 0 32 0C36 18 29 3 20 3Z"/><path class="spots" d="M9 30q11 5 22 0" fill="none" stroke="#fff3b0" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/><ellipse class="shine" cx="14" cy="18" rx="3.5" ry="6" fill="#fffbe6" opacity="0.85" transform="rotate(18 14 18)"/><text class="q" x="20" y="35" text-anchor="middle">?</text></svg>';
   }
+  function trophyIcon() {
+    return '<svg class="trophy-svg" viewBox="0 0 40 42" aria-hidden="true"><path d="M11 4h18v9a9 9 0 0 1-18 0zM11 7H4q0 9 8 10M29 7h7q0 9-8 10M17 22h6v8h-6zM11 30h18v6H11z"/></svg>';
+  }
+
+  function rowHTML(item, icon, chip) {
+    return `<li class="egg-row" data-egg="${item.id}">${icon}
+        <span class="egg-name">${item.name} ${chip}</span>
+        <span class="egg-hint">${item.hint}</span>
+        <span class="egg-tick" aria-label="Found">✓</span></li>`;
+  }
 
   function buildEggs() {
-    eggList.innerHTML = EGGS.map(egg => {
+    const eggRows = EGGS.map(egg => {
       const skin = egg.skin && SKINS[skinIndex(egg.skin)];
       const chip = skin
         ? `<button class="egg-skin" data-skin="${skin.id}" title="Switch to ${skin.name}">${skin.name}</button>`
         : '<span class="egg-skin">Any skin</span>';
-      return `<li class="egg-row" data-egg="${egg.id}">${eggIcon()}
-        <span class="egg-name">${egg.name} ${chip}</span>
-        <span class="egg-hint">${egg.hint}</span>
-        <span class="egg-tick" aria-label="Found">✓</span></li>`;
+      return rowHTML(egg, eggIcon(), chip);
     }).join('');
+    const goalRows = GOALS.map(goal => rowHTML(goal, trophyIcon(), '')).join('');
+    eggList.innerHTML = `<h3 class="eggs-group">🥚 Eggs</h3><ol class="egg-list">${eggRows}</ol>
+      <h3 class="eggs-group">🏆 Achievements</h3><ol class="egg-list">${goalRows}</ol>`;
     updateEggs();
   }
 
   function updateEggs() {
-    let count = 0;
+    let count = 0, eggCount = 0;
     eggList.querySelectorAll('.egg-row').forEach(row => {
       const found = foundEggs.includes(row.dataset.egg);
       row.classList.toggle('found', found);
       if (found) count++;
+      if (found && !row.dataset.egg.startsWith('goal-')) eggCount++;
     });
-    document.getElementById('eggsCount').textContent = `${count} / ${EGGS.length}`;
-    document.getElementById('eggsBar').style.width = `${count / EGGS.length * 100}%`;
-    document.getElementById('eggsSecret').hidden = count < EGGS.length;
-    eggsToggle.setAttribute('aria-label', `Egg hunt: ${count} of ${EGGS.length} found`);
+    document.getElementById('eggsCount').textContent = `${count} / ${ALL_EGGS.length}`;
+    document.getElementById('eggsBar').style.width = `${count / ALL_EGGS.length * 100}%`;
+    document.getElementById('eggsSecret').hidden = eggCount < EGGS.length;
+    eggsToggle.setAttribute('aria-label', `Egg hunt: ${count} of ${ALL_EGGS.length} found`);
   }
 
   function eggFound(id) {
-    const egg = EGGS.find(e => e.id === id);
-    if (!egg || foundEggs.includes(id)) return;
+    const item = ALL_EGGS.find(e => e.id === id);
+    if (!item || foundEggs.includes(id)) return;
     foundEggs.push(id);
     try { localStorage.setItem('calc-eggs', JSON.stringify(foundEggs)); } catch {}
     updateEggs();
@@ -4347,8 +4494,44 @@
     eggsEl.classList.remove('bump');
     void eggsEl.offsetWidth;
     eggsEl.classList.add('bump');
-    setTimeout(() => toast(`🥚 Golden egg found: ${egg.name}!`), 600);
-    setTimeout(() => playTune([784, 988, 1175, 1568], 'triangle'), 650);
+    const isGoal = id.startsWith('goal-');
+    // Two finds at once (an egg and the achievement it completes): show them one after the other
+    const wait = 600 + (isGoal ? 2000 : 0);
+    setTimeout(() => toast(isGoal ? `🏆 Achievement unlocked: ${item.name}!` : `🥚 Golden egg found: ${item.name}!`), wait);
+    setTimeout(() => playTune([784, 988, 1175, 1568], 'triangle'), wait + 50);
+    if (!isGoal) checkGoals();
+  }
+
+  function saveStats() {
+    try { localStorage.setItem('calc-stats', JSON.stringify(stats)); } catch {}
+  }
+  function checkGoals() {
+    const eggCount = foundEggs.filter(id => !id.startsWith('goal-')).length;
+    if (eggCount >= 5) eggFound('goal-eggs5');
+    if (eggCount >= EGGS.length) eggFound('goal-eggsall');
+    if (['Classic', 'Consoles', 'Food & Drink', 'Games'].every(c => stats.cats.includes(c))) eggFound('goal-tour');
+    if (stats.sumSkins.length >= 12) eggFound('goal-sums');
+    if (stats.shuffles >= 10) eggFound('goal-shuffle');
+  }
+  // Called from setSkin, equals, shuffle and the tape
+  function trackSkinVisit(skin) {
+    if (!skin || skin.cat === 'Secret' || stats.cats.includes(skin.cat)) return;
+    stats.cats.push(skin.cat);
+    saveStats();
+    checkGoals();
+  }
+  function trackSum() {
+    const id = document.body.dataset.skin;
+    if (!stats.sumSkins.includes(id)) { stats.sumSkins.push(id); saveStats(); checkGoals(); }
+    trackTape();
+  }
+  function trackShuffle() {
+    stats.shuffles++;
+    saveStats();
+    checkGoals();
+  }
+  function trackTape() {
+    if (!tapeEl.hidden && tape.length >= 3) eggFound('goal-tape');
   }
 
   eggsToggle.addEventListener('click', () => {
@@ -4365,10 +4548,12 @@
   document.getElementById('eggsReset').addEventListener('click', () => {
     if (!confirm('Hide all the eggs again and start a new hunt?')) return;
     foundEggs = [];
-    try { localStorage.removeItem('calc-eggs'); } catch {}
+    stats = { cats: [], sumSkins: [], shuffles: 0 };
+    try { localStorage.removeItem('calc-eggs'); localStorage.removeItem('calc-stats'); } catch {}
     updateEggs();
   });
   buildEggs();
+  setTimeout(checkGoals, 800);  // older saves may already qualify
 
   let savedSkin = 'modern';
   try { savedSkin = localStorage.getItem('calc-skin') || 'modern'; } catch {}
