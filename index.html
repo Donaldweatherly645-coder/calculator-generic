@@ -3010,15 +3010,55 @@
   .hot-egg b { display: block; font-size: 12px; font-weight: 600; }
   @keyframes hot-shake { 25% { transform: translate(2px, -1px); } 75% { transform: translate(-2px, 1px); } }
 
-  /* Achievements: trophies in the Egg hunt list */
-  .eggs-group { margin: 12px 4px 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); }
-  .eggs-group:first-child { margin-top: 2px; }
-  .trophy-svg { grid-row: 1 / 3; width: 32px; height: 34px; justify-self: center; }
-  .trophy-svg path { fill: rgba(255, 255, 255, 0.06); stroke: rgba(255, 255, 255, 0.35); stroke-width: 2; stroke-dasharray: 4 3; stroke-linejoin: round; }
-  .found .trophy-svg path { fill: url(#eggGold); stroke: #9a6a00; stroke-dasharray: none; }
-  .egg-row.just-found .trophy-svg { animation: egg-wobble 0.9s ease-in-out; }
+
+  /* ---------- New easter eggs (round 3) ---------- */
+  .mph-egg { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font: italic 900 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #ffffff; text-shadow: 0 0 12px #ff2bd6, 0 0 24px #00e5ff; background: linear-gradient(180deg, #1a0033, #ff2bd6 140%); animation: mph-flash 0.15s steps(1) 6, oneup 3s ease forwards; }
+  .mph-egg b { display: block; font-size: 12px; font-style: normal; font-weight: 600; letter-spacing: 0.2em; }
+  @keyframes mph-flash { 50% { background: #ffffff; } }
+  .lines-egg { display: grid; gap: 6px; justify-items: center; font: 10px "Press Start 2P", monospace; color: #0f380f; animation: oneup 3s ease forwards; }
+  .lines-egg i { display: block; width: 180px; height: 14px; background: repeating-linear-gradient(90deg, #0f380f 0 16px, #306230 16px 18px); animation: line-clear 0.25s steps(1) 6; }
+  @keyframes line-clear { 50% { background: #9bbc0f; } }
+  .start-egg { text-align: center; font: 700 18px "Michroma", sans-serif; letter-spacing: 0.1em; color: #ffffff; animation: oneup 3s ease forwards; }
+  .start-egg span { animation: blink 0.6s steps(1) infinite; }
+  .start-egg b { display: block; margin-top: 6px; font-size: 10px; font-weight: 400; color: #b4b4b4; }
+  .pong-egg { position: absolute; inset: 8px; background: #000000; animation: oneup 3.2s ease forwards; }
+  .pong-egg::before, .pong-egg::after { content: ""; position: absolute; top: 30%; width: 6px; height: 30%; background: #ffffff; }
+  .pong-egg::before { left: 10px; animation: paddle 0.8s ease-in-out infinite alternate; }
+  .pong-egg::after { right: 10px; animation: paddle 0.8s ease-in-out 0.4s infinite alternate-reverse; }
+  .pong-egg i { position: absolute; width: 8px; height: 8px; background: #ffffff; top: 45%; left: 18px; animation: ball-x 0.8s linear infinite alternate, ball-y 0.55s linear infinite alternate; }
+  .pong-egg b { position: absolute; top: 6px; left: 0; right: 0; text-align: center; font: 12px "Press Start 2P", monospace; color: #ffffff; }
+  @keyframes paddle { from { transform: translateY(-40%); } to { transform: translateY(40%); } }
+  @keyframes ball-x { to { left: calc(100% - 26px); } }
+  @keyframes ball-y { from { top: 25%; } to { top: 75%; } }
+  .chalk-egg { text-align: center; font: 52px/1 "Patrick Hand", cursive; color: #f4f1e8; animation: lucky 3s ease forwards; }
+  .chalk-egg b { display: block; font-size: 20px; font-weight: 400; }
+  .bee-egg { position: absolute; inset: 0; display: grid; place-items: center; font: 900 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #e2001a; background: #ffd200; background-image: radial-gradient(circle at 50% 50%, transparent 9px, rgba(200, 140, 0, 0.35) 10px 12px, transparent 13px); background-size: 26px 30px; animation: oneup 3s ease forwards; }
+  .bee-egg i { position: absolute; font-style: normal; font-size: 24px; animation: bee-fly 1.4s ease-in-out 2 alternate; }
+  @keyframes bee-fly { from { transform: translate(-90px, 18px) rotate(-10deg); } to { transform: translate(90px, -18px) rotate(10deg); } }
+  .shot-egg { text-align: center; font: 800 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #ffffff; background: #00704a; padding: 10px 16px; border-radius: 999px; box-shadow: 0 0 0 3px #ffffff; animation: lucky 3s ease forwards; }
+  .shot-egg b { display: block; font-size: 22px; }
+  .boba-egg { position: absolute; inset: 0; display: grid; place-items: center; font: 700 22px "Fredoka", sans-serif; color: #5a3a2a; animation: oneup 3.2s ease forwards; }
+  .boba-egg i { position: absolute; top: -20px; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #7a5a48, #2a1810); animation: pearl-drop 1.4s cubic-bezier(0.5, 0, 0.8, 1) forwards; }
+  @keyframes pearl-drop { to { transform: translateY(140px); } }
+  .room-egg { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font: 26px "Special Elite", monospace; color: #e8d8c8; background: radial-gradient(circle, #3a1a14, #0a0303); animation: oneup 3.4s ease forwards; }
+  .room-egg b { display: block; font-size: 12px; font-weight: 400; color: #c02020; }
+  .room-egg span { animation: neon-glitch 3.4s steps(1); }
+  .swirl-egg { display: flex; align-items: center; gap: 10px; font: 700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #ff6a00; animation: oneup 3s ease forwards; }
+  .swirl-egg svg { width: 44px; height: 44px; animation: swirl-spin 1s linear 3; }
+  @keyframes swirl-spin { to { transform: rotate(360deg); } }
+  .angle-egg { display: flex; align-items: center; gap: 10px; font: 700 30px "Patrick Hand", cursive; color: #ffffff; animation: oneup 3s ease forwards; }
+  .angle-egg path { fill: none; stroke: #ffffff; stroke-width: 3; stroke-dasharray: 120; stroke-dashoffset: 120; animation: pi-draw 1.2s ease-out 0.2s forwards; }
+  .ring-egg { display: flex; align-items: center; gap: 10px; font: 700 28px "Rajdhani", sans-serif; color: #9bf00b; text-shadow: 0 0 10px #9bf00b; animation: oneup 3s ease forwards; }
+  .ring-egg svg { width: 46px; height: 46px; animation: swirl-spin 0.8s linear 3; }
+
+  /* Bigger hint button in each Egg hunt row */
+  .eggs .egg-more-btn { grid-column: 2 / 4; justify-self: start; margin-top: 4px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #ffe08a; background: rgba(255, 204, 51, 0.12); }
+  .eggs .egg-more-btn:hover { background: rgba(255, 204, 51, 0.22); }
+  .egg-more { grid-column: 2 / 4; margin-top: 4px; padding: 6px 10px; border-radius: 10px; font-size: 13px; line-height: 1.35; color: #fff4cf; background: rgba(255, 204, 51, 0.1); border-left: 3px solid #ffcc33; }
+  .egg-more[hidden] { display: none; }
 
   @media (prefers-reduced-motion: reduce) {
+    .mph-egg, .bee-egg i, .swirl-egg svg, .ring-egg svg, .pong-egg, .pong-egg::before, .pong-egg::after, .pong-egg i { animation: none; }
     .turbo-egg, .hot-egg, .neon-egg, .trident-egg i { animation: oneup 3s ease forwards; }
     .pi-egg circle { animation: none; stroke-dashoffset: 0; }
     .eggs-bar i, .eggs.bump .eggs-toggle, .egg-row.just-found, .egg-row.just-found .egg-svg, .sparkle { animation: none; }
@@ -3733,7 +3773,6 @@
     // Show the finished sum above the answer, e.g. "12 × 3 ="
     historyEl.textContent = `${withCommas(format(a))} ${SYMBOLS[op]} ${withCommas(format(b))} =`;
     addToTape(a, op, b, state.current);
-    if (state.current !== 'Error') trackSum();
   }
 
   function clearAll() {
@@ -3935,7 +3974,6 @@
 
     try { localStorage.setItem('calc-skin', skin.id); } catch {}
     render();
-    trackSkinVisit(skin);
   }
 
   function cycleSkin(step) {
@@ -4072,6 +4110,43 @@
   // Rooster Sauce: a million on the heat scale.
   NUMBER_EGGS.roostersauce = { at: '1000000', ms: 2800, html: () => '<div class="hot-egg">🔥 TOO HOT! 🔥<b>One million heat units</b></div>' };
 
+  // Round 3 number eggs
+  // Synthwave: the year of the time-travel car.
+  NUMBER_EGGS.synthwave = { at: '1985', ms: 3000, html: () => '<div class="mph-egg"><span>⚡ 88 MPH ⚡<b>BACK IN 1985</b></span></div>' };
+  // Pocket Brick: the year the handheld came out. Lines clear!
+  NUMBER_EGGS.pocketbrick = { at: '1989', ms: 3000, html: () => '<div class="lines-egg"><i></i><i></i><i></i><i></i><span>LINE CLEAR!</span></div>' };
+  // Grey Console: the year the grey box arrived.
+  NUMBER_EGGS.greyconsole = { at: '1994', ms: 3000, html: () => '<div class="start-egg"><span>PRESS START</span><b>SINCE 1994</b></div>' };
+  // Wood Panel: the year it came out. Bat and ball!
+  NUMBER_EGGS.woodpanel = { at: '1977', ms: 3200, html: () => '<div class="pong-egg"><b>1 &nbsp; 0</b><i></i></div>' };
+  // Chalkboard: full marks.
+  NUMBER_EGGS.chalkboard = { at: '100', ms: 3000, html: () => '<div class="chalk-egg">A+ ⭐<b>Full marks!</b></div>' };
+  // Boba Tea: a screen full of round pearls.
+  NUMBER_EGGS.bobatea = { at: '0.0000', ms: 3200, html: () => '<div class="boba-egg">' +
+    Array.from({ length: 16 }, () => `<i style="left:${4 + Math.random() * 90}%;animation-delay:${(Math.random() * 0.8).toFixed(2)}s"></i>`).join('') +
+    '<span>Extra pearls!</span></div>' };
+  // Foggy Town 4: the famous room.
+  NUMBER_EGGS.foggy4 = { at: '302', ms: 3400, html: () => '<div class="room-egg"><span>ROOM 302<b>the door is chained from the inside</b></span></div>' };
+  // Swirl Console: launched on a date of all nines.
+  NUMBER_EGGS.swirlconsole = { at: '9999', ms: 3000, html: () => '<div class="swirl-egg"><svg viewBox="0 0 40 40"><path d="M20 20m-2 0a2 2 0 1 1 4 0a6 6 0 1 1-12 0a10 10 0 1 1 20 0a14 14 0 1 1-28 0" fill="none" stroke="#ff6a00" stroke-width="3.5" stroke-linecap="round"/></svg><span>IT’S<br>THINKING…</span></div>' };
+  // Blueprint: a square corner.
+  NUMBER_EGGS.blueprint = { at: '90', ms: 3000, html: () => '<div class="angle-egg"><svg viewBox="0 0 50 50" width="50" height="50"><path d="M8 4V42H46M8 30H20V42"/></svg>90°</div>' };
+  // Green Machine: all the way round.
+  NUMBER_EGGS.greenmachine = { at: '360', ms: 3000, html: () => '<div class="ring-egg"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="none" stroke="#9bf00b" stroke-width="5" stroke-dasharray="70 25"/></svg>360°</div>' };
+
+  // Green Café: tap the screen 3 times quickly for a triple shot.
+  let cafeTaps = [];
+  document.querySelector('.screen').addEventListener('click', () => {
+    if (document.body.dataset.skin !== 'greencafe') return;
+    const t = Date.now();
+    cafeTaps = cafeTaps.filter(x => t - x < 1200).concat(t);
+    if (cafeTaps.length < 3) return;
+    cafeTaps = [];
+    showEgg('<div class="shot-egg"><b>☕☕☕</b>TRIPLE SHOT</div>', 3000);
+    playTune([659, 784, 988], 'sine');
+    eggFound('greencafe');
+  });
+
   // Turbo 16: hammer the equals button for a turbo boost.
   let equalsTaps = [];
   function turboCheck() {
@@ -4112,17 +4187,29 @@
   // Foggy Town 2: press and hold the screen. Something is out there…
   let fogTimer;
   const screenEl = document.querySelector('.screen');
-  screenEl.addEventListener('pointerdown', () => {
-    if (document.body.dataset.skin !== 'foggy2') return;
-    clearTimeout(fogTimer);
-    fogTimer = setTimeout(() => {
+  const HOLD_EGGS = {
+    foggy2: () => {
       showEgg('<div class="fog-egg"><span>…kssshhhh…<b>something is near</b></span></div>', 3400);
       playNoise(1.6, 'bandpass', 1800, 0.18);
-      eggFound('foggy2');
+    },
+    // Happy Bee: hold still like a flower and a bee lands.
+    happybee: () => {
+      showEgg('<div class="bee-egg"><i>🐝</i>BUZZ BUZZ!</div>', 3000);
+      playNoise(1.2, 'bandpass', 250, 0.15);
+    },
+  };
+  screenEl.addEventListener('pointerdown', () => {
+    const skin = document.body.dataset.skin;
+    if (!HOLD_EGGS[skin]) return;
+    clearTimeout(fogTimer);
+    fogTimer = setTimeout(() => {
+      if (document.body.dataset.skin !== skin) return;
+      HOLD_EGGS[skin]();
+      eggFound(skin);
     }, 1500);
   });
   ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => screenEl.addEventListener(ev, () => clearTimeout(fogTimer)));
-  screenEl.addEventListener('contextmenu', e => { if (document.body.dataset.skin === 'foggy2') e.preventDefault(); });
+  screenEl.addEventListener('contextmenu', e => { if (HOLD_EGGS[document.body.dataset.skin]) e.preventDefault(); });
 
   // ---------- More easter eggs ----------
   // Monster Dex: 151, a wild monster appears.
@@ -4298,7 +4385,6 @@
   function toggleTape() {
     tapeEl.hidden = !tapeEl.hidden;
     tapeBtn.setAttribute('aria-pressed', !tapeEl.hidden);
-    trackTape();
   }
 
   tapeBtn.addEventListener('click', toggleTape);
@@ -4323,7 +4409,6 @@
     const current = document.body.dataset.skin;
     const others = SKINS.filter(s => s.id !== current);
     setSkin(others[Math.floor(Math.random() * others.length)].id, 'right');
-    trackShuffle();
   }
   document.getElementById('shuffleBtn').addEventListener('click', shuffleSkin);
 
@@ -4388,60 +4473,92 @@
   // Every easter egg and achievement, with a hint that points the way without giving the answer.
   // (The gold skin stays a secret, so it is not on this list.)
   const EGGS = [
-    { id: 'flip',        name: 'Upside-Down Word',      skin: 'retro',        hint: 'Some words still make sense when turned around.' },
-    { id: 'died',        name: 'You Died',              skin: 'ashenrealm',   hint: 'Ask this world for something it cannot give.' },
-    { id: 'gameover',    name: 'Game Over',             skin: null,           hint: 'Every calculator has a few sums it cannot handle.' },
-    { id: 'ringworld',   name: 'Dropship Drop-off',     skin: 'ringworld',    hint: 'Every dropship has a call sign. Who is listening?' },
-    { id: 'terminal',    name: 'Access Granted',        skin: 'terminal',     hint: 'Some letters look a lot like digits on a screen.' },
-    { id: 'classiccola', name: 'Fizz!',                 skin: 'classiccola',  hint: 'This drink has been around a very long time.' },
-    { id: 'mazemuncher', name: 'Broken Level',          skin: 'mazemuncher',  hint: 'Some numbers keep doubling until something breaks.' },
-    { id: 'super16',     name: 'Cheat Code',            skin: 'super16',      hint: 'Gamers know a famous code. Needs a keyboard, not a phone.' },
-    { id: 'hello',       name: 'Say Hello',             skin: null,           hint: 'Old calculators could spell words, if you held them right.' },
-    { id: 'monsterdex',  name: 'Wild Monster',          skin: 'monsterdex',   hint: 'Count them all, starting with the first lot.' },
-    { id: 'eightbit',    name: 'Blow on the Cartridge', skin: 'eightbit',     hint: 'Old games glitched when someone gave them a nudge.' },
-    { id: 'modern',      name: 'Don’t Panic',           skin: 'modern',       hint: 'Deep thought needed: the answer to everything.' },
-    { id: 'cyberpunk',   name: 'Neon City',             skin: 'cyberpunk',    hint: 'This bright city lives in the future.' },
-    { id: 'graphing',    name: 'Round and Round',       skin: 'graphing',     hint: 'A number that never ends, and goes round.' },
-    { id: 'turbo16',     name: 'Turbo Boost',           skin: 'turbo16',      hint: 'Fast fingers get a bonus.' },
-    { id: 'trident64',   name: '64-Bit Power',          skin: 'trident64',    hint: 'Its name holds a clue to its power.' },
-    { id: 'pixelcraft',  name: 'Diamonds!',             skin: 'pixelcraft',   hint: 'Dig deep into the stone for something shiny.' },
-    { id: 'crystal7',    name: 'Lucky Sevens',          skin: 'crystal7',     hint: 'Lucky numbers can power up a hero.' },
-    { id: 'foggy2',      name: 'Something Is Near',     skin: 'foggy2',       hint: 'Stay very still and listen to the fog.' },
-    { id: 'silverpeak',  name: 'Stay Frosty',           skin: 'silverpeak',   hint: 'So cold that two thermometers agree.' },
-    { id: 'roostersauce', name: 'Too Hot!',             skin: 'roostersauce', hint: 'Turn the heat way, way up.' },
+    { id: 'flip',         name: 'Upside-Down Word',      skin: 'retro',         hint: 'Some words still make sense when turned around.',
+      more: 'The number printed on the case looks like a word upside down. Then flip it.' },
+    { id: 'died',         name: 'You Died',              skin: 'ashenrealm',    hint: 'Ask this world for something it cannot give.',
+      more: 'Try sharing a number between nobody at all.' },
+    { id: 'gameover',     name: 'Game Over',             skin: null,            hint: 'Every calculator has a few sums it cannot handle.',
+      more: 'Dividing by nothing never ends well. Try it on any skin but one.' },
+    { id: 'ringworld',    name: 'Dropship Drop-off',     skin: 'ringworld',     hint: 'Every dropship has a call sign. Who is listening?',
+      more: 'The famous dropship has a three-digit number. It starts with a 4.' },
+    { id: 'terminal',     name: 'Access Granted',        skin: 'terminal',      hint: 'Some letters look a lot like digits on a screen.',
+      more: 'Spell "LEET" using numbers that look like those letters.' },
+    { id: 'classiccola',  name: 'Fizz!',                 skin: 'classiccola',   hint: 'This drink has been around a very long time.',
+      more: 'The first cola was poured in the 1880s. Try the years.' },
+    { id: 'mazemuncher',  name: 'Broken Level',          skin: 'mazemuncher',   hint: 'Some numbers keep doubling until something breaks.',
+      more: 'Keep doubling from 2: 4, 8, 16… The broken level is a few steps on.' },
+    { id: 'super16',      name: 'Cheat Code',            skin: 'super16',       hint: 'Gamers know a famous code. Needs a keyboard, not a phone.',
+      more: 'Up, up, down, down… you probably know the rest. Arrow keys, then two letters.' },
+    { id: 'hello',        name: 'Say Hello',             skin: null,            hint: 'Old calculators could spell words, if you held them right.',
+      more: 'Type numbers that look like O, L, L, E, h. Start with 0 and a dot.' },
+    { id: 'monsterdex',   name: 'Wild Monster',          skin: 'monsterdex',    hint: 'Count them all, starting with the first lot.',
+      more: 'The very first Dex had just over 150 monsters.' },
+    { id: 'eightbit',     name: 'Blow on the Cartridge', skin: 'eightbit',      hint: 'Old games glitched when someone gave them a nudge.',
+      more: 'Give the screen a few quick taps in a row.' },
+    { id: 'modern',       name: 'Don’t Panic',           skin: 'modern',        hint: 'Deep thought needed: the answer to everything.',
+      more: 'A famous funny sci-fi book says the answer is a number in the 40s.' },
+    { id: 'cyberpunk',    name: 'Neon City',             skin: 'cyberpunk',     hint: 'This bright city lives in the future.',
+      more: 'Look at the top of this skin. The city’s year is printed there.' },
+    { id: 'graphing',     name: 'Round and Round',       skin: 'graphing',      hint: 'A number that never ends, and goes round.',
+      more: 'The circle number starts 3.14… Add a few more digits.' },
+    { id: 'turbo16',      name: 'Turbo Boost',           skin: 'turbo16',       hint: 'Fast fingers get a bonus.',
+      more: 'Hit the button that finishes a sum, again and again, really fast.' },
+    { id: 'trident64',    name: '64-Bit Power',          skin: 'trident64',     hint: 'Its name holds a clue to its power.',
+      more: 'Type the number in this console’s name.' },
+    { id: 'pixelcraft',   name: 'Diamonds!',             skin: 'pixelcraft',    hint: 'Dig deep into the stone for something shiny.',
+      more: 'Tap the screen again and again, like mining a block.' },
+    { id: 'crystal7',     name: 'Lucky Sevens',          skin: 'crystal7',      hint: 'Lucky numbers can power up a hero.',
+      more: 'This game is number seven. Three lucky ones in a row.' },
+    { id: 'foggy2',       name: 'Something Is Near',     skin: 'foggy2',        hint: 'Stay very still and listen to the fog.',
+      more: 'Press on the screen and don’t let go.' },
+    { id: 'silverpeak',   name: 'Stay Frosty',           skin: 'silverpeak',    hint: 'So cold that two thermometers agree.',
+      more: 'Celsius and Fahrenheit match at one freezing number below zero. Use ±.' },
+    { id: 'roostersauce', name: 'Too Hot!',              skin: 'roostersauce',  hint: 'Turn the heat way, way up.',
+      more: 'Type a really big round number: a one with six zeros.' },
+    { id: 'synthwave',    name: '88 MPH',                skin: 'synthwave',     hint: 'Some years just sound like neon.',
+      more: 'The mid-1980s, when a famous time-travel car hit the big screen.' },
+    { id: 'pocketbrick',  name: 'Line Clear',            skin: 'pocketbrick',   hint: 'Blocks first fell here.',
+      more: 'Type the year this handheld came out, near the end of the 1980s.' },
+    { id: 'greyconsole',  name: 'Press Start',           skin: 'greyconsole',   hint: 'Remember when this grey box arrived?',
+      more: 'Type the year it first came out. It’s in the mid-1990s.' },
+    { id: 'woodpanel',    name: 'Bat and Ball',          skin: 'woodpanel',     hint: 'The oldest console here. Remember its birthday?',
+      more: 'It came out in the late 1970s. Try those years.' },
+    { id: 'chalkboard',   name: 'Full Marks',            skin: 'chalkboard',    hint: 'Teachers love a perfect score.',
+      more: 'What is full marks out of a hundred?' },
+    { id: 'happybee',     name: 'Buzz Buzz',             skin: 'happybee',      hint: 'Bees like a flower that stays still.',
+      more: 'Rest your finger on the screen like a bee on a flower.' },
+    { id: 'greencafe',    name: 'Triple Shot',           skin: 'greencafe',     hint: 'Need more than one shot of coffee?',
+      more: 'Tap the screen quickly, once for each shot. Make it three.' },
+    { id: 'bobatea',      name: 'Extra Pearls',          skin: 'bobatea',       hint: 'Some numbers look like little pearls.',
+      more: 'Put a dot, then fill it up with round zeros.' },
+    { id: 'foggy4',       name: 'The Room',              skin: 'foggy4',        hint: 'Someone is locked inside their own room.',
+      more: 'It’s a famous room number: three-oh-something.' },
+    { id: 'swirlconsole', name: 'It’s Thinking',         skin: 'swirlconsole',  hint: 'This swirl launched on a very lucky date.',
+      more: 'Its launch date was written with only nines.' },
+    { id: 'blueprint',    name: 'Square Corner',         skin: 'blueprint',     hint: 'Every good plan needs square corners.',
+      more: 'How many degrees is the corner of a square?' },
+    { id: 'greenmachine', name: 'Full Spin',             skin: 'greenmachine',  hint: 'Spin all the way round.',
+      more: 'How many degrees are in one full turn?' },
   ];
-  // Achievements: rewards for playing, not one secret code.
-  const GOALS = [
-    { id: 'goal-eggs5',    name: 'Egg Hunter',   hint: 'A small basket is a good start.' },
-    { id: 'goal-eggsall',  name: 'Egg Master',   hint: 'Leave no shell unturned.' },
-    { id: 'goal-tour',     name: 'Grand Tour',   hint: 'Every family of machines is worth a visit.' },
-    { id: 'goal-sums',     name: 'Maths Club',   hint: 'Lots of machines, lots of maths.' },
-    { id: 'goal-tape',     name: 'Paper Trail',  hint: 'Some machines remember what you did.' },
-    { id: 'goal-shuffle',  name: 'Lucky Dip',    hint: 'Let luck pick your look, again and again.' },
-  ];
-  const ALL_EGGS = [...EGGS, ...GOALS];
   const eggsEl = document.getElementById('eggs');
   const eggsToggle = document.getElementById('eggsToggle');
   const eggsPanel = document.getElementById('eggsPanel');
   const eggList = document.getElementById('eggList');
   let foundEggs = [];
-  try { foundEggs = JSON.parse(localStorage.getItem('calc-eggs')) || []; } catch {}
-  // What counts toward the achievements: categories visited, skins with a sum done, shuffles
-  let stats = { cats: [], sumSkins: [], shuffles: 0 };
-  try { stats = { ...stats, ...JSON.parse(localStorage.getItem('calc-stats')) }; } catch {}
+  try { foundEggs = (JSON.parse(localStorage.getItem('calc-eggs')) || []).filter(id => !id.startsWith('goal-')); } catch {}
+  try { localStorage.removeItem('calc-stats'); } catch {}  // old achievement progress, no longer used
 
   function eggIcon() {
     return '<svg class="egg-svg" viewBox="0 0 40 48" aria-hidden="true"><path class="shell" d="M20 3C11 3 4 18 4 29a16 16 0 0 0 32 0C36 18 29 3 20 3Z"/><path class="spots" d="M9 30q11 5 22 0" fill="none" stroke="#fff3b0" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/><ellipse class="shine" cx="14" cy="18" rx="3.5" ry="6" fill="#fffbe6" opacity="0.85" transform="rotate(18 14 18)"/><text class="q" x="20" y="35" text-anchor="middle">?</text></svg>';
-  }
-  function trophyIcon() {
-    return '<svg class="trophy-svg" viewBox="0 0 40 42" aria-hidden="true"><path d="M11 4h18v9a9 9 0 0 1-18 0zM11 7H4q0 9 8 10M29 7h7q0 9-8 10M17 22h6v8h-6zM11 30h18v6H11z"/></svg>';
   }
 
   function rowHTML(item, icon, chip) {
     return `<li class="egg-row" data-egg="${item.id}">${icon}
         <span class="egg-name">${item.name} ${chip}</span>
         <span class="egg-hint">${item.hint}</span>
-        <span class="egg-tick" aria-label="Found">✓</span></li>`;
+        <span class="egg-tick" aria-label="Found">✓</span>
+        <button class="egg-more-btn" aria-expanded="false">💡 Bigger hint</button>
+        <span class="egg-more" hidden>${item.more}</span></li>`;
   }
 
   function buildEggs() {
@@ -4452,28 +4569,25 @@
         : '<span class="egg-skin">Any skin</span>';
       return rowHTML(egg, eggIcon(), chip);
     }).join('');
-    const goalRows = GOALS.map(goal => rowHTML(goal, trophyIcon(), '')).join('');
-    eggList.innerHTML = `<h3 class="eggs-group">🥚 Eggs</h3><ol class="egg-list">${eggRows}</ol>
-      <h3 class="eggs-group">🏆 Achievements</h3><ol class="egg-list">${goalRows}</ol>`;
+    eggList.innerHTML = `<ol class="egg-list">${eggRows}</ol>`;
     updateEggs();
   }
 
   function updateEggs() {
-    let count = 0, eggCount = 0;
+    let count = 0;
     eggList.querySelectorAll('.egg-row').forEach(row => {
       const found = foundEggs.includes(row.dataset.egg);
       row.classList.toggle('found', found);
       if (found) count++;
-      if (found && !row.dataset.egg.startsWith('goal-')) eggCount++;
     });
-    document.getElementById('eggsCount').textContent = `${count} / ${ALL_EGGS.length}`;
-    document.getElementById('eggsBar').style.width = `${count / ALL_EGGS.length * 100}%`;
-    document.getElementById('eggsSecret').hidden = eggCount < EGGS.length;
-    eggsToggle.setAttribute('aria-label', `Egg hunt: ${count} of ${ALL_EGGS.length} found`);
+    document.getElementById('eggsCount').textContent = `${count} / ${EGGS.length}`;
+    document.getElementById('eggsBar').style.width = `${count / EGGS.length * 100}%`;
+    document.getElementById('eggsSecret').hidden = count < EGGS.length;
+    eggsToggle.setAttribute('aria-label', `Egg hunt: ${count} of ${EGGS.length} found`);
   }
 
   function eggFound(id) {
-    const item = ALL_EGGS.find(e => e.id === id);
+    const item = EGGS.find(e => e.id === id);
     if (!item || foundEggs.includes(id)) return;
     foundEggs.push(id);
     try { localStorage.setItem('calc-eggs', JSON.stringify(foundEggs)); } catch {}
@@ -4494,45 +4608,10 @@
     eggsEl.classList.remove('bump');
     void eggsEl.offsetWidth;
     eggsEl.classList.add('bump');
-    const isGoal = id.startsWith('goal-');
-    // Two finds at once (an egg and the achievement it completes): show them one after the other
-    const wait = 600 + (isGoal ? 2000 : 0);
-    setTimeout(() => toast(isGoal ? `🏆 Achievement unlocked: ${item.name}!` : `🥚 Golden egg found: ${item.name}!`), wait);
-    setTimeout(() => playTune([784, 988, 1175, 1568], 'triangle'), wait + 50);
-    if (!isGoal) checkGoals();
+    setTimeout(() => toast(`🥚 Golden egg found: ${item.name}!`), 600);
+    setTimeout(() => playTune([784, 988, 1175, 1568], 'triangle'), 650);
   }
 
-  function saveStats() {
-    try { localStorage.setItem('calc-stats', JSON.stringify(stats)); } catch {}
-  }
-  function checkGoals() {
-    const eggCount = foundEggs.filter(id => !id.startsWith('goal-')).length;
-    if (eggCount >= 5) eggFound('goal-eggs5');
-    if (eggCount >= EGGS.length) eggFound('goal-eggsall');
-    if (['Classic', 'Consoles', 'Food & Drink', 'Games'].every(c => stats.cats.includes(c))) eggFound('goal-tour');
-    if (stats.sumSkins.length >= 12) eggFound('goal-sums');
-    if (stats.shuffles >= 10) eggFound('goal-shuffle');
-  }
-  // Called from setSkin, equals, shuffle and the tape
-  function trackSkinVisit(skin) {
-    if (!skin || skin.cat === 'Secret' || stats.cats.includes(skin.cat)) return;
-    stats.cats.push(skin.cat);
-    saveStats();
-    checkGoals();
-  }
-  function trackSum() {
-    const id = document.body.dataset.skin;
-    if (!stats.sumSkins.includes(id)) { stats.sumSkins.push(id); saveStats(); checkGoals(); }
-    trackTape();
-  }
-  function trackShuffle() {
-    stats.shuffles++;
-    saveStats();
-    checkGoals();
-  }
-  function trackTape() {
-    if (!tapeEl.hidden && tape.length >= 3) eggFound('goal-tape');
-  }
 
   eggsToggle.addEventListener('click', () => {
     const open = eggsPanel.hidden;
@@ -4540,6 +4619,14 @@
     eggsToggle.setAttribute('aria-expanded', open);
   });
   eggList.addEventListener('click', e => {
+    const moreBtn = e.target.closest('.egg-more-btn');
+    if (moreBtn) {
+      const more = moreBtn.nextElementSibling;
+      more.hidden = !more.hidden;
+      moreBtn.setAttribute('aria-expanded', !more.hidden);
+      moreBtn.textContent = more.hidden ? '💡 Bigger hint' : '💡 Hide bigger hint';
+      return;
+    }
     const chip = e.target.closest('button.egg-skin');
     if (!chip) return;
     setSkin(chip.dataset.skin, 'right');
@@ -4548,12 +4635,10 @@
   document.getElementById('eggsReset').addEventListener('click', () => {
     if (!confirm('Hide all the eggs again and start a new hunt?')) return;
     foundEggs = [];
-    stats = { cats: [], sumSkins: [], shuffles: 0 };
-    try { localStorage.removeItem('calc-eggs'); localStorage.removeItem('calc-stats'); } catch {}
+    try { localStorage.removeItem('calc-eggs'); } catch {}
     updateEggs();
   });
   buildEggs();
-  setTimeout(checkGoals, 800);  // older saves may already qualify
 
   let savedSkin = 'modern';
   try { savedSkin = localStorage.getItem('calc-skin') || 'modern'; } catch {}
