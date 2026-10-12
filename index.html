@@ -2759,11 +2759,11 @@
 
   /* ---------- Extras bar: shuffle, copy, tape, sound, keys ---------- */
   .extras {
-    display: flex;
-    justify-content: space-between;
-    gap: 4px;
-    padding: 4px;
-    border-radius: 999px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 2px;
+    padding: 6px 8px;
+    border-radius: 22px;  /* a soft box, not a full pill, so the ends never cut into the buttons */
   }
   .extras, .tape, .help-card, .toast {
     background: rgba(18, 18, 24, 0.78);
@@ -2783,15 +2783,23 @@
     transition: background 0.15s, transform 0.12s cubic-bezier(0.3, 1.6, 0.5, 1);
   }
   .extras button {
-    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1px;
-    padding: 6px 0 5px;
-    border-radius: 18px;
+    padding: 6px 2px 5px;
+    border-radius: 16px;
+    font-size: 12px;
+    white-space: nowrap;
   }
   .extras button span { font-size: 18px; line-height: 1.1; }
+  .extras-2 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  /* Very narrow phones: smaller labels so "Shuffle" still fits its box */
+  @media (max-width: 340px) {
+    .extras button { font-size: 11px; }
+    .extras button span { font-size: 16px; }
+  }
   .extras button:hover, .tape button:hover, .help-card button:hover { background: rgba(255, 255, 255, 0.12); }
   .extras button:active, .tape button:active { transform: scale(0.9); }
   .extras button[aria-pressed="true"] { background: rgba(255, 255, 255, 0.18); }
@@ -3324,7 +3332,7 @@
   .paint-card button { padding: 6px 14px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
   .toast { white-space: normal; max-width: min(92vw, 380px); text-align: center; }
   /* ---------- Games menu: a drop-down list of mini games ---------- */
-  .games { border-radius: 18px; overflow: hidden; background: rgba(18, 18, 24, 0.78); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.1); color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .games { margin: 6px 0; border-radius: 18px; overflow: hidden; background: rgba(18, 18, 24, 0.78); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.1); color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
   .games button { font-family: inherit; color: inherit; background: transparent; box-shadow: none; height: auto; border: 0; cursor: pointer; }
   .games-toggle { width: 100%; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 18px; text-align: left; font-size: 15px; font-weight: 700; }
   .games-toggle:hover { background: rgba(255, 255, 255, 0.06); }
@@ -3813,6 +3821,18 @@
       </div>
     </main>
 
+    <section class="games" id="games" aria-label="Games">
+      <button class="games-toggle" id="gamesToggle" aria-expanded="false" aria-controls="gamesPanel">
+        <span aria-hidden="true">🎮</span>
+        <span>Games</span>
+        <span class="games-caret" aria-hidden="true">▾</span>
+      </button>
+      <div class="games-panel" id="gamesPanel" hidden>
+        <ul class="game-list" id="gameList"></ul>
+        <p class="games-soon">More games coming soon.</p>
+      </div>
+    </section>
+
     <div class="extras" role="toolbar" aria-label="Extras">
       <button id="shuffleBtn" title="Random skin ( S )"><span aria-hidden="true">🎲</span>Shuffle</button>
       <button id="copyBtn" title="Copy the answer ( C )"><span aria-hidden="true">📋</span>Copy</button>
@@ -3836,17 +3856,6 @@
       <div class="tape-empty" id="tapeEmpty">Your sums will show up here. Tap one to use the answer again.</div>
     </section>
 
-    <section class="games" id="games" aria-label="Games">
-      <button class="games-toggle" id="gamesToggle" aria-expanded="false" aria-controls="gamesPanel">
-        <span aria-hidden="true">🎮</span>
-        <span>Games</span>
-        <span class="games-caret" aria-hidden="true">▾</span>
-      </button>
-      <div class="games-panel" id="gamesPanel" hidden>
-        <ul class="game-list" id="gameList"></ul>
-        <p class="games-soon">More games coming soon.</p>
-      </div>
-    </section>
 
     <section class="eggs" id="eggs" aria-label="Egg hunt">
       <button class="eggs-toggle" id="eggsToggle" aria-expanded="false" aria-controls="eggsPanel">
