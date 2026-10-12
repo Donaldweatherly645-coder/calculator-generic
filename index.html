@@ -5305,9 +5305,11 @@
     document.getElementById('wavesIcon').textContent = wavesOn ? '〰' : '🖼️';
     cancelAnimationFrame(wavesFrame);
     wavesFrame = 0;
-    if (!wavesOn) return;
+    if (!wavesOn) { syncEdges(); return; }
     wavesPal = wavesPalette();
-    document.body.style.setProperty('--waves-sky', wavesPal.top);
+    wavesCtx.fillStyle = wavesPal.top;  // the canvas hands it back as #rrggbb, which phones accept as theme-color
+    document.body.style.setProperty('--waves-sky', wavesCtx.fillStyle);
+    syncEdges();
     sizeWaves();
     if (stillMotion.matches || document.hidden) drawWaves(8000);
     else wavesFrame = requestAnimationFrame(loopWaves);
@@ -5382,11 +5384,13 @@
       else if (ch === ',' && depth === 0) start = i + 1;
     });
     const colours = bg.slice(start).match(/#[0-9a-f]{3,8}\b|rgba?\([^)]*\)/gi);
-    const edge = colours ? colours[colours.length - 1] : '#0d0f17';
+    // With the animated background on, the edges match its dark sky instead.
+    const wavesSky = document.body.classList.contains('waves') && document.body.style.getPropertyValue('--waves-sky');
+    const edge = wavesSky || (colours ? colours[colours.length - 1] : '#0d0f17');
     document.documentElement.style.backgroundColor = edge;
     if (themeMeta) themeMeta.setAttribute('content', edge);
     // The phone's clock is drawn in white, so light skins get a soft shade behind it.
-    document.documentElement.classList.toggle('light-top', colours ? isLight(colours[0]) : false);
+    document.documentElement.classList.toggle('light-top', !wavesSky && colours ? isLight(colours[0]) : false);
   }
   function isLight(colour) {
     let r, g, b;
