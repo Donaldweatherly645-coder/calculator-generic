@@ -3300,7 +3300,7 @@
     letter-spacing: 0.04em;
     word-spacing: 0.1em;
   }
-  body.easy-read .keys button { font-family: "Atkinson Hyperlegible", Arial, sans-serif !important; font-weight: 700; font-size: 1.15em; }
+  body.easy-read .keys button { font-family: "Atkinson Hyperlegible", Arial, sans-serif !important; font-weight: 700; font-size: 24px; height: 74px; }
   body.easy-read .keys button, body.easy-read .extras button { text-shadow: none; }
   body.easy-read .history { font-size: 1.05em; }
   .new-egg { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; text-align: center; padding: 12px; font: 700 20px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #ffffff; background: rgba(0, 0, 0, 0.55); pointer-events: none; }
@@ -3322,6 +3322,7 @@
   .paint-card input[type="color"] { width: 56px; height: 32px; border: 0; background: none; padding: 0; cursor: pointer; }
   .paint-card .paint-row { display: flex; gap: 8px; justify-content: flex-end; }
   .paint-card button { padding: 6px 14px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: #ffffff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .toast { white-space: normal; max-width: min(92vw, 380px); text-align: center; }
 </style>
 </head>
 <body data-skin="modern">
@@ -4250,7 +4251,7 @@
     return SKINS.findIndex(s => s.id === id);
   }
 
-  function setSkin(id, direction) {
+  function setSkin(id, direction, remember = true) {
     const skin = findSkin(id) || SKINS[0];
     const changed = document.body.dataset.skin !== skin.id;
     document.body.dataset.skin = skin.id;
@@ -4278,7 +4279,7 @@
       calcEl.classList.add('switching');
     }
 
-    try { localStorage.setItem('calc-skin', skin.id); } catch {}
+    if (remember) try { localStorage.setItem('calc-skin', skin.id); } catch {}
     render();
   }
 
@@ -5136,10 +5137,12 @@
   let daily = {};
   try { daily = JSON.parse(localStorage.getItem('calc-daily')) || {}; } catch {}
   function saveDaily() {
-    try { localStorage.setItem('calc-daily', JSON.stringify(daily)); } catch {}
+    try { localStorage.setItem('calc-daily', JSON.stringify(daily)); }
+    catch { toast('⚠️ Could not save on this device'); }
   }
   function dayKey(offset = 0) {
-    const d = new Date(Date.now() - offset * 86400000);
+    const d = new Date();
+    d.setDate(d.getDate() - offset);  // calendar maths, so daylight saving can't shift the day
     return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
   }
   function dailyTarget(key) {
@@ -5149,12 +5152,14 @@
   }
   function dailyInfo() {
     const today = dayKey();
-    const streak = daily.streak || 0;
+    const streak = daily.last === today || daily.last === dayKey(1) ? daily.streak || 0 : 0;
     if (daily.last === today) return `✅ Done today! Streak: ${streak} day${streak === 1 ? '' : 's'}`;
     return `📅 Today's number is ${dailyTarget(today)}. Reach it with a sum, then press =. Streak: ${streak}`;
   }
   function checkDaily(value) {
     const today = dayKey();
+    // Another tab may have solved a puzzle since this one loaded, so read the latest record first.
+    try { const stored = JSON.parse(localStorage.getItem('calc-daily')); if (stored && stored.last) daily = stored; } catch {}
     if (daily.last === today || value !== dailyTarget(today)) return;
     daily.streak = daily.last === dayKey(1) ? (daily.streak || 0) + 1 : 1;
     daily.last = today;
@@ -5173,7 +5178,8 @@
   }
   easyBtn.addEventListener('click', () => {
     easyRead = !easyRead;
-    try { localStorage.setItem('calc-easy', easyRead ? 'on' : 'off'); } catch {}
+    try { localStorage.setItem('calc-easy', easyRead ? 'on' : 'off'); }
+    catch { toast('⚠️ Could not save on this device'); }
     applyEasy();
     toast(easyRead ? '🔤 Easy read on' : 'Easy read off');
   });
@@ -5189,13 +5195,15 @@
     if (m >= 3 && m <= 5) return 'springbloom';
     if (m >= 6 && m <= 8) return 'beachday';
     if ((m === 9) || (m === 10 && day < 20) || (m === 11)) return 'autumnleaves';
+    if (m === 2 || (m === 1 && day >= 6)) return 'wintermint';
     return null;
   }
 
   let savedSkin = null;
   try { savedSkin = localStorage.getItem('calc-skin'); } catch {}
-  setSkin(savedSkin || seasonalSkin() || 'modern');
-  if (!savedSkin) { try { localStorage.removeItem('calc-skin'); } catch {} }  // a seasonal pick is not a saved choice
+  // 'modern' was saved automatically by earlier versions, so it no longer counts as a choice.
+  const chosen = savedSkin && savedSkin !== 'modern' ? savedSkin : null;
+  setSkin(chosen || seasonalSkin() || 'modern', null, !!chosen);
 
   // Phone install: save a copy for offline use (only works on a real website, not a file).
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
