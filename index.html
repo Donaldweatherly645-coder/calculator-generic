@@ -5914,9 +5914,10 @@
   const SP_LATE_STEP = 1.04;
   // Each level adds a kind of sum: Easy + −, Medium adds ×, Hard adds ÷.
   const SP_LEVELS = {
-    easy: { icon: '🌱', name: 'Easy', fall: 11, every: 6, ops: ['add', 'sub'] },
-    medium: { icon: '🚀', name: 'Medium', fall: 12, every: 6, ops: ['add', 'sub', 'mul'] },
-    hard: { icon: '🌟', name: 'Hard', fall: 14, every: 7, ops: ['add', 'sub', 'mul', 'div'] },
+    // quick = an answer in this many seconds (or less) counts as fast
+    easy: { icon: '🌱', name: 'Easy', fall: 11, every: 6, quick: 3, ops: ['add', 'sub'] },
+    medium: { icon: '🚀', name: 'Medium', fall: 12, every: 6, quick: 4, ops: ['add', 'sub', 'mul'] },
+    hard: { icon: '🌟', name: 'Hard', fall: 14, every: 7, quick: 5, ops: ['add', 'sub', 'mul', 'div'] },
   };
   // time = how much extra time that kind of sum gets; eg = examples for each level
   const SP_MODES = {
@@ -5980,11 +5981,24 @@
   // harder than the others (as if it were 3 waves later, and the bigger of 2 tries), but
   // still inside the level. Solve it for a prize. Missing a box costs no life.
   const SP_BOX_CHANCE = 0.15;  // chance that a new arrival is a box (after the first few rocks)
-  const SP_FREEZE = 5;         // seconds the freeze prize stops the rocks
-  function spaceBoxSum(mode, level, wave) {
-    const tries = [0, 1].map(() => spaceSum(mode, level, wave + 3));
+  const SP_SLOW = 3;           // seconds the slow-mo prize lasts
+  const SP_SLOW_BY = 0.75;     // slow-mo: rocks on screen move at 3/4 speed
+  // The bigger of 2 sums: harder, but still inside the level
+  function spBigger(mode, level, wave) {
+    const tries = [0, 1].map(() => spaceSum(mode, level, wave));
     return tries.reduce((a, b) => (+b.ans > +a.ans ? b : a));
   }
+  const spaceBoxSum = (mode, level, wave) => spBigger(mode, level, wave + 3);
+  // Fast answers push the game on: each one makes the rocks a little faster (never slower),
+  // and a run of them makes the sums harder. A slow answer eases the sums back again.
+  // Losing a heart gives a short breather: the rocks slow down, then speed back up.
+  const SP_BOOST_STEP = 0.04;  // each fast answer: rocks 4% faster…
+  const SP_BOOST_MAX = 1.4;    // …up to 40% faster than the wave's own pace
+  const SP_TOP_SPEED = 3.2;    // the speed cap: never more than 3.2× wave 1, however good you are
+  const SP_HOT_MAX = 4;        // fast answers in a row (net) that give the hardest sums
+  const SP_EASE = 4;           // seconds of breather after losing a heart…
+  const SP_EASE_BY = 0.65;     // …at 65% speed, easing back to full speed over the last 1.5 s
+  const spEase = left => left <= 0 ? 1 : left >= 1.5 ? SP_EASE_BY : SP_EASE_BY + (1 - SP_EASE_BY) * (1 - left / 1.5);
 
   const spaceSums = {
     calm: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -6033,7 +6047,7 @@
       this.mode = mode;
       try { localStorage.setItem('calc-space-mode', mode); } catch {}
       const level = this.level, L = SP_LEVELS[level], m = spTime(mode, level);
-      Object.assign(this, { level, L, fall: L.fall * m, every: L.every * m, score: 0, wave: 1, lives: SP_LIVES, spawned: 0, freeze: 0, rocks: [], bits: [], rings: [], beam: null, shake: null,
+      Object.assign(this, { level, L, fall: L.fall * m, every: L.every * m, score: 0, wave: 1, lives: SP_LIVES, spawned: 0, slow: 0, ease: 0, boost: 1, hot: 0, clock: 0, askedAt: 0, quick: L.quick * m, rocks: [], bits: [], rings: [], beam: null, shake: null,
         banner: { text: 'WAVE 1', sub: 'Get ready!', t: 0 },
         hurt: 0, typed: '', misses: 0, target: null, sinceSpawn: 99, paused: false, over: false, last: '' });
       this.body.innerHTML = `
@@ -6097,7 +6111,10 @@
       const box = this.spawned >= 3 && !this.rocks.some(r => r.box) && Math.random() < SP_BOX_CHANCE;
       this.spawned++;
       let sum;
-      do sum = box ? spaceBoxSum(this.mode, this.level, this.wave) : spaceSum(this.mode, this.level, this.wave); while (sum.text === this.last);
+      const w = this.wave + this.hot;  // fast players get the sums of a later wave
+      const make = () => box ? spaceBoxSum(this.mode, this.level, w)
+        : this.hot >= SP_HOT_MAX ? spBigger(this.mode, this.level, w) : spaceSum(this.mode, this.level, w);
+      do sum = make(); while (sum.text === this.last);
       this.last = sum.text;
       // each rock sways gently side to side as it falls, like a leaf
       this.rocks.push({ box, x, x0: x, sway: 0.04 + Math.random() * 0.04, wob: 0.6 + Math.random() * 0.5, ph: Math.random() * 6.28, t: 0, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
@@ -6110,20 +6127,23 @@
       this.target = this.rocks.reduce((a, r) => (!a || r.p > a.p ? r : a), null);
       this.typed = '';
       this.misses = 0;
+      this.askedAt = this.clock;  // to time the answer
       this.showSum();
       if (this.target?.box) this.say('🎁 Mystery box! Solve it for a prize!');
     },
     update(dt) {
-      const pace = spPace(this.wave);  // 10% faster each wave
-      this.freeze = Math.max(0, this.freeze - dt);
-      const speed = this.freeze ? 0 : pace / this.fall;  // the freeze prize stops everything
-      if (!this.freeze) this.sinceSpawn += dt;
+      this.clock += dt;
+      this.slow = Math.max(0, this.slow - dt);
+      this.ease = Math.max(0, this.ease - dt);
+      // 10% faster each wave, plus the fast-answer boost, never past the cap; slower for a moment after a hit
+      const pace = Math.min(SP_TOP_SPEED, spPace(this.wave) * this.boost) * spEase(this.ease);
+      const speed = pace / this.fall;
+      this.sinceSpawn += dt;
       // an empty sky gets a new rock almost at once; otherwise one every `every` seconds
       if (this.sinceSpawn >= (this.rocks.length ? this.every : 0.8) / pace) this.spawn();
       for (const r of [...this.rocks]) {
         if (this.over) break;
-        r.p += dt * speed;
-        if (this.freeze) continue;
+        r.p += dt * speed * (this.slowed(r) ? SP_SLOW_BY : 1);  // slow-mo only reaches rocks on screen
         r.spin += dt * r.turn;
         r.t += dt;
         if (!this.calm) r.x = Math.min(0.95, Math.max(0.05, r.x0 + Math.sin(r.t * r.wob + r.ph) * r.sway));
@@ -6149,8 +6169,14 @@
           size: 3 + Math.random() * 4, colour: colours[i % colours.length] });
       }
     },
+    slowed(r) { return this.slow > 0 && this.rockAt(r).y >= 0; },
     zap() {
       const r = this.target;
+      // a fast answer (with no wrong tries) speeds things up and makes the sums harder; a slow one eases the sums
+      if (!this.misses && this.clock - this.askedAt <= this.quick) {
+        this.boost = Math.min(SP_BOOST_MAX, this.boost + SP_BOOST_STEP);
+        this.hot = Math.min(SP_HOT_MAX, this.hot + 1);
+      } else this.hot = Math.max(0, this.hot - 1);
       this.beam = { at: this.rockAt(r), life: 0.4 };
       // the explosion: sparkles, a ring that grows and fades, and a small wobble of the screen
       this.burst(r, [r.colour, '#ffffff', '#ffd75e'], 28, 120);
@@ -6166,14 +6192,15 @@
       this.drawHud();
       this.pickTarget();
     },
-    // The mystery box prizes: an extra life (only when one is missing), freeze or blast.
+    // The mystery box prizes: an extra life (only when one is missing), slow-mo (one at a time) or blast.
     prize() {
-      const prizes = ['freeze', 'blast'];
+      const prizes = ['blast'];
+      if (!this.slow) prizes.push('slow');
       if (this.lives < SP_LIVES) prizes.push('life');
       const pick = prizes[rnd(0, prizes.length - 1)];
       let text, sub;
       if (pick === 'life') { this.lives++; text = '❤️ EXTRA LIFE'; sub = 'You got a life back!'; }
-      else if (pick === 'freeze') { this.freeze = SP_FREEZE; text = '❄️ FREEZE'; sub = `Rocks stop for ${SP_FREEZE} seconds!`; }
+      else if (pick === 'slow') { this.slow = SP_SLOW; text = '🐢 SLOW-MO'; sub = `Rocks slow down for ${SP_SLOW} seconds!`; }
       else {
         const gone = this.rocks.length;
         for (const r of this.rocks) {
@@ -6213,10 +6240,11 @@
       this.rocks = this.rocks.filter(x => x !== r);
       this.lives--;
       this.hurt = 0.8;
+      this.ease = SP_EASE;  // a short breather
       spTone(196, 'sine', 0.25, 0.06);
       this.drawHud();
       if (this.lives <= 0) { this.end(); return; }
-      const left = `${this.lives} ${this.lives === 1 ? 'life' : 'lives'} left`;
+      const left = `${this.lives} ${this.lives === 1 ? 'life' : 'lives'} left. Rocks slow down for a moment`;
       this.say(r === this.target ? `Bonk! ${r.sum.text} = ${r.sum.ans}. ${left}` : `Bonk! ${left}`);
       this.pickTarget();
     },
@@ -6381,9 +6409,9 @@
       this.drawShip(18 + this.shipX * (W - 36), this.shipTop(), time);
       g.restore();
       if (this.banner) this.drawBanner(this.banner);
-      if (this.freeze) {
+      if (this.slow) {
         g.fillStyle = '#bfe9ff'; g.textAlign = 'left'; g.textBaseline = 'top';
-        g.font = `800 18px ${this.font}`; g.fillText(`❄️ ${Math.ceil(this.freeze)}`, 10, 10);
+        g.font = `800 18px ${this.font}`; g.fillText(`🐢 ${Math.ceil(this.slow)}`, 10, 10);
       }
       if (this.paused) {
         g.fillStyle = 'rgba(0, 0, 0, 0.45)'; g.fillRect(0, 0, W, H);
@@ -6451,7 +6479,7 @@
       g.strokeStyle = '#2b2140'; g.lineWidth = 2.5; g.lineCap = 'round';
       g.beginPath(); g.arc(0, R * 0.08, R * 0.24, 0.2 * Math.PI, 0.8 * Math.PI); g.stroke();
       }
-      if (this.freeze) {  // frosty while frozen
+      if (this.slowed(r)) {  // a blue ring while slow-mo holds it
         g.strokeStyle = 'rgba(190, 235, 255, 0.9)'; g.lineWidth = 4;
         g.beginPath(); g.arc(0, 0, R + 2, 0, Math.PI * 2); g.stroke();
       }
