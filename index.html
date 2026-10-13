@@ -5967,16 +5967,24 @@
     const ans = op === '+' ? a + b : op === '−' ? a - b : op === '×' ? a * b : a / b;
     return { a, b, op, text: `${a} ${op} ${b}`, ans: String(ans) };
   }
+  // Combo: right answers in a row raise the multiplier (×2 at 5, ×3 at 10 … ×5 at 20).
+  // A wrong answer or a hit resets it. Each zap scores 10 × the multiplier.
+  const SP_POINTS = 10;
+  const SP_COMBO_STEP = 5;
+  const SP_COMBO_MAX = 5;
+  const spMult = combo => Math.min(SP_COMBO_MAX, 1 + Math.floor(combo / SP_COMBO_STEP));
+  // Scores are saved under calc-space2- since combo points began (older scores counted 1 a rock).
+  const SP_KEY = 'calc-space2-';
   // The arcade score table: the top 5 for each level, saved on this device.
   // key is mode-level, like add-easy
   function spTable(key) {
     try {
-      const list = JSON.parse(localStorage.getItem('calc-space-top-' + key) || '[]');
+      const list = JSON.parse(localStorage.getItem(SP_KEY + 'top-' + key) || '[]');
       return Array.isArray(list) ? list.filter(e => e && Number.isFinite(e.s)).map(e => ({ n: String(e.n || '').replace(/[^A-Z0-9]/g, '').slice(0, 3) || '???', s: e.s })).slice(0, 5) : [];
     } catch { return []; }
   }
   function spSaveTable(key, list) {
-    try { localStorage.setItem('calc-space-top-' + key, JSON.stringify(list.slice(0, 5))); } catch { toast('⚠️ Could not save on this device'); }
+    try { localStorage.setItem(SP_KEY + 'top-' + key, JSON.stringify(list.slice(0, 5))); } catch { toast('⚠️ Could not save on this device'); }
   }
   const spMakesTable = (key, score) => score > 0 && (spTable(key).length < 5 || score > spTable(key)[4].s);
   // Mystery boxes: now and then a gold gift box floats down instead of a rock. Its sum is
@@ -6011,7 +6019,7 @@
       this.card.classList.add('sp-card');
       this.home();
     },
-    best(mode, level) { return loadNum(`calc-space-${mode}-${level}`); },
+    best(mode, level) { return loadNum(`${SP_KEY}${mode}-${level}`); },
     home(note = '') {
       this.halt();
       if (!this.level) {
@@ -6020,7 +6028,7 @@
       }
       this.body.innerHTML = `
         ${note}
-        <p class="game-how">Space rocks are flying at your ship! Answer the sum on the rock with the yellow ring, and your ship zaps it. You have 3 lives ❤️. Every wave the rocks get faster and the sums bigger. 🚀</p>
+        <p class="game-how">Space rocks are flying at your ship! Answer the sum on the rock with the yellow ring, and your ship zaps it. You have 3 lives ❤️. Get answers right in a row for a 🔥 combo and more points. Every wave the rocks get faster and the sums bigger. 🚀</p>
         <div class="sp-step">1. Pick a level</div>
         <div class="sp-modes sp-lvls" role="radiogroup" aria-label="Level">${Object.entries(SP_LEVELS).map(([id, l]) => `
           <button class="sp-mode ${id}" role="radio" aria-checked="${id === this.level}" data-level="${id}"><span aria-hidden="true">${l.icon}</span>${l.name}<small>${l.ops.map(op => SP_OPS[op]).join(' ')}</small></button>`).join('')}</div>
@@ -6050,7 +6058,7 @@
       this.mode = mode;
       try { localStorage.setItem('calc-space-mode', mode); } catch {}
       const level = this.level, L = SP_LEVELS[level], m = spTime(mode, level);
-      Object.assign(this, { level, L, fall: L.fall * m, every: L.every * m, score: 0, wave: 1, lives: SP_LIVES, spawned: 0, slow: 0, ease: 0, boost: 1, hot: 0, clock: 0, askedAt: 0, quick: L.quick * m, rocks: [], bits: [], rings: [], beam: null, shake: null,
+      Object.assign(this, { level, L, fall: L.fall * m, every: L.every * m, score: 0, wave: 1, lives: SP_LIVES, spawned: 0, zaps: 0, combo: 0, comboPop: 0, slow: 0, ease: 0, boost: 1, hot: 0, clock: 0, askedAt: 0, quick: L.quick * m, rocks: [], bits: [], rings: [], beam: null, shake: null,
         banner: { text: 'WAVE 1', sub: 'Get ready!', t: 0 },
         hurt: 0, typed: '', misses: 0, target: null, sinceSpawn: 99, paused: false, over: false, last: '' });
       this.body.innerHTML = `
@@ -6164,6 +6172,7 @@
       if (this.shake && (this.shake.t -= dt) <= 0) this.shake = null;
       if (this.banner && (this.banner.t += dt) > 2.6) this.banner = null;
       this.hurt = Math.max(0, this.hurt - dt);
+      this.comboPop = Math.max(0, this.comboPop - dt * 1.5);
     },
     burst(r, colours, n, fast = 60) {
       const at = this.rockAt(r);
@@ -6190,12 +6199,16 @@
       this.rings.push({ ...this.rockAt(r), r: this.rockR(), colour: r.colour, t: 0 });
       this.wobble(0.25, 3);
       this.rocks = this.rocks.filter(x => x !== r);
-      this.score++;
+      this.zaps++;
+      this.combo++;
+      this.score += SP_POINTS * spMult(this.combo);
+      const lift = this.combo % SP_COMBO_STEP === 0 && spMult(this.combo) === this.combo / SP_COMBO_STEP + 1;
       // a little pop: a quick burst of noise with a bright blip on top (only when Sound is on)
       playNoise(0.07, 'bandpass', 1600, 0.18); spTone(1046, 'sine', 0.06, 0.06); spTone(1568, 'sine', 0.09, 0.04, 0.05);
       if (r.box) this.prize();
+      else if (lift) { this.comboPop = 1; this.say(`🔥 Combo ×${spMult(this.combo)}!`); spTone(1319, 'triangle', 0.12, 0.05); }
       else this.say(SP_CHEERS[rnd(0, SP_CHEERS.length - 1)]);
-      while (this.score >= this.wave * SP_WAVE_ZAPS) this.nextWave();
+      while (this.zaps >= this.wave * SP_WAVE_ZAPS) this.nextWave();
       this.drawHud();
       this.pickTarget();
     },
@@ -6219,7 +6232,8 @@
           this.rings.push({ ...this.rockAt(r), r: this.rockR(), colour: r.colour, t: 0 });
         }
         this.rocks = [];
-        this.score += gone;
+        this.zaps += gone;
+        this.score += gone * SP_POINTS * spMult(this.combo);
         this.wobble(0.4, 5);
         text = '💥 BLAST'; sub = gone ? `Cleared ${gone} rock${gone === 1 ? '' : 's'}!` : 'Clear skies!';
       }
@@ -6251,6 +6265,7 @@
       this.rocks = this.rocks.filter(x => x !== r);
       this.lives--;
       this.hurt = 0.8;
+      this.combo = 0;
       this.ease = SP_EASE;  // a short breather…
       this.boost = Math.max(1, this.boost - SP_BOOST_HIT);  // …and a little less boost from now on
       spTone(196, 'sine', 0.25, 0.06);
@@ -6266,7 +6281,7 @@
       this.showSum();
       const old = this.best(this.mode, this.level);
       const newBest = this.score > old;
-      if (newBest) { saveNum(`calc-space-${this.mode}-${this.level}`, this.score); playTune([523, 659, 784, 1047], 'triangle'); }
+      if (newBest) { saveNum(`${SP_KEY}${this.mode}-${this.level}`, this.score); playTune([523, 659, 784, 1047], 'triangle'); }
       const run = this.run;
       setTimeout(() => {
         if (run !== this.run || currentGame !== this) return;
@@ -6343,6 +6358,7 @@
       if (this.typed === t.sum.ans) { this.showTyped('good'); this.zap(); return; }
       if (t.sum.ans.startsWith(this.typed)) { this.showTyped(); return; }
       this.misses++;
+      this.combo = 0;
       this.showTyped('bad');
       spTone(330, 'sine', 0.12, 0.04);
       this.say(this.misses >= 2 ? `Psst… it's ${t.sum.ans}` : 'Oops! Try again 🙂');
@@ -6421,6 +6437,11 @@
       this.drawShip(18 + this.shipX * (W - 36), this.shipTop(), time);
       g.restore();
       if (this.banner) this.drawBanner(this.banner);
+      if (spMult(this.combo) > 1) {  // the combo, top right; it pops when it goes up
+        const size = 18 * (1 + this.comboPop * 0.5);
+        g.fillStyle = '#ffd75e'; g.textAlign = 'right'; g.textBaseline = 'top';
+        g.font = `800 ${size}px ${this.font}`; g.fillText(`🔥 ×${spMult(this.combo)}`, W - 10, 10);
+      }
       if (this.slow) {
         g.fillStyle = '#bfe9ff'; g.textAlign = 'left'; g.textBaseline = 'top';
         g.font = `800 18px ${this.font}`; g.fillText(`🐢 ${Math.ceil(this.slow)}`, 10, 10);
@@ -6578,7 +6599,7 @@
     { id: 'streak', icon: '⚡', name: 'Speed Streak', blurb: 'Quick sums that get harder.',
       score: () => { const n = loadNum('calc-streak'); return n ? `Best ${n}` : ''; }, game: speedStreak },
     { id: 'space', icon: '🚀', name: 'Space Sums', blurb: 'Zap space rocks with right answers.',
-      score: () => { const n = Math.max(...Object.keys(SP_LEVELS).flatMap(l => spModesFor(l).map(m => loadNum(`calc-space-${m}-${l}`)))); return n ? `Best ${n}` : ''; }, game: spaceSums },
+      score: () => { const n = Math.max(...Object.keys(SP_LEVELS).flatMap(l => spModesFor(l).map(m => loadNum(`${SP_KEY}${m}-${l}`)))); return n ? `Best ${n}` : ''; }, game: spaceSums },
     { id: 'race', icon: '🏁', name: 'Race', blurb: 'Make a number on the calculator, fast.',
       score: () => race ? 'Running · tap to stop' : (raceBest ? `Best ${raceBest.toFixed(1)}s` : ''),
       play: () => raceBtn.click() },
