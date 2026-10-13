@@ -2516,7 +2516,7 @@
   @keyframes name-from-left { from { transform: translateX(-18px); opacity: 0; } }
   .caret { opacity: 0.75; flex-shrink: 0; transition: transform 0.25s; }
   .current[aria-expanded="true"] .caret { transform: rotate(180deg); }
-  /* Round buttons beside the skin picker: shuffle, and Flip on the Retro skin */
+  /* Round button beside the skin picker: Flip, on the Retro skin only */
   .toolbar .round-btn {
     flex-shrink: 0;
     width: 47px;   /* same height as the skin picker */
@@ -2808,10 +2808,10 @@
   body[data-skin="gold"] .fn { color: #fff6c9; }
   @media (prefers-reduced-motion: reduce) { body[data-skin="gold"] .calc::after { animation: none; display: none; } }
 
-  /* ---------- Extras bar: shuffle, copy, tape, sound, keys ---------- */
+  /* ---------- Tools box: 2 rows of 5. Top row works with your sums, bottom row changes the look ---------- */
   .extras {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 4px;
     padding: 6px;
     border-radius: 22px;  /* a soft box, not a full pill, so the ends never cut into the buttons */
@@ -3381,11 +3381,12 @@
   /* ---------- Games menu: a drop-down list of mini games ---------- */
   .games { border-radius: 18px; overflow: hidden; background: rgba(18, 18, 24, 0.78); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.1); color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
   .games button { font-family: inherit; color: inherit; background: transparent; box-shadow: none; height: auto; border: 0; cursor: pointer; }
-  .games-toggle { min-height: 57px; /* same height as the Egg hunt bar */ width: 100%; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 18px; text-align: left; font-size: 15px; font-weight: 700; }
+  .games-toggle { min-height: 57px; /* same height as the Egg hunt bar */ width: 100%; display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 18px; text-align: left; font-size: 15px; font-weight: 700; }
   .games-toggle:hover { background: rgba(255, 255, 255, 0.06); }
   .games-toggle:focus-visible { outline: 2px solid #ffffff; outline-offset: -2px; }
   .games-toggle > span:first-child { font-size: 20px; }
-  .games-caret { font-size: 16px; opacity: 0.7; transition: transform 0.25s; }
+  .games-count { font-size: 13px; font-weight: 700; color: #ffd75e; }
+  .games-caret { opacity: 0.7; transition: transform 0.25s; }
   .games-toggle[aria-expanded="true"] .games-caret { transform: rotate(180deg); }
   .games-panel { padding: 0 8px 10px; }
   .games-panel[hidden] { display: none; }
@@ -3493,16 +3494,16 @@
   @media (prefers-reduced-motion: reduce) { .m24-card.picked { transform: none; } .game-card button:active { transform: none; } }
 
   /* ---------- Waves: an animated background, like a classic console's wave menu ----------
-     A canvas fixed behind everything. The round button beside 🎲 switches between the skin's
+     A canvas fixed behind everything. The Sky button in the tools box switches between the skin's
      still background (🖼️) and the animated waves (〰). Still is the default. */
   .waves-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; display: none; }
   body.waves { background: var(--waves-sky, #06205a); }
   body.waves .waves-bg { display: block; }
-  /* Small phones: slimmer round buttons so the skin name still fits beside 🎲, 〰 and ↻ */
+  /* Small phones: a slimmer Flip button and smaller tool labels so everything fits */
   @media (max-width: 359px) {
     .toolbar { gap: 6px; }
     .toolbar .round-btn { width: 40px; height: 40px; font-size: 17px; }
-    #currentMini { display: none; }
+    .extras button { font-size: 11px; }
   }
 </style>
 </head>
@@ -3519,8 +3520,6 @@
         </button>
         <button class="nav-btn" id="nextSkin" aria-label="Next skin" title="Next skin ( ] )">›</button>
       </div>
-      <button class="round-btn" id="shuffleBtn" aria-label="Shuffle to a random skin" title="Random skin ( S )"><span aria-hidden="true">🎲</span></button>
-      <button class="round-btn" id="wavesBtn" aria-pressed="false" aria-label="Animated background" title="Background: still or animated"><span aria-hidden="true" id="wavesIcon">🖼️</span></button>
       <button class="round-btn flip-btn" id="flip" aria-pressed="false" aria-label="Flip" title="Flip the calculator"><span aria-hidden="true">↻</span></button>
       <div class="skin-menu" id="skinMenu" role="dialog" aria-label="Choose a skin">
         <input class="skin-search" id="skinSearch" type="search" autocomplete="off" spellcheck="false">
@@ -3930,15 +3929,18 @@
       </div>
     </main>
 
+    <!-- Tools: top row works with your sums, bottom row changes the look. -->
     <div class="extras" role="toolbar" aria-label="Tools">
       <button id="copyBtn" title="Copy the answer ( C )"><span aria-hidden="true">📋</span>Copy</button>
       <button id="tapeBtn" aria-pressed="false" aria-controls="tape" title="History tape ( T )"><span aria-hidden="true">🧾</span>Tape</button>
       <button id="speakBtn" aria-pressed="false" title="Say each answer out loud"><span aria-hidden="true">🗣️</span>Speak</button>
       <button id="soundBtn" aria-pressed="false" title="Sound on or off ( M )"><span aria-hidden="true" id="soundIcon">🔇</span>Sound</button>
+      <button id="helpBtn" title="Keyboard keys ( ? )"><span aria-hidden="true">⌨️</span>Keys</button>
+      <button id="shuffleBtn" title="Random skin ( S )"><span aria-hidden="true">🎲</span>Shuffle</button>
       <button id="paintBtn" aria-expanded="false" title="Change this skin's colours"><span aria-hidden="true">🎨</span>Paint</button>
+      <button id="wavesBtn" aria-pressed="false" aria-label="Sky: animated background" title="Background: still or animated"><span aria-hidden="true" id="wavesIcon">🖼️</span>Sky</button>
       <button id="nightBtn" aria-pressed="false" title="Dim the calculator for night"><span aria-hidden="true">🌙</span>Night</button>
       <button id="easyBtn" aria-pressed="false" title="Easy-read font and bigger keys"><span aria-hidden="true">Aa</span>Easy</button>
-      <button id="helpBtn" title="Keyboard keys ( ? )"><span aria-hidden="true">⌨️</span>Keys</button>
     </div>
     <!-- Race and Daily are started from the Games list; these hidden buttons keep their switches. -->
     <div hidden>
@@ -3956,7 +3958,8 @@
       <button class="games-toggle" id="gamesToggle" aria-expanded="false" aria-controls="gamesPanel">
         <span aria-hidden="true">🎮</span>
         <span>Games</span>
-        <span class="games-caret" aria-hidden="true">▾</span>
+        <span class="games-count" id="gamesCount"></span>
+        <svg class="games-caret" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="games-panel" id="gamesPanel" hidden>
         <ul class="game-list" id="gameList"></ul>
@@ -6514,6 +6517,7 @@
     if (open) drawGameList();
   }
   gamesToggle.addEventListener('click', () => setGamesOpen(gamesPanel.hidden));
+  document.getElementById('gamesCount').textContent = GAMES.length + ' games';
 
   function openGame(g) {
     currentGame = g.game;
