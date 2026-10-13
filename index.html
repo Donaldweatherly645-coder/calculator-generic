@@ -3448,6 +3448,16 @@
   /* Space Sums: a bigger game window, a space picture on top and a number pad below.
      Phones turned sideways put the picture and the pad side by side. */
   .game-card.sp-card { max-width: 520px; padding: 14px; }
+  .sp-step { margin: 2px 0 6px; font-size: 13px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); text-align: left; }
+  .sp-modes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; }
+  .game-card .sp-mode { display: grid; justify-items: center; gap: 2px; padding: 8px 2px; border-radius: 14px; background: rgba(255, 255, 255, 0.12); font-size: 11px; font-weight: 700; line-height: 1.15; }
+  .sp-mode span { font-size: 22px; }
+  .game-card .sp-mode[aria-checked="true"] { background: #ffd75e; color: #2e2200; }
+  .sp-modes.sp-lvls { grid-template-columns: repeat(3, 1fr); }
+  .game-card .sp-lvls .sp-mode { font-size: 14px; }
+  .sp-lvls .sp-mode small { font-size: 13px; font-weight: 800; opacity: 0.8; }
+  .game-card .sp-mode.easy[aria-checked="true"] { background: #7ee787; color: #0b2a10; }
+  .game-card .sp-mode.medium[aria-checked="true"] { background: #5ec8ff; color: #062236; }
   .sp-levels { display: grid; gap: 10px; margin: 4px 0 6px; }
   .game-card .sp-pick { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 2px 12px; padding: 12px 14px; border-radius: 18px; text-align: left; font-size: 18px; font-weight: 800; }
   .sp-pick .si { grid-row: 1 / 3; font-size: 32px; text-align: center; }
@@ -3485,9 +3495,12 @@
     .sp-sum { font-size: 28px; }
     .sp-answer { min-height: 38px; }
     .game-card .sp-pad button { padding: 7px 0; font-size: 22px; }
+    .game-card .sp-pick { padding: 8px 12px; font-size: 16px; }
+    .sp-pick .si { font-size: 26px; }
   }
   @media (orientation: landscape) and (max-height: 600px) {
     .game-card.sp-card { max-width: 860px; }
+    .sp-levels { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     .sp-play { grid-template-columns: 1.25fr 1fr; align-items: center; }
     .sp-sky canvas { height: calc(100dvh - 130px); min-height: 160px; }
   }
@@ -5884,75 +5897,92 @@
   // rock with the yellow ring and the ship zaps it. Made for young players: slow rocks,
   // big numbers, no clock on a sum, and a little hint after two tries. Three bumps and
   // the game is over.
-  // Waves: every SP_WAVE_ZAPS zaps a WAVE banner shows and everything gets a small step
-  // harder: rocks a bit faster, sums a bit bigger, new kinds of sum at set waves, and one
-  // more rock later on. Each level climbs from its own start to its own top by wave
-  // SP_TOP_WAVE, in even steps, so nothing jumps.
-  // fall = seconds a rock takes to reach the ship on wave 1, top = speed at the top wave
-  // (1.8 = 1.8 times wave 1), most = rocks at once on wave 1, extra = rocks added by the
-  // top wave, gap = seconds between new rocks on wave 1.
+  // Pick a kind of sum (adding, taking away, times, dividing or a mix) and a level.
+  // Speed: two numbers set the pace. fall = seconds a rock takes to reach the ship, and
+  // every = seconds between new rocks (how many sums a minute you must answer). On wave 1
+  // they come from the level, times the kind of sum (dividing takes people longer than
+  // adding, so it gets more time). Every wave (SP_WAVE_ZAPS zaps) both shrink so the game
+  // is SP_STEP (10%) faster: big enough to feel, small enough not to jump. By SP_TOP_WAVE
+  // that is 1.1 ^ 9 = about 2.4 times wave 1, and the sums stop growing; after that it
+  // keeps creeping up by SP_LATE_STEP (4%) a wave so even very fast players meet their match.
+  // A fast player clears the sky and the next rock comes almost at once, so they set the
+  // pace; a slower player gets the full gap.
   const SP_LIVES = 3;
   const SP_WAVE_ZAPS = 8;
   const SP_TOP_WAVE = 10;
+  const SP_STEP = 1.1;
+  const SP_LATE_STEP = 1.04;
+  // Each level adds a kind of sum: Easy + −, Medium adds ×, Hard adds ÷.
   const SP_LEVELS = {
-    easy: { icon: '🌱', name: 'Easy', eg: '3 + 5,  9 − 4', fall: 24, top: 1.8, most: 1, extra: 1, gap: 6 },
-    medium: { icon: '🚀', name: 'Medium', eg: '14 + 9,  6 × 4', fall: 19, top: 2.1, most: 2, extra: 1, gap: 6 },
-    hard: { icon: '🌟', name: 'Hard', eg: '8 × 12,  73 − 38', fall: 15, top: 2.4, most: 3, extra: 1, gap: 5 },
+    easy: { icon: '🌱', name: 'Easy', fall: 11, every: 6, ops: ['add', 'sub'] },
+    medium: { icon: '🚀', name: 'Medium', fall: 12, every: 6, ops: ['add', 'sub', 'mul'] },
+    hard: { icon: '🌟', name: 'Hard', fall: 14, every: 7, ops: ['add', 'sub', 'mul', 'div'] },
   };
+  // time = how much extra time that kind of sum gets; eg = examples for each level
+  const SP_MODES = {
+    add: { icon: '➕', name: 'Adding', time: 1, eg: { easy: '4 + 3', medium: '27 + 15', hard: '146 + 87' } },
+    sub: { icon: '➖', name: 'Taking away', time: 1.1, eg: { easy: '9 − 4', medium: '42 − 17', hard: '231 − 94' } },
+    mul: { icon: '✖️', name: 'Times', time: 1.1, eg: { medium: '7 × 8', hard: '12 × 9' } },
+    div: { icon: '➗', name: 'Dividing', time: 1.25, eg: { hard: '132 ÷ 11' } },
+    mix: { icon: '🎲', name: 'Mix', eg: { easy: '9 − 4, 5 + 3', medium: '42 − 17, 7 × 8', hard: '146 + 87, 132 ÷ 11' } },
+  };
+  // The kinds of sum you can pick on a level: its own, then Mix
+  const spModesFor = level => [...SP_LEVELS[level].ops, 'mix'];
+  // Mix gets the average time of the level's sums, plus a little for switching between them
+  const spTime = (mode, level) => mode !== 'mix' ? SP_MODES[mode].time
+    : SP_LEVELS[level].ops.reduce((t, op) => t + SP_MODES[op].time, 0) / SP_LEVELS[level].ops.length + 0.05;
+  const SP_OPS = { add: '+', sub: '−', mul: '×', div: '÷' };
   const SP_ROCKS = ['#ff9f43', '#ff7eb6', '#4ecdc4', '#b197fc', '#ffd166', '#74c0fc'];
   const SP_CHEERS = ['Zap! ⭐', 'Great job!', 'You got it!', 'Super!', 'Boom! 🎉', 'Nice one!'];
   const spTone = (...args) => { if (soundOn) tone(...args); };  // only when Sound is on
   // How far through the climb a wave is: 0 on wave 1, 1 from SP_TOP_WAVE on.
   const spClimb = wave => Math.min(1, (wave - 1) / (SP_TOP_WAVE - 1));
-  // New kinds of sum join at these waves (also named on the WAVE banner).
-  const SP_NEW = {
-    easy: { 3: 'Take-away sums join in!' },
-    medium: { 3: 'Times tables join in!' },
-    hard: { 4: 'Up to 12 × 12 now!', 7: 'Big times sums join in!' },
-  };
-  function spaceSum(level, wave = 1) {
+  // How fast a wave is compared with wave 1: 1, 1.1, 1.21 … 2.36 on wave 10, then 4% a wave.
+  const spPace = wave => SP_STEP ** (Math.min(wave, SP_TOP_WAVE) - 1) * SP_LATE_STEP ** Math.max(0, wave - SP_TOP_WAVE);
+  function spaceSum(mode, level, wave = 1) {
     const k = spClimb(wave);
     const up = (from, to) => Math.round(from + (to - from) * k);  // grows a little each wave
-    let a, b, op;
-    if (level === 'easy') {
-      op = wave >= 3 && Math.random() < 0.25 + 0.2 * k ? '−' : '+';
-      if (op === '+') { a = rnd(1, up(6, 10)); b = rnd(1, up(5, 9)); }
-      else { a = rnd(3, up(9, 15)); b = rnd(1, Math.min(9, a)); }
-    } else if (level === 'medium') {
-      op = ['+', '−', '×'][rnd(0, wave >= 3 ? 2 : 1)];
-      if (op === '+') { a = rnd(6, up(15, 35)); b = rnd(3, up(9, 18)); }
-      else if (op === '−') { a = rnd(10, up(20, 40)); b = rnd(2, up(9, 18)); }
-      else { a = rnd(2, up(4, 10)); b = rnd(2, 10); }
-    } else {
-      op = ['+', '−', '×', '÷'][rnd(0, 3)];
-      const top = wave >= 4 ? 12 : 10;
-      if (op === '+') { a = rnd(15, up(60, 99)); b = rnd(8, up(40, 85)); }
-      else if (op === '−') { a = rnd(30, 99); b = rnd(10, up(50, 80)); }
-      else if (op === '×' && wave >= 7 && Math.random() < 0.4) { a = rnd(11, 15); b = rnd(2, 5); }
-      else { a = rnd(3, top); b = rnd(3, top); if (op === '÷') a *= b; }
+    const ops = SP_LEVELS[level].ops;
+    const op = SP_OPS[mode === 'mix' ? ops[rnd(0, ops.length - 1)] : mode];
+    let a, b;
+    if (op === '+') {
+      if (level === 'easy') { a = rnd(1, up(6, 12)); b = rnd(1, up(5, 9)); }
+      else if (level === 'medium') { a = rnd(6, up(25, 60)); b = rnd(3, up(15, 39)); }
+      else { a = rnd(25, up(150, 450)); b = rnd(12, up(99, 350)); }
+    } else if (op === '−') {
+      if (level === 'easy') { a = rnd(3, up(10, 20)); b = rnd(1, Math.min(9, a)); }
+      else if (level === 'medium') { a = rnd(15, up(50, 99)); b = rnd(3, up(20, 49)); }
+      else { a = rnd(60, up(250, 900)); b = rnd(15, up(99, 450)); }
+    } else {  // times and dividing share their tables: 7 × 8 = 56 and 56 ÷ 7 = 8
+      if (level === 'easy') { a = [2, 5, 10, 3, 4][rnd(0, up(2, 4))]; b = rnd(1, up(5, 10)); }
+      else if (level === 'medium') { a = rnd(2, up(7, 10)); b = rnd(2, up(7, 10)); }
+      else if (Math.random() < 0.15 + 0.35 * k) { a = rnd(11, up(13, 19)); b = rnd(3, 9); }
+      else { a = rnd(3, up(10, 12)); b = rnd(3, up(10, 12)); }
+      if (op === '÷') { const t = a * b; [a, b] = [t, a]; }  // t ÷ a = b
     }
     if (op === '−' && b > a) [a, b] = [b, a];
     const ans = op === '+' ? a + b : op === '−' ? a - b : op === '×' ? a * b : a / b;
     return { a, b, op, text: `${a} ${op} ${b}`, ans: String(ans) };
   }
   // The arcade score table: the top 5 for each level, saved on this device.
-  function spTable(level) {
+  // key is mode-level, like add-easy
+  function spTable(key) {
     try {
-      const list = JSON.parse(localStorage.getItem('calc-space-top-' + level) || '[]');
+      const list = JSON.parse(localStorage.getItem('calc-space-top-' + key) || '[]');
       return Array.isArray(list) ? list.filter(e => e && Number.isFinite(e.s)).map(e => ({ n: String(e.n || '').replace(/[^A-Z0-9]/g, '').slice(0, 3) || '???', s: e.s })).slice(0, 5) : [];
     } catch { return []; }
   }
-  function spSaveTable(level, list) {
-    try { localStorage.setItem('calc-space-top-' + level, JSON.stringify(list.slice(0, 5))); } catch { toast('⚠️ Could not save on this device'); }
+  function spSaveTable(key, list) {
+    try { localStorage.setItem('calc-space-top-' + key, JSON.stringify(list.slice(0, 5))); } catch { toast('⚠️ Could not save on this device'); }
   }
-  const spMakesTable = (level, score) => score > 0 && (spTable(level).length < 5 || score > spTable(level)[4].s);
+  const spMakesTable = (key, score) => score > 0 && (spTable(key).length < 5 || score > spTable(key)[4].s);
   // Mystery boxes: now and then a gold gift box floats down instead of a rock. Its sum is
   // harder than the others (as if it were 3 waves later, and the bigger of 2 tries), but
   // still inside the level. Solve it for a prize. Missing a box costs no life.
   const SP_BOX_CHANCE = 0.15;  // chance that a new arrival is a box (after the first few rocks)
   const SP_FREEZE = 5;         // seconds the freeze prize stops the rocks
-  function spaceBoxSum(level, wave) {
-    const tries = [0, 1].map(() => spaceSum(level, wave + 3));
+  function spaceBoxSum(mode, level, wave) {
+    const tries = [0, 1].map(() => spaceSum(mode, level, wave + 3));
     return tries.reduce((a, b) => (+b.ans > +a.ans ? b : a));
   }
 
@@ -5964,24 +5994,48 @@
       this.card.classList.add('sp-card');
       this.home();
     },
-    best(level) { return loadNum('calc-space-' + level); },
+    best(mode, level) { return loadNum(`calc-space-${mode}-${level}`); },
     home(note = '') {
       this.halt();
+      if (!this.level) {
+        try { this.level = localStorage.getItem('calc-space-level'); this.mode = localStorage.getItem('calc-space-mode'); } catch {}
+        if (!SP_LEVELS[this.level]) this.level = 'easy';
+      }
       this.body.innerHTML = `
         ${note}
-        <p class="game-how">Space rocks are floating towards your ship! Answer the sum on the rock with the yellow ring, and your ship zaps it. You have 3 lives ❤️. Every wave the rocks get a little faster and the sums a little bigger. 🚀</p>
-        <div class="sp-levels">${Object.entries(SP_LEVELS).map(([id, l]) => `
-          <button class="sp-pick ${id}" data-level="${id}"><span class="si" aria-hidden="true">${l.icon}</span><span>${l.name}</span>
-            <small>${l.eg}</small><span class="sb">${this.best(id) ? '🏆 ' + this.best(id) : ''}</span></button>`).join('')}</div>`;
-      this.body.querySelectorAll('[data-level]').forEach(b => b.addEventListener('click', () => this.go(b.dataset.level)));
-      this.body.querySelector(`[data-level="${this.level || 'easy'}"]`).focus();
+        <p class="game-how">Space rocks are flying at your ship! Answer the sum on the rock with the yellow ring, and your ship zaps it. You have 3 lives ❤️. Every wave the rocks get faster and the sums bigger. 🚀</p>
+        <div class="sp-step">1. Pick a level</div>
+        <div class="sp-modes sp-lvls" role="radiogroup" aria-label="Level">${Object.entries(SP_LEVELS).map(([id, l]) => `
+          <button class="sp-mode ${id}" role="radio" aria-checked="${id === this.level}" data-level="${id}"><span aria-hidden="true">${l.icon}</span>${l.name}<small>${l.ops.map(op => SP_OPS[op]).join(' ')}</small></button>`).join('')}</div>
+        <div class="sp-step">2. Pick your sums to start</div>
+        <div class="sp-levels" data-modes></div>`;
+      this.body.querySelectorAll('[data-level]').forEach(b => b.addEventListener('click', () => this.pickLevel(b.dataset.level)));
+      this.drawModes();
+      (this.body.querySelector(`[data-mode="${this.mode}"]`) || this.body.querySelector('[data-mode]')).focus();
     },
-    go(level) {
+    pickLevel(level) {
+      this.level = level;
+      try { localStorage.setItem('calc-space-level', level); } catch {}
+      this.body.querySelectorAll('[data-level]').forEach(b => b.setAttribute('aria-checked', b.dataset.level === level));
+      this.drawModes();
+    },
+    drawModes() {
+      const box = this.body.querySelector('[data-modes]');
+      box.innerHTML = spModesFor(this.level).map(id => {
+        const m = SP_MODES[id], best = this.best(id, this.level);
+        return `<button class="sp-pick ${this.level}" data-mode="${id}"><span class="si" aria-hidden="true">${m.icon}</span><span>${m.name}</span>
+          <small>${m.eg[this.level]}</small><span class="sb">${best ? '🏆 ' + best : ''}</span></button>`;
+      }).join('');
+      box.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => this.go(b.dataset.mode)));
+    },
+    go(mode) {
       this.halt();
-      const L = SP_LEVELS[level];
-      Object.assign(this, { level, L, score: 0, wave: 1, lives: SP_LIVES, spawned: 0, freeze: 0, rocks: [], bits: [], rings: [], beam: null, shake: null,
+      this.mode = mode;
+      try { localStorage.setItem('calc-space-mode', mode); } catch {}
+      const level = this.level, L = SP_LEVELS[level], m = spTime(mode, level);
+      Object.assign(this, { level, L, fall: L.fall * m, every: L.every * m, score: 0, wave: 1, lives: SP_LIVES, spawned: 0, freeze: 0, rocks: [], bits: [], rings: [], beam: null, shake: null,
         banner: { text: 'WAVE 1', sub: 'Get ready!', t: 0 },
-        hurt: 0, typed: '', misses: 0, target: null, sinceSpawn: L.gap, paused: false, over: false, last: '' });
+        hurt: 0, typed: '', misses: 0, target: null, sinceSpawn: 99, paused: false, over: false, last: '' });
       this.body.innerHTML = `
         <div class="sp-play">
           <div>
@@ -6043,7 +6097,7 @@
       const box = this.spawned >= 3 && !this.rocks.some(r => r.box) && Math.random() < SP_BOX_CHANCE;
       this.spawned++;
       let sum;
-      do sum = box ? spaceBoxSum(this.level, this.wave) : spaceSum(this.level, this.wave); while (sum.text === this.last);
+      do sum = box ? spaceBoxSum(this.mode, this.level, this.wave) : spaceSum(this.mode, this.level, this.wave); while (sum.text === this.last);
       this.last = sum.text;
       // each rock sways gently side to side as it falls, like a leaf
       this.rocks.push({ box, x, x0: x, sway: 0.04 + Math.random() * 0.04, wob: 0.6 + Math.random() * 0.5, ph: Math.random() * 6.28, t: 0, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
@@ -6060,15 +6114,12 @@
       if (this.target?.box) this.say('🎁 Mystery box! Solve it for a prize!');
     },
     update(dt) {
-      const L = this.L;
-      const k = spClimb(this.wave);
-      const fast = 1 + (L.top - 1) * k;  // a little faster every wave
+      const pace = spPace(this.wave);  // 10% faster each wave
       this.freeze = Math.max(0, this.freeze - dt);
-      const speed = this.freeze ? 0 : fast / L.fall;  // the freeze prize stops everything
-      const most = L.most + Math.floor(L.extra * k + 0.0001);  // the extra rock joins on the top wave
+      const speed = this.freeze ? 0 : pace / this.fall;  // the freeze prize stops everything
       if (!this.freeze) this.sinceSpawn += dt;
-      if ((this.rocks.length === 0 && this.sinceSpawn >= 1.2 / fast) ||
-          (this.rocks.length < most && this.sinceSpawn >= L.gap / fast)) this.spawn();
+      // an empty sky gets a new rock almost at once; otherwise one every `every` seconds
+      if (this.sinceSpawn >= (this.rocks.length ? this.every : 0.8) / pace) this.spawn();
       for (const r of [...this.rocks]) {
         if (this.over) break;
         r.p += dt * speed;
@@ -6140,11 +6191,8 @@
       this.drawHud();
     },
     nextWave() {
-      const L = this.L, before = L.most + Math.floor(L.extra * spClimb(this.wave) + 0.0001);
       this.wave++;
-      const more = L.most + Math.floor(L.extra * spClimb(this.wave) + 0.0001) > before;
-      const sub = SP_NEW[this.level][this.wave] || (more ? 'One more rock!' :
-        this.wave <= SP_TOP_WAVE ? 'A little faster!' : 'Keep going, space pilot!');
+      const sub = `Faster! Speed ×${spPace(this.wave).toFixed(1)}`;
       this.banner = { text: `WAVE ${this.wave}`, sub, t: 0 };
       this.say(`Wave ${this.wave}! ${sub}`);
       playTune([523, 659, 784], 'triangle');
@@ -6176,15 +6224,15 @@
       this.over = true;
       this.target = null;
       this.showSum();
-      const old = this.best(this.level);
+      const old = this.best(this.mode, this.level);
       const newBest = this.score > old;
-      if (newBest) { saveNum('calc-space-' + this.level, this.score); playTune([523, 659, 784, 1047], 'triangle'); }
+      if (newBest) { saveNum(`calc-space-${this.mode}-${this.level}`, this.score); playTune([523, 659, 784, 1047], 'triangle'); }
       const run = this.run;
       setTimeout(() => {
         if (run !== this.run || currentGame !== this) return;
         const top = `<div class="game-msg good">${this.score ? 'Great flying, space pilot! 🚀' : 'Good try! Have another go. 🙂'}</div>
           <div class="ss-sum">⭐ ${this.score} <small class="sp-reached">· wave ${this.wave}</small></div>`;
-        if (spMakesTable(this.level, this.score)) this.askName(top);
+        if (spMakesTable(this.tableKey(), this.score)) this.askName(top);
         else this.home(top + this.tableHtml());
       }, 1400);
     },
@@ -6204,20 +6252,21 @@
         e.preventDefault();
         const n = input.value || 'ACE';
         try { localStorage.setItem('calc-space-name', n); } catch {}
-        const list = spTable(this.level);
+        const list = spTable(this.tableKey());
         const entry = { n, s: this.score };
         list.push(entry);
         list.sort((x, y) => y.s - x.s);
-        spSaveTable(this.level, list);
+        spSaveTable(this.tableKey(), list);
         this.home(top + this.tableHtml(list.indexOf(entry)));
       });
       input.focus();
       input.select();
     },
+    tableKey() { return `${this.mode}-${this.level}`; },
     tableHtml(mine = -1) {
-      const list = spTable(this.level);
+      const list = spTable(this.tableKey());
       if (!list.length) return '';
-      return `<div class="sp-table"><div class="sp-table-head">🏆 Top scores · ${SP_LEVELS[this.level].icon} ${SP_LEVELS[this.level].name}</div>
+      return `<div class="sp-table"><div class="sp-table-head">🏆 Top scores · ${SP_MODES[this.mode].icon} ${SP_LEVELS[this.level].icon} ${SP_LEVELS[this.level].name}</div>
         <ol>${list.map((e, i) => `<li${i === mine ? ' class="mine"' : ''}><span>${i + 1}.</span><b>${e.n}</b><span>⭐ ${e.s}</span></li>`).join('')}</ol></div>`;
     },
     drawHud() {
@@ -6233,7 +6282,7 @@
       const t = this.target;
       this.body.querySelector('[data-sum]').textContent = t ? t.sum.text : '…';
       // Easy shows dots to count on: 2 + 3 is ●● + ●●●
-      this.body.querySelector('[data-dots]').textContent = t && this.level === 'easy' ? `${'●'.repeat(t.sum.a)}  ${t.sum.op}  ${'●'.repeat(t.sum.b)}` : '';
+      this.body.querySelector('[data-dots]').textContent = t && this.level === 'easy' && '+−'.includes(t.sum.op) && t.sum.a <= 12 ? `${'●'.repeat(t.sum.a)}  ${t.sum.op}  ${'●'.repeat(t.sum.b)}` : '';
       this.showTyped();
     },
     showTyped(kind = '') {
@@ -6489,7 +6538,7 @@
     { id: 'streak', icon: '⚡', name: 'Speed Streak', blurb: 'Quick sums that get harder.',
       score: () => { const n = loadNum('calc-streak'); return n ? `Best ${n}` : ''; }, game: speedStreak },
     { id: 'space', icon: '🚀', name: 'Space Sums', blurb: 'Zap space rocks with right answers.',
-      score: () => { const n = Math.max(...Object.keys(SP_LEVELS).map(l => loadNum('calc-space-' + l))); return n ? `Best ${n}` : ''; }, game: spaceSums },
+      score: () => { const n = Math.max(...Object.keys(SP_LEVELS).flatMap(l => spModesFor(l).map(m => loadNum(`calc-space-${m}-${l}`)))); return n ? `Best ${n}` : ''; }, game: spaceSums },
     { id: 'race', icon: '🏁', name: 'Race', blurb: 'Make a number on the calculator, fast.',
       score: () => race ? 'Running · tap to stop' : (raceBest ? `Best ${raceBest.toFixed(1)}s` : ''),
       play: () => raceBtn.click() },
