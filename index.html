@@ -6010,6 +6010,15 @@
   const SP_EASE = 4;           // seconds of breather after losing a heart…
   const SP_EASE_BY = 0.65;     // …at 65% speed, easing back to full speed over the last 1.5 s
   const spEase = left => left <= 0 ? 1 : left >= 1.5 ? SP_EASE_BY : SP_EASE_BY + (1 - SP_EASE_BY) * (1 - left / 1.5);
+  // Bonus round: after every SP_BONUS_EVERY waves, a short rest. For SP_BONUS_TIME seconds gold
+  // rocks fall that can't hurt you, with the level's normal sums (never harder). Zaps score
+  // (combo too) but don't count towards the next wave, and fast answers don't speed things up.
+  // A landing gold rock just fades away and keeps your combo; a wrong answer still resets it.
+  const SP_BONUS_EVERY = 4;
+  const SP_BONUS_TIME = 15;
+  const SP_BONUS_ROCKS = { easy: 2, medium: 3, hard: 4 };  // gold rocks on screen at once
+  const SP_BONUS_GAP = 1.2;    // seconds between new gold rocks
+  const SP_REST = 2.4;         // seconds of empty sky after the bonus round, to read the tally
 
   const spaceSums = {
     calm: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -6028,7 +6037,7 @@
       }
       this.body.innerHTML = `
         ${note}
-        <p class="game-how">Space rocks are flying at your ship! Answer the sum on the rock with the yellow ring, and your ship zaps it. You have 3 lives ❤️. Get answers right in a row for a 🔥 combo and more points. Every wave the rocks get faster and the sums bigger. 🚀</p>
+        <p class="game-how">Space rocks are flying at your ship! Answer the sum on the rock with the yellow ring, and your ship zaps it. You have 3 lives ❤️. Get answers right in a row for a 🔥 combo and more points. Every wave the rocks get faster and the sums bigger. Every ${SP_BONUS_EVERY} waves there's a ⭐ bonus round of gold rocks that can't hurt you. 🚀</p>
         <div class="sp-step">1. Pick a level</div>
         <div class="sp-modes sp-lvls" role="radiogroup" aria-label="Level">${Object.entries(SP_LEVELS).map(([id, l]) => `
           <button class="sp-mode ${id}" role="radio" aria-checked="${id === this.level}" data-level="${id}"><span aria-hidden="true">${l.icon}</span>${l.name}<small>${l.ops.map(op => SP_OPS[op]).join(' ')}</small></button>`).join('')}</div>
@@ -6058,7 +6067,7 @@
       this.mode = mode;
       try { localStorage.setItem('calc-space-mode', mode); } catch {}
       const level = this.level, L = SP_LEVELS[level], m = spTime(mode, level);
-      Object.assign(this, { level, L, fall: L.fall * m, every: L.every * m, score: 0, wave: 1, lives: SP_LIVES, spawned: 0, zaps: 0, combo: 0, comboPop: 0, slow: 0, ease: 0, boost: 1, hot: 0, clock: 0, askedAt: 0, quick: L.quick * m, rocks: [], bits: [], rings: [], beam: null, shake: null,
+      Object.assign(this, { level, L, fall: L.fall * m, every: L.every * m, score: 0, wave: 1, lives: SP_LIVES, spawned: 0, zaps: 0, combo: 0, comboPop: 0, slow: 0, ease: 0, boost: 1, hot: 0, bonus: null, bonusDone: 0, rest: 0, clock: 0, askedAt: 0, quick: L.quick * m, rocks: [], bits: [], rings: [], beam: null, shake: null,
         banner: { text: 'WAVE 1', sub: 'Get ready!', t: 0 },
         hurt: 0, typed: '', misses: 0, target: null, sinceSpawn: 99, paused: false, over: false, last: '' });
       this.body.innerHTML = `
@@ -6114,6 +6123,7 @@
     shipTop() { return this.H - 64; },
     rockAt(r) { return { x: 18 + r.x * (this.W - 36), y: -this.rockR() + r.p * this.shipTop() }; },
     spawn() {
+      if (this.bonus) { this.spawnGold(); return; }
       let x = 0.5;
       for (let i = 0; i < 12; i++) {  // try not to drop a rock on top of another one
         x = 0.1 + Math.random() * 0.8;
@@ -6134,6 +6144,20 @@
       this.sinceSpawn = 0;
       this.pickTarget();
     },
+    // A bonus-round rock: gold, harmless, with the level's normal sums for this wave
+    spawnGold() {
+      let x = 0.5;
+      for (let i = 0; i < 12; i++) {
+        x = 0.1 + Math.random() * 0.8;
+        if (this.rocks.every(r => r.p > 0.3 || Math.abs(r.x - x) > 0.22)) break;
+      }
+      let sum;
+      do sum = spaceSum(this.mode, this.level, this.wave); while (sum.text === this.last);
+      this.last = sum.text;
+      this.rocks.push({ gold: true, x, x0: x, sway: 0.04 + Math.random() * 0.04, wob: 0.6 + Math.random() * 0.5, ph: Math.random() * 6.28, t: 0, p: 0, sum, colour: '#ffd75e', spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
+      this.sinceSpawn = 0;
+      this.pickTarget();
+    },
     // The ringed rock is always the one nearest the ship.
     pickTarget() {
       if (this.target && this.rocks.includes(this.target)) return;
@@ -6151,8 +6175,12 @@
       const pace = this.pace();
       const speed = pace / this.fall;
       this.sinceSpawn += dt;
-      // an empty sky gets a new rock almost at once; otherwise one every `every` seconds
-      if (this.sinceSpawn >= (this.rocks.length ? this.every : 0.8) / pace) this.spawn();
+      if (this.rest > 0 && (this.rest -= dt) <= 0) this.waveCheck();  // the bonus tally is over: on to the next wave (or more)
+      if (this.bonus && (this.bonus.left -= dt) <= 0) this.endBonus();
+      // bonus round: keep a few gold rocks on screen
+      if (this.bonus) { if (this.rocks.length < SP_BONUS_ROCKS[this.level] && this.sinceSpawn >= (this.rocks.length ? SP_BONUS_GAP : 0.4)) this.spawn(); }
+      // an empty sky gets a new rock almost at once; otherwise one every `every` seconds (none while the bonus tally shows)
+      else if (this.rest <= 0 && this.sinceSpawn >= (this.rocks.length ? this.every : 0.8) / pace) this.spawn();
       for (const r of [...this.rocks]) {
         if (this.over) break;
         r.p += dt * speed * (this.slowed(r) ? SP_SLOW_BY : 1);  // slow-mo only reaches rocks on screen
@@ -6189,7 +6217,8 @@
     zap() {
       const r = this.target;
       // a fast answer (with no wrong tries) speeds things up and makes the sums harder; a slow one eases the sums
-      if (!this.misses && this.clock - this.askedAt <= this.quick) {
+      if (this.bonus) {}  // the bonus round doesn't speed anything up
+      else if (!this.misses && this.clock - this.askedAt <= this.quick) {
         this.boost = Math.min(SP_BOOST_MAX, this.boost + SP_BOOST_STEP);
         this.hot = Math.min(SP_HOT_MAX, this.hot + 1);
       } else this.hot = Math.max(0, this.hot - 1);
@@ -6199,16 +6228,18 @@
       this.rings.push({ ...this.rockAt(r), r: this.rockR(), colour: r.colour, t: 0 });
       this.wobble(0.25, 3);
       this.rocks = this.rocks.filter(x => x !== r);
-      this.zaps++;
+      if (!this.bonus) this.zaps++;  // bonus zaps don't count towards the next wave
       this.combo++;
-      this.score += SP_POINTS * spMult(this.combo);
+      const pts = SP_POINTS * spMult(this.combo);
+      this.score += pts;
+      if (this.bonus) { this.bonus.got++; this.bonus.pts += pts; }
       const lift = this.combo % SP_COMBO_STEP === 0 && spMult(this.combo) === this.combo / SP_COMBO_STEP + 1;
       // a little pop: a quick burst of noise with a bright blip on top (only when Sound is on)
       playNoise(0.07, 'bandpass', 1600, 0.18); spTone(1046, 'sine', 0.06, 0.06); spTone(1568, 'sine', 0.09, 0.04, 0.05);
       if (r.box) this.prize();
       else if (lift) { this.comboPop = 1; this.say(`🔥 Combo ×${spMult(this.combo)}!`); spTone(1319, 'triangle', 0.12, 0.05); }
       else this.say(SP_CHEERS[rnd(0, SP_CHEERS.length - 1)]);
-      while (this.zaps >= this.wave * SP_WAVE_ZAPS) this.nextWave();
+      this.waveCheck();
       this.drawHud();
       this.pickTarget();
     },
@@ -6232,7 +6263,7 @@
           this.rings.push({ ...this.rockAt(r), r: this.rockR(), colour: r.colour, t: 0 });
         }
         this.rocks = [];
-        this.zaps += gone;
+        this.zaps += gone;  // zap() checks for the next wave after the prize, so a bonus round's banner isn't covered up
         this.score += gone * SP_POINTS * spMult(this.combo);
         this.wobble(0.4, 5);
         text = '💥 BLAST'; sub = gone ? `Cleared ${gone} rock${gone === 1 ? '' : 's'}!` : 'Clear skies!';
@@ -6242,17 +6273,61 @@
       playTune([784, 988, 1175, 1568], 'triangle');
       this.drawHud();
     },
+    // Enough zaps for the next wave? After every SP_BONUS_EVERY waves the bonus round comes first.
+    waveCheck() {
+      while (!this.bonus && this.rest <= 0 && this.zaps >= this.wave * SP_WAVE_ZAPS) {
+        if (this.wave % SP_BONUS_EVERY === 0 && this.bonusDone < this.wave) { this.startBonus(); return; }
+        this.nextWave();
+      }
+    },
+    startBonus() {
+      this.bonusDone = this.wave;
+      this.bonus = { left: SP_BONUS_TIME, got: 0, pts: 0 };
+      // rocks still in the sky turn to gold (a mystery box just floats away)
+      for (const r of this.rocks) {
+        if (r.box) this.burst(r, ['#ffd75e', '#fff3b0'], 12);
+        else Object.assign(r, { gold: true, colour: '#ffd75e', sum: spaceSum(this.mode, this.level, this.wave) });  // normal sums only
+      }
+      this.rocks = this.rocks.filter(r => !r.box);
+      this.target = null;  // ask the new sum afresh
+      this.sinceSpawn = 0;
+      this.banner = { text: '⭐ BONUS ROUND', sub: `${SP_BONUS_TIME} seconds. Gold rocks can't hurt you!`, t: 0, prize: true };
+      this.say(`Bonus round! ${SP_BONUS_TIME} seconds of gold rocks that can't hurt you.`);
+      playTune([659, 784, 988, 1319], 'triangle');
+      this.drawHud();
+    },
+    endBonus() {
+      const { got, pts } = this.bonus;
+      this.bonus = null;
+      for (const r of this.rocks) this.burst(r, ['#ffd75e', '#fff3b0'], 10);  // leftover gold sparkles away
+      this.rocks = [];
+      this.target = null;
+      this.showSum();
+      this.rest = SP_REST;
+      const sub = got ? `${got} gold rock${got === 1 ? '' : 's'} zapped!` : 'Get ready for the next wave!';
+      this.banner = { text: `BONUS +${pts}`, sub, t: 0, prize: true };
+      this.say(`Bonus over! +${pts} points. ${sub}`);
+      playTune([784, 988, 1175], 'triangle');
+      this.drawHud();
+    },
     nextWave() {
       this.wave++;
       const sub = `Faster! Speed ×${this.pace().toFixed(1)}`;
       this.banner = { text: `WAVE ${this.wave}`, sub, t: 0 };
       this.say(`Wave ${this.wave}! ${sub}`);
       playTune([523, 659, 784], 'triangle');
+      this.drawHud();
     },
     // a gentle screen wobble (none when the device asks for less motion)
     wobble(time, px) { if (!this.calm) this.shake = { t: time, total: time, px }; },
     bonk(r) {
       if (this.over) return;
+      if (r.gold) {  // a gold rock just fades away: no life lost, and the combo keeps going
+        this.burst(r, ['#ffd75e', '#fff3b0'], 10);
+        this.rocks = this.rocks.filter(x => x !== r);
+        this.pickTarget();
+        return;
+      }
       if (r.box) {  // a missed box just floats away: no life lost
         this.burst(r, ['#ffd75e', '#fff3b0'], 12);
         this.rocks = this.rocks.filter(x => x !== r);
@@ -6327,7 +6402,7 @@
     drawHud() {
       const $ = s => this.body.querySelector(s);
       $('[data-score]').textContent = this.score;
-      $('[data-wave]').textContent = `Wave ${this.wave}`;
+      $('[data-wave]').textContent = this.bonus ? '⭐ Bonus' : `Wave ${this.wave}`;
       const lives = Math.max(0, this.lives);
       const el = $('[data-lives]');
       el.textContent = '❤️'.repeat(lives) + '🤍'.repeat(SP_LIVES - lives);
@@ -6362,9 +6437,9 @@
       this.showTyped('bad');
       spTone(330, 'sine', 0.12, 0.04);
       this.say(this.misses >= 2 ? `Psst… it's ${t.sum.ans}` : 'Oops! Try again 🙂');
-      const run = this.run, wrong = this.typed;
-      setTimeout(() => {  // clear the wrong answer, unless the player has already fixed it
-        if (run !== this.run || this.target !== t || this.typed !== wrong) return;
+      const run = this.run, wrong = this.typed, sum = t.sum;
+      setTimeout(() => {  // clear the wrong answer, unless the player has already fixed it (or moved on to a new sum)
+        if (run !== this.run || this.target !== t || t.sum !== sum || this.typed !== wrong) return;
         this.typed = '';
         this.showTyped();
       }, 500);
@@ -6442,6 +6517,12 @@
         g.fillStyle = '#ffd75e'; g.textAlign = 'right'; g.textBaseline = 'top';
         g.font = `800 ${size}px ${this.font}`; g.fillText(`🔥 ×${spMult(this.combo)}`, W - 10, 10);
       }
+      if (this.bonus) {  // the bonus clock, top middle
+        g.fillStyle = 'rgba(20, 16, 60, 0.7)';
+        g.beginPath(); g.roundRect ? g.roundRect(W / 2 - 34, 6, 68, 28, 14) : g.rect(W / 2 - 34, 6, 68, 28); g.fill();
+        g.fillStyle = '#ffd75e'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = `800 18px ${this.font}`; g.fillText(`⭐ ${Math.ceil(this.bonus.left)}`, W / 2, 21);
+      }
       if (this.slow) {
         g.fillStyle = '#bfe9ff'; g.textAlign = 'left'; g.textBaseline = 'top';
         g.font = `800 18px ${this.font}`; g.fillText(`🐢 ${Math.ceil(this.slow)}`, 10, 10);
@@ -6493,6 +6574,7 @@
       else {
       g.save();
       g.rotate(r.spin);
+      if (r.gold) { g.shadowColor = '#fff3b0'; g.shadowBlur = 18; }  // gold rocks glow
       g.fillStyle = r.colour;
       g.strokeStyle = 'rgba(0, 0, 0, 0.25)'; g.lineWidth = 3;
       g.beginPath();  // a lumpy round rock
