@@ -6114,8 +6114,10 @@
       this.spawned++;
       let sum;
       const w = this.wave + this.hot;  // fast players get the sums of a later wave
+      // sums stop growing after SP_TOP_WAVE, so past it any fast run gets the bigger of 2
+      const harder = this.hot >= SP_HOT_MAX || (this.hot > 0 && w > SP_TOP_WAVE);
       const make = () => box ? spaceBoxSum(this.mode, this.level, w)
-        : this.hot >= SP_HOT_MAX ? spBigger(this.mode, this.level, w) : spaceSum(this.mode, this.level, w);
+        : harder ? spBigger(this.mode, this.level, w) : spaceSum(this.mode, this.level, w);
       do sum = make(); while (sum.text === this.last);
       this.last = sum.text;
       // each rock sways gently side to side as it falls, like a leaf
@@ -6137,8 +6139,7 @@
       this.clock += dt;
       this.slow = Math.max(0, this.slow - dt);
       this.ease = Math.max(0, this.ease - dt);
-      // 10% faster each wave, plus the fast-answer boost, never past the cap; slower for a moment after a hit
-      const pace = Math.min(SP_TOP_SPEED, spPace(this.wave) * this.boost) * spEase(this.ease);
+      const pace = this.pace();
       const speed = pace / this.fall;
       this.sinceSpawn += dt;
       // an empty sky gets a new rock almost at once; otherwise one every `every` seconds
@@ -6171,7 +6172,10 @@
           size: 3 + Math.random() * 4, colour: colours[i % colours.length] });
       }
     },
-    slowed(r) { return this.slow > 0 && this.rockAt(r).y >= 0; },
+    // 10% faster each wave, plus the fast-answer boost, never past the cap; slower for a moment after a hit
+    pace() { return Math.min(SP_TOP_SPEED, spPace(this.wave) * this.boost) * spEase(this.ease); },
+    // slow-mo holds only the rocks that were (even partly) on screen when it began
+    slowed(r) { return this.slow > 0 && r.slowed; },
     zap() {
       const r = this.target;
       // a fast answer (with no wrong tries) speeds things up and makes the sums harder; a slow one eases the sums
@@ -6202,7 +6206,11 @@
       const pick = prizes[rnd(0, prizes.length - 1)];
       let text, sub;
       if (pick === 'life') { this.lives++; text = '❤️ EXTRA LIFE'; sub = 'You got a life back!'; }
-      else if (pick === 'slow') { this.slow = SP_SLOW; text = '🐢 SLOW-MO'; sub = `Rocks slow down for ${SP_SLOW} seconds!`; }
+      else if (pick === 'slow') {
+        this.slow = SP_SLOW;
+        for (const r of this.rocks) r.slowed = this.rockAt(r).y + this.rockR() > 0;
+        text = '🐢 SLOW-MO'; sub = `Rocks slow down for ${SP_SLOW} seconds!`;
+      }
       else {
         const gone = this.rocks.length;
         for (const r of this.rocks) {
@@ -6221,7 +6229,7 @@
     },
     nextWave() {
       this.wave++;
-      const sub = `Faster! Speed ×${spPace(this.wave).toFixed(1)}`;
+      const sub = `Faster! Speed ×${this.pace().toFixed(1)}`;
       this.banner = { text: `WAVE ${this.wave}`, sub, t: 0 };
       this.say(`Wave ${this.wave}! ${sub}`);
       playTune([523, 659, 784], 'triangle');
