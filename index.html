@@ -3467,6 +3467,16 @@
   .sp-answer.bad { background: rgba(255, 155, 138, 0.35); }
   .sp-dots { min-height: 22px; font-size: 18px; letter-spacing: 2px; color: #ffd75e; }
   .sp-say { min-height: 1.3em; font-size: 16px; font-weight: 700; color: #ffd75e; }
+  .sp-reached { font-size: 16px; font-weight: 700; opacity: 0.7; }
+  .sp-name { display: grid; justify-items: center; gap: 10px; margin: 10px 0 4px; font-size: 15px; font-weight: 700; }
+  .sp-initials { width: 150px; padding: 8px 0; border: 0; border-radius: 14px; background: #fff8e8; color: #1a1a2e; font: 900 36px/1 ui-monospace, Menlo, Consolas, monospace; letter-spacing: 0.35em; text-indent: 0.35em; text-align: center; text-transform: uppercase; box-shadow: inset 0 0 0 3px #ffd75e; }
+  .sp-initials:focus { outline: 3px solid #ff7eb6; outline-offset: 2px; }
+  .sp-table { margin: 8px auto 12px; max-width: 280px; padding: 10px 12px; border-radius: 16px; background: rgba(255, 255, 255, 0.08); }
+  .sp-table-head { margin-bottom: 6px; font-size: 14px; font-weight: 800; color: #ffd75e; }
+  .sp-table ol { list-style: none; margin: 0; padding: 0; }
+  .sp-table li { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; padding: 3px 8px; border-radius: 10px; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .sp-table li b { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 18px; letter-spacing: 0.15em; text-align: left; }
+  .sp-table li.mine { background: rgba(255, 215, 94, 0.25); }
   .sp-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .game-card .sp-pad button { padding: 12px 0; border-radius: 16px; background: rgba(255, 255, 255, 0.16); font-size: 26px; font-weight: 800; }
   .game-card .sp-pad button:hover { background: rgba(255, 255, 255, 0.26); }
@@ -5870,44 +5880,69 @@
   // Space Sums: friendly space rocks float down towards your ship. Answer the sum on the
   // rock with the yellow ring and the ship zaps it. Made for young players: slow rocks,
   // big numbers, no clock on a sum, and a little hint after two tries. Three bumps and
-  // the game is over. The longer you last, the faster rocks come. For the first few waves
-  // (10 zaps each) the sums get a little bigger, and every 2 waves an extra rock can join in.
-  // fall = seconds a rock takes to reach the ship at the start, most = rocks at once at the
-  // start, gap = seconds between new rocks, ramp = how much faster per second you last,
-  // top = the fastest it gets (2 = twice the starting speed).
+  // the game is over.
+  // Waves: every SP_WAVE_ZAPS zaps a WAVE banner shows and everything gets a small step
+  // harder: rocks a bit faster, sums a bit bigger, new kinds of sum at set waves, and one
+  // more rock later on. Each level climbs from its own start to its own top by wave
+  // SP_TOP_WAVE, in even steps, so nothing jumps.
+  // fall = seconds a rock takes to reach the ship on wave 1, top = speed at the top wave
+  // (1.8 = 1.8 times wave 1), most = rocks at once on wave 1, extra = rocks added by the
+  // top wave, gap = seconds between new rocks on wave 1.
   const SP_LIVES = 3;
+  const SP_WAVE_ZAPS = 8;
+  const SP_TOP_WAVE = 10;
   const SP_LEVELS = {
-    easy: { icon: '🌱', name: 'Easy', eg: '3 + 5,  9 − 4', fall: 24, most: 1, gap: 6, ramp: 0.006, top: 1.8 },
-    medium: { icon: '🚀', name: 'Medium', eg: '14 + 9,  6 × 4', fall: 19, most: 2, gap: 6, ramp: 0.009, top: 2.1 },
-    hard: { icon: '🌟', name: 'Hard', eg: '8 × 12,  73 − 38', fall: 15, most: 3, gap: 5, ramp: 0.012, top: 2.4 },
+    easy: { icon: '🌱', name: 'Easy', eg: '3 + 5,  9 − 4', fall: 24, top: 1.8, most: 1, extra: 1, gap: 6 },
+    medium: { icon: '🚀', name: 'Medium', eg: '14 + 9,  6 × 4', fall: 19, top: 2.1, most: 2, extra: 1, gap: 6 },
+    hard: { icon: '🌟', name: 'Hard', eg: '8 × 12,  73 − 38', fall: 15, top: 2.4, most: 3, extra: 1, gap: 5 },
   };
   const SP_ROCKS = ['#ff9f43', '#ff7eb6', '#4ecdc4', '#b197fc', '#ffd166', '#74c0fc'];
   const SP_CHEERS = ['Zap! ⭐', 'Great job!', 'You got it!', 'Super!', 'Boom! 🎉', 'Nice one!'];
   const spTone = (...args) => { if (soundOn) tone(...args); };  // only when Sound is on
-  // step goes 0 to 3 as the waves go by, so the sums grow a little at a time.
-  function spaceSum(level, step = 0) {
+  // How far through the climb a wave is: 0 on wave 1, 1 from SP_TOP_WAVE on.
+  const spClimb = wave => Math.min(1, (wave - 1) / (SP_TOP_WAVE - 1));
+  // New kinds of sum join at these waves (also named on the WAVE banner).
+  const SP_NEW = {
+    easy: { 3: 'Take-away sums join in!' },
+    medium: { 3: 'Times tables join in!' },
+    hard: { 4: 'Up to 12 × 12 now!', 7: 'Big times sums join in!' },
+  };
+  function spaceSum(level, wave = 1) {
+    const k = spClimb(wave);
+    const up = (from, to) => Math.round(from + (to - from) * k);  // grows a little each wave
     let a, b, op;
     if (level === 'easy') {
-      op = step >= 1 && Math.random() < 0.4 ? '−' : '+';
-      if (op === '+') { a = rnd(1, [6, 8, 9, 10][step]); b = rnd(1, [5, 5, 6, 9][step]); }
-      else { a = rnd(3, [10, 10, 12, 15][step]); b = rnd(1, Math.min(9, a)); }
+      op = wave >= 3 && Math.random() < 0.25 + 0.2 * k ? '−' : '+';
+      if (op === '+') { a = rnd(1, up(6, 10)); b = rnd(1, up(5, 9)); }
+      else { a = rnd(3, up(9, 15)); b = rnd(1, Math.min(9, a)); }
     } else if (level === 'medium') {
-      op = ['+', '−', '×'][rnd(0, step >= 1 ? 2 : 1)];
-      if (op === '+') { a = rnd(6, 15 + step * 5); b = rnd(3, 9 + step * 3); }
-      else if (op === '−') { a = rnd(10, 20 + step * 5); b = rnd(2, 9 + step * 3); }
-      else { a = rnd(2, step >= 2 ? 10 : 5); b = rnd(2, 10); }
+      op = ['+', '−', '×'][rnd(0, wave >= 3 ? 2 : 1)];
+      if (op === '+') { a = rnd(6, up(15, 35)); b = rnd(3, up(9, 18)); }
+      else if (op === '−') { a = rnd(10, up(20, 40)); b = rnd(2, up(9, 18)); }
+      else { a = rnd(2, up(4, 10)); b = rnd(2, 10); }
     } else {
       op = ['+', '−', '×', '÷'][rnd(0, 3)];
-      const top = step >= 2 ? 12 : 10;
-      if (op === '+') { a = rnd(15, 60 + step * 15); b = rnd(8, 40 + step * 15); }
-      else if (op === '−') { a = rnd(30, 99); b = rnd(10, 50 + step * 10); }
-      else if (op === '×' && step >= 3 && Math.random() < 0.4) { a = rnd(11, 15); b = rnd(2, 5); }
+      const top = wave >= 4 ? 12 : 10;
+      if (op === '+') { a = rnd(15, up(60, 99)); b = rnd(8, up(40, 85)); }
+      else if (op === '−') { a = rnd(30, 99); b = rnd(10, up(50, 80)); }
+      else if (op === '×' && wave >= 7 && Math.random() < 0.4) { a = rnd(11, 15); b = rnd(2, 5); }
       else { a = rnd(3, top); b = rnd(3, top); if (op === '÷') a *= b; }
     }
     if (op === '−' && b > a) [a, b] = [b, a];
     const ans = op === '+' ? a + b : op === '−' ? a - b : op === '×' ? a * b : a / b;
     return { a, b, op, text: `${a} ${op} ${b}`, ans: String(ans) };
   }
+  // The arcade score table: the top 5 for each level, saved on this device.
+  function spTable(level) {
+    try {
+      const list = JSON.parse(localStorage.getItem('calc-space-top-' + level) || '[]');
+      return Array.isArray(list) ? list.filter(e => e && Number.isFinite(e.s)).map(e => ({ n: String(e.n || '').replace(/[^A-Z0-9]/g, '').slice(0, 3) || '???', s: e.s })).slice(0, 5) : [];
+    } catch { return []; }
+  }
+  function spSaveTable(level, list) {
+    try { localStorage.setItem('calc-space-top-' + level, JSON.stringify(list.slice(0, 5))); } catch { toast('⚠️ Could not save on this device'); }
+  }
+  const spMakesTable = (level, score) => score > 0 && (spTable(level).length < 5 || score > spTable(level)[4].s);
 
   const spaceSums = {
     calm: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -5922,7 +5957,7 @@
       this.halt();
       this.body.innerHTML = `
         ${note}
-        <p class="game-how">Space rocks are floating towards your ship! Answer the sum on the rock with the yellow ring, and your ship zaps it. You have 3 lives ❤️, and the rocks get faster the longer you last. 🚀</p>
+        <p class="game-how">Space rocks are floating towards your ship! Answer the sum on the rock with the yellow ring, and your ship zaps it. You have 3 lives ❤️. Every wave the rocks get a little faster and the sums a little bigger. 🚀</p>
         <div class="sp-levels">${Object.entries(SP_LEVELS).map(([id, l]) => `
           <button class="sp-pick ${id}" data-level="${id}"><span class="si" aria-hidden="true">${l.icon}</span><span>${l.name}</span>
             <small>${l.eg}</small><span class="sb">${this.best(id) ? '🏆 ' + this.best(id) : ''}</span></button>`).join('')}</div>`;
@@ -5932,7 +5967,8 @@
     go(level) {
       this.halt();
       const L = SP_LEVELS[level];
-      Object.assign(this, { level, L, score: 0, wave: 1, lives: SP_LIVES, alive: 0, rocks: [], bits: [], beam: null,
+      Object.assign(this, { level, L, score: 0, wave: 1, lives: SP_LIVES, rocks: [], bits: [], rings: [], beam: null, shake: null,
+        banner: { text: 'WAVE 1', sub: 'Get ready!', t: 0 },
         hurt: 0, typed: '', misses: 0, target: null, sinceSpawn: L.gap, paused: false, over: false, last: '' });
       this.body.innerHTML = `
         <div class="sp-play">
@@ -5993,7 +6029,7 @@
         if (this.rocks.every(r => r.p > 0.4 || Math.abs(r.x - x) > 0.25)) break;
       }
       let sum;
-      do sum = spaceSum(this.level, Math.min(3, this.wave - 1)); while (sum.text === this.last);
+      do sum = spaceSum(this.level, this.wave); while (sum.text === this.last);
       this.last = sum.text;
       // each rock sways gently side to side as it falls, like a leaf
       this.rocks.push({ x, x0: x, sway: 0.04 + Math.random() * 0.04, wob: 0.6 + Math.random() * 0.5, ph: Math.random() * 6.28, t: 0, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
@@ -6010,10 +6046,10 @@
     },
     update(dt) {
       const L = this.L;
-      this.alive += dt;
-      const fast = Math.min(L.top, 1 + this.alive * L.ramp);  // speeds up the longer you last
+      const k = spClimb(this.wave);
+      const fast = 1 + (L.top - 1) * k;  // a little faster every wave
       const speed = fast / L.fall;
-      const most = L.most + Math.floor((this.wave - 1) / 2);  // one more rock every 2 waves
+      const most = L.most + Math.floor(L.extra * k + 0.0001);  // the extra rock joins on the top wave
       this.sinceSpawn += dt;
       if ((this.rocks.length === 0 && this.sinceSpawn >= 1.2 / fast) ||
           (this.rocks.length < most && this.sinceSpawn >= L.gap / fast)) this.spawn();
@@ -6031,12 +6067,16 @@
       for (const b of this.bits) { b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt; }
       this.bits = this.bits.filter(b => b.life > 0);
       if (this.beam && (this.beam.life -= dt) <= 0) this.beam = null;
+      for (const g of this.rings) g.t += dt;
+      this.rings = this.rings.filter(g => g.t < 0.5);
+      if (this.shake && (this.shake.t -= dt) <= 0) this.shake = null;
+      if (this.banner && (this.banner.t += dt) > 2.6) this.banner = null;
       this.hurt = Math.max(0, this.hurt - dt);
     },
-    burst(r, colours, n) {
+    burst(r, colours, n, fast = 60) {
       const at = this.rockAt(r);
       for (let i = 0; i < n; i++) {
-        const a = Math.random() * Math.PI * 2, v = 30 + Math.random() * 60;
+        const a = Math.random() * Math.PI * 2, v = 30 + Math.random() * fast;
         this.bits.push({ x: at.x, y: at.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.8 + Math.random() * 0.4,
           size: 3 + Math.random() * 4, colour: colours[i % colours.length] });
       }
@@ -6044,22 +6084,35 @@
     zap() {
       const r = this.target;
       this.beam = { at: this.rockAt(r), life: 0.4 };
-      this.burst(r, [r.colour, '#ffffff', '#ffd75e'], 18);
+      // the explosion: sparkles, a ring that grows and fades, and a small wobble of the screen
+      this.burst(r, [r.colour, '#ffffff', '#ffd75e'], 28, 120);
+      this.rings.push({ ...this.rockAt(r), r: this.rockR(), colour: r.colour, t: 0 });
+      this.wobble(0.25, 3);
       this.rocks = this.rocks.filter(x => x !== r);
       this.score++;
       // a little pop: a quick burst of noise with a bright blip on top (only when Sound is on)
       playNoise(0.07, 'bandpass', 1600, 0.18); spTone(1046, 'sine', 0.06, 0.06); spTone(1568, 'sine', 0.09, 0.04, 0.05);
-      if (this.score % 10 === 0) {
-        this.wave++;
-        this.say(`Wave ${this.wave}! You're doing great 🚀`);
-        playTune([523, 659, 784], 'triangle');
-      } else this.say(SP_CHEERS[rnd(0, SP_CHEERS.length - 1)]);
+      if (this.score % SP_WAVE_ZAPS === 0) this.nextWave();
+      else this.say(SP_CHEERS[rnd(0, SP_CHEERS.length - 1)]);
       this.drawHud();
       this.pickTarget();
     },
+    nextWave() {
+      const L = this.L, before = L.most + Math.floor(L.extra * spClimb(this.wave) + 0.0001);
+      this.wave++;
+      const more = L.most + Math.floor(L.extra * spClimb(this.wave) + 0.0001) > before;
+      const sub = SP_NEW[this.level][this.wave] || (more ? 'One more rock!' :
+        this.wave <= SP_TOP_WAVE ? 'A little faster!' : 'Keep going, space pilot!');
+      this.banner = { text: `WAVE ${this.wave}`, sub, t: 0 };
+      this.say(`Wave ${this.wave}! ${sub}`);
+      playTune([523, 659, 784], 'triangle');
+    },
+    // a gentle screen wobble (none when the device asks for less motion)
+    wobble(time, px) { if (!this.calm) this.shake = { t: time, total: time, px }; },
     bonk(r) {
       if (this.over) return;
       this.burst(r, ['#c9c9d6', '#8d8da3'], 10);
+      this.wobble(0.35, 5);
       this.rocks = this.rocks.filter(x => x !== r);
       this.lives--;
       this.hurt = 0.8;
@@ -6080,10 +6133,43 @@
       const run = this.run;
       setTimeout(() => {
         if (run !== this.run || currentGame !== this) return;
-        this.home(`<div class="game-msg good">${this.score ? 'Great flying, space pilot! 🚀' : 'Good try! Have another go. 🙂'}</div>
-          <div class="ss-sum">⭐ ${this.score}</div>
-          ${newBest ? '<div class="game-msg good">🏆 New best!</div>' : ''}`);
+        const top = `<div class="game-msg good">${this.score ? 'Great flying, space pilot! 🚀' : 'Good try! Have another go. 🙂'}</div>
+          <div class="ss-sum">⭐ ${this.score} <small class="sp-reached">· wave ${this.wave}</small></div>`;
+        if (spMakesTable(this.level, this.score)) this.askName(top);
+        else this.home(top + this.tableHtml());
       }, 1400);
+    },
+    // Arcade style: a score that makes the top 5 gets 3 initials.
+    askName(top) {
+      let last = '';
+      try { last = (localStorage.getItem('calc-space-name') || '').replace(/[^A-Z0-9]/g, '').slice(0, 3); } catch {}
+      this.body.innerHTML = `${top}
+        <form class="sp-name" data-name>
+          <label for="spInitials">🏆 You made the score table! Type 3 letters for your name:</label>
+          <input id="spInitials" class="sp-initials" maxlength="3" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${last}" placeholder="ABC">
+          <button class="game-btn big" type="submit">Save</button>
+        </form>`;
+      const input = this.body.querySelector('#spInitials');
+      input.addEventListener('input', () => { input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 3); });
+      this.body.querySelector('[data-name]').addEventListener('submit', e => {
+        e.preventDefault();
+        const n = input.value || 'ACE';
+        try { localStorage.setItem('calc-space-name', n); } catch {}
+        const list = spTable(this.level);
+        const entry = { n, s: this.score };
+        list.push(entry);
+        list.sort((x, y) => y.s - x.s);
+        spSaveTable(this.level, list);
+        this.home(top + this.tableHtml(list.indexOf(entry)));
+      });
+      input.focus();
+      input.select();
+    },
+    tableHtml(mine = -1) {
+      const list = spTable(this.level);
+      if (!list.length) return '';
+      return `<div class="sp-table"><div class="sp-table-head">🏆 Top scores · ${SP_LEVELS[this.level].icon} ${SP_LEVELS[this.level].name}</div>
+        <ol>${list.map((e, i) => `<li${i === mine ? ' class="mine"' : ''}><span>${i + 1}.</span><b>${e.n}</b><span>⭐ ${e.s}</span></li>`).join('')}</ol></div>`;
     },
     drawHud() {
       const $ = s => this.body.querySelector(s);
@@ -6144,6 +6230,11 @@
     },
     draw(time) {
       const g = this.g, W = this.W, H = this.H;
+      g.save();
+      if (this.shake) {  // fades out as it ends
+        const s = this.shake.px * (this.shake.t / this.shake.total);
+        g.translate((Math.random() - 0.5) * 2 * s, (Math.random() - 0.5) * 2 * s);
+      }
       const sky = g.createLinearGradient(0, 0, 0, H);
       sky.addColorStop(0, '#1b2a8a');
       sky.addColorStop(1, '#4b2585');
@@ -6177,13 +6268,48 @@
         g.fillStyle = b.colour;
         g.beginPath(); g.arc(b.x, b.y, b.size, 0, Math.PI * 2); g.fill();
       }
+      for (const ring of this.rings) {
+        const f = ring.t / 0.5;
+        g.globalAlpha = 1 - f;
+        g.strokeStyle = ring.colour; g.lineWidth = 6 * (1 - f) + 1;
+        g.beginPath(); g.arc(ring.x, ring.y, ring.r * (0.8 + f * 1.4), 0, Math.PI * 2); g.stroke();
+        if (f < 0.3) {  // a quick soft flash in the middle
+          g.globalAlpha = 0.6 * (1 - f / 0.3);
+          g.fillStyle = '#ffffff';
+          g.beginPath(); g.arc(ring.x, ring.y, ring.r * 0.9, 0, Math.PI * 2); g.fill();
+        }
+      }
       g.globalAlpha = 1;
       this.drawShip(18 + this.shipX * (W - 36), this.shipTop(), time);
+      g.restore();
+      if (this.banner) this.drawBanner(this.banner);
       if (this.paused) {
         g.fillStyle = 'rgba(0, 0, 0, 0.45)'; g.fillRect(0, 0, W, H);
         g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
         g.font = `800 28px ${this.font}`; g.fillText('Paused', W / 2, H / 2);
       }
+    },
+    drawBanner(b) {
+      const g = this.g, W = this.W, H = this.H;
+      const a = b.t < 0.3 ? b.t / 0.3 : b.t > 2.1 ? Math.max(0, (2.6 - b.t) / 0.5) : 1;
+      const grow = this.calm ? 1 : 0.85 + 0.15 * Math.min(1, b.t / 0.3);
+      g.save();
+      g.globalAlpha = a;
+      g.translate(W / 2, H * 0.42);
+      g.scale(grow, grow);
+      g.fillStyle = 'rgba(20, 16, 60, 0.7)';
+      const bw = Math.min(W - 24, 300), bh = 92;
+      g.beginPath(); g.roundRect ? g.roundRect(-bw / 2, -bh / 2, bw, bh, 20) : g.rect(-bw / 2, -bh / 2, bw, bh); g.fill();
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.font = `900 ${Math.min(44, W * 0.12)}px ${this.font}`;
+      g.lineWidth = 6; g.strokeStyle = '#ff7eb6'; g.lineJoin = 'round';
+      g.strokeText(b.text + '!', 0, -12);
+      g.fillStyle = '#ffd75e';
+      g.fillText(b.text + '!', 0, -12);
+      g.font = `700 16px ${this.font}`;
+      g.fillStyle = '#ffffff';
+      g.fillText(b.sub, 0, 26);
+      g.restore();
     },
     drawRock(r, R, time) {
       const g = this.g, at = this.rockAt(r);
