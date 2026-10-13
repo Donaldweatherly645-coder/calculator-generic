@@ -6169,6 +6169,14 @@
       const box = this.spawned >= 3 && !this.rocks.some(r => r.box) && Math.random() < SP_BOX_CHANCE;
       const kind = box ? null : this.pickKind();
       this.spawned++;
+      const sum = this.newSum(box);
+      // each rock sways gently side to side as it falls, like a leaf
+      this.rocks.push({ box, kind, shield: kind === 'armour', x, x0: x, sway: 0.04 + Math.random() * 0.04, wob: 0.6 + Math.random() * 0.5, ph: Math.random() * 6.28, t: 0, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
+      this.sinceSpawn = 0;
+      this.pickTarget();
+    },
+    // A new sum for a rock (or a box), as hard as the wave and the player's fast answers say
+    newSum(box = false) {
       let sum;
       const w = this.wave + this.hot;  // fast players get the sums of a later wave
       // sums stop growing after SP_TOP_WAVE, so past it any fast run gets the bigger of 2
@@ -6177,14 +6185,11 @@
         : harder ? spBigger(this.mode, this.level, w) : spaceSum(this.mode, this.level, w);
       do sum = make(); while (sum.text === this.last);
       this.last = sum.text;
-      // each rock sways gently side to side as it falls, like a leaf
-      this.rocks.push({ box, kind, shield: kind === 'armour', x, x0: x, sway: 0.04 + Math.random() * 0.04, wob: 0.6 + Math.random() * 0.5, ph: Math.random() * 6.28, t: 0, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
-      this.sinceSpawn = 0;
-      this.pickTarget();
+      return sum;
     },
     // Maybe a special rock: one at a time, each kind more common the longer it has been in
     pickKind() {
-      if (this.rocks.some(r => r.kind)) return null;
+      if (this.rocks.some(r => r.kind || r.mini)) return null;  // a splitter's tiny rocks still count as its turn
       const chances = spKindChances(this.level, this.wave);
       const total = chances.reduce((t, [, c]) => t + c, 0);
       let roll = Math.random() * Math.max(1, total / SP_KIND_ALL);  // all kinds together top out at SP_KIND_ALL
@@ -6211,10 +6216,7 @@
       this.wobble(0.15, 2);
       playNoise(0.06, 'bandpass', 2400, 0.15); spTone(880, 'sine', 0.06, 0.05);
       this.say('🛡️ Shield down! One more!');
-      let sum;
-      do sum = spaceSum(this.mode, this.level, this.wave); while (sum.text === this.last);
-      r.sum = sum;
-      this.last = sum.text;
+      r.sum = this.newSum();
       this.target = null;  // the same rock, a new sum: ask afresh
       this.drawHud();
       this.pickTarget();
