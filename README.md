@@ -15,7 +15,7 @@ A fun browser calculator with a big collection of themed skins: classic styles, 
 
 Click **▶ Play now** above. Nothing to install.
 
-- 🎨 Pick a skin from the menu at the top, or press `[` and `]` to flip through them. The 🎲 next to it picks one at random.
+- 🎨 Pick a skin from the menu at the top, or press `[` and `]` to flip through them. The 🎲 Shuffle button under the calculator picks one at random.
 - 🧰 The tools box under the calculator has Copy, Tape, Speak, Sound, Paint, Night, Easy and Keys.
 - ⌨️ Type numbers on your keyboard or click the buttons.
 - 🎮 Open **Games** to play **Make 24** (use four numbers to make 24), **Speed Streak** (quick sums that get harder), **Race** or the **Daily number**. Your best scores are saved.
