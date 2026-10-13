@@ -16,7 +16,7 @@ A fun browser calculator with a big collection of themed skins: classic styles, 
 Click **▶ Play now** above. Nothing to install.
 
 - 🎨 Pick a skin from the menu at the top, or press `[` and `]` to flip through them. The 🎲 Shuffle button under the calculator picks one at random.
-- 🧰 The tools box under the calculator has Copy, Tape, Speak, Sound, Keys, Shuffle, Paint, Sky, Night and Easy.
+- 🧰 The tools box under the calculator has Sound, Keys, Shuffle, Paint, Sky and Easy.
 - ⌨️ Type numbers on your keyboard or click the buttons.
 - 🎮 Open **Games** to play **Make 24** (use four numbers to make 24), **Speed Streak** (quick sums that get harder), **Race** or the **Daily number**. Your best scores are saved.
 - 🥚 Open **Egg hunt** to see every easter egg, with a hint for each. Found eggs turn gold.
