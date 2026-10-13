@@ -6175,7 +6175,7 @@
       const pace = this.pace();
       const speed = pace / this.fall;
       this.sinceSpawn += dt;
-      if (this.rest > 0 && (this.rest -= dt) <= 0) this.nextWave();  // the bonus tally is over: on to the next wave
+      if (this.rest > 0 && (this.rest -= dt) <= 0) this.waveCheck();  // the bonus tally is over: on to the next wave (or more)
       if (this.bonus && (this.bonus.left -= dt) <= 0) this.endBonus();
       // bonus round: keep a few gold rocks on screen
       if (this.bonus) { if (this.rocks.length < SP_BONUS_ROCKS[this.level] && this.sinceSpawn >= (this.rocks.length ? SP_BONUS_GAP : 0.4)) this.spawn(); }
@@ -6263,8 +6263,7 @@
           this.rings.push({ ...this.rockAt(r), r: this.rockR(), colour: r.colour, t: 0 });
         }
         this.rocks = [];
-        this.zaps += gone;
-        this.waveCheck();
+        this.zaps += gone;  // zap() checks for the next wave after the prize, so a bonus round's banner isn't covered up
         this.score += gone * SP_POINTS * spMult(this.combo);
         this.wobble(0.4, 5);
         text = '💥 BLAST'; sub = gone ? `Cleared ${gone} rock${gone === 1 ? '' : 's'}!` : 'Clear skies!';
@@ -6287,9 +6286,10 @@
       // rocks still in the sky turn to gold (a mystery box just floats away)
       for (const r of this.rocks) {
         if (r.box) this.burst(r, ['#ffd75e', '#fff3b0'], 12);
-        else { r.gold = true; r.colour = '#ffd75e'; }
+        else Object.assign(r, { gold: true, colour: '#ffd75e', sum: spaceSum(this.mode, this.level, this.wave) });  // normal sums only
       }
       this.rocks = this.rocks.filter(r => !r.box);
+      this.target = null;  // ask the new sum afresh
       this.sinceSpawn = 0;
       this.banner = { text: '⭐ BONUS ROUND', sub: `${SP_BONUS_TIME} seconds. Gold rocks can't hurt you!`, t: 0, prize: true };
       this.say(`Bonus round! ${SP_BONUS_TIME} seconds of gold rocks that can't hurt you.`);
@@ -6437,9 +6437,9 @@
       this.showTyped('bad');
       spTone(330, 'sine', 0.12, 0.04);
       this.say(this.misses >= 2 ? `Psst… it's ${t.sum.ans}` : 'Oops! Try again 🙂');
-      const run = this.run, wrong = this.typed;
-      setTimeout(() => {  // clear the wrong answer, unless the player has already fixed it
-        if (run !== this.run || this.target !== t || this.typed !== wrong) return;
+      const run = this.run, wrong = this.typed, sum = t.sum;
+      setTimeout(() => {  // clear the wrong answer, unless the player has already fixed it (or moved on to a new sum)
+        if (run !== this.run || this.target !== t || t.sum !== sum || this.typed !== wrong) return;
         this.typed = '';
         this.showTyped();
       }, 500);
