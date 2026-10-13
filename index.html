@@ -6026,6 +6026,23 @@
   // big prize × the combo. Its fall is timed by the number of sums (SP_BOSS_TIME × the normal
   // gap between rocks, for each sum), so a bigger boss doesn't give less time a sum. If it
   // lands you lose 1 heart. Wave 20, 40 … has both: the boss first, then the bonus round.
+  // Rock types: special rocks join one at a time, each on its own wave with a banner.
+  // first = the wave it joins on each level (none = never on that level). It starts rare
+  // (1 in 10 rocks) and gets a little more common each wave, up to 1 in 4; only one special
+  // rock is in the sky at a time, and never in the bonus round or with the boss.
+  //   Splitter: zap it and it breaks into 2 tiny rocks with very easy sums (they can't hurt you).
+  //   Armoured: a shield, then the rock: 2 right answers (both count for the combo). Falls a bit slower.
+  //   Zippy: small and quick (1.3× speed, never past the speed cap), worth double points.
+  const SP_KINDS = {
+    split: { icon: '🪨', name: 'Splitter', first: { easy: 3, medium: 2, hard: 2 }, intro: 'They break into 2 tiny, easy rocks.' },
+    armour: { icon: '🛡️', name: 'Armoured', first: { medium: 6, hard: 5 }, intro: 'They need 2 answers: shield, then rock.' },
+    zippy: { icon: '⚡', name: 'Zippy', first: { hard: 8 }, intro: 'They are quick, and worth double points.' },
+  };
+  const SP_KIND_START = 0.1, SP_KIND_STEP = 0.03, SP_KIND_TOP = 0.25, SP_KIND_ALL = 0.35;
+  const SP_ARMOUR_SPEED = 0.7, SP_ZIPPY_SPEED = 1.3;
+  // The chance that a new rock is each special kind on this wave (0 before it joins)
+  const spKindChances = (level, wave) => Object.entries(SP_KINDS).map(([id, k]) =>
+    [id, k.first[level] && wave >= k.first[level] ? Math.min(SP_KIND_TOP, SP_KIND_START + SP_KIND_STEP * (wave - k.first[level])) : 0]);
   const SP_BOSS_EVERY = 5;
   const SP_BOSS = { easy: { hp: 3, top: 3, pts: 100 }, medium: { hp: 4, top: 6, pts: 150 }, hard: { hp: 5, top: 7, pts: 200 } };
   const SP_BOSS_TIME = 1.3;
@@ -6150,7 +6167,16 @@
         if (this.rocks.every(r => r.p > 0.4 || Math.abs(r.x - x) > 0.25)) break;
       }
       const box = this.spawned >= 3 && !this.rocks.some(r => r.box) && Math.random() < SP_BOX_CHANCE;
+      const kind = box ? null : this.pickKind();
       this.spawned++;
+      const sum = this.newSum(box);
+      // each rock sways gently side to side as it falls, like a leaf
+      this.rocks.push({ box, kind, shield: kind === 'armour', x, x0: x, sway: 0.04 + Math.random() * 0.04, wob: 0.6 + Math.random() * 0.5, ph: Math.random() * 6.28, t: 0, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
+      this.sinceSpawn = 0;
+      this.pickTarget();
+    },
+    // A new sum for a rock (or a box), as hard as the wave and the player's fast answers say
+    newSum(box = false) {
       let sum;
       const w = this.wave + this.hot;  // fast players get the sums of a later wave
       // sums stop growing after SP_TOP_WAVE, so past it any fast run gets the bigger of 2
@@ -6159,9 +6185,40 @@
         : harder ? spBigger(this.mode, this.level, w) : spaceSum(this.mode, this.level, w);
       do sum = make(); while (sum.text === this.last);
       this.last = sum.text;
-      // each rock sways gently side to side as it falls, like a leaf
-      this.rocks.push({ box, x, x0: x, sway: 0.04 + Math.random() * 0.04, wob: 0.6 + Math.random() * 0.5, ph: Math.random() * 6.28, t: 0, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
-      this.sinceSpawn = 0;
+      return sum;
+    },
+    // Maybe a special rock: one at a time, each kind more common the longer it has been in
+    pickKind() {
+      if (this.rocks.some(r => r.kind || r.mini)) return null;  // a splitter's tiny rocks still count as its turn
+      const chances = spKindChances(this.level, this.wave);
+      const total = chances.reduce((t, [, c]) => t + c, 0);
+      let roll = Math.random() * Math.max(1, total / SP_KIND_ALL);  // all kinds together top out at SP_KIND_ALL
+      for (const [id, c] of chances) if ((roll -= c) < 0) return id;
+      return null;
+    },
+    // A splitter breaks into 2 tiny rocks with very easy sums (like 3 + 2); they can't hurt you
+    split(r) {
+      for (const side of [-1, 1]) {
+        const x = Math.min(0.92, Math.max(0.08, r.x + side * 0.1));
+        let sum;
+        do sum = spaceSum('add', 'easy', 1); while (sum.text === this.last);
+        this.last = sum.text;
+        this.rocks.push({ mini: true, x, x0: x, sway: 0.03, wob: 0.8, ph: Math.random() * 6.28, t: 0, p: Math.max(0, r.p - 0.15), sum, colour: r.colour, spin: Math.random() * 6, turn: (Math.random() - 0.5) * 1.2 });
+      }
+    },
+    // The first right answer on an armoured rock breaks its shield; the rock then needs one more
+    unshield(r) {
+      r.shield = false;
+      this.combo++;
+      this.score += SP_POINTS * spMult(this.combo);
+      this.beam = { at: this.rockAt(r), life: 0.4 };
+      this.burst(r, ['#c9d3e0', '#8d99ae', '#ffffff'], 18, 100);
+      this.wobble(0.15, 2);
+      playNoise(0.06, 'bandpass', 2400, 0.15); spTone(880, 'sine', 0.06, 0.05);
+      this.say('🛡️ Shield down! One more!');
+      r.sum = this.newSum();
+      this.target = null;  // the same rock, a new sum: ask afresh
+      this.drawHud();
       this.pickTarget();
     },
     // A bonus-round rock: gold, harmless, with the level's normal sums for this wave
@@ -6203,7 +6260,8 @@
       else if (!this.boss && this.rest <= 0 && this.sinceSpawn >= (this.rocks.length ? this.every : 0.8) / pace) this.spawn();
       for (const r of [...this.rocks]) {
         if (this.over) break;
-        r.p += dt * (r.boss ? r.speed : speed * (this.slowed(r) ? SP_SLOW_BY : 1));  // slow-mo only reaches rocks on screen
+        const kind = r.kind === 'armour' ? SP_ARMOUR_SPEED : r.kind === 'zippy' ? Math.min(SP_TOP_SPEED, pace * SP_ZIPPY_SPEED) / pace : 1;
+        r.p += dt * (r.boss ? r.speed : speed * kind * (this.slowed(r) ? SP_SLOW_BY : 1));  // slow-mo only reaches rocks on screen
         r.spin += dt * r.turn;
         r.t += dt;
         if (!this.calm) r.x = Math.min(0.95, Math.max(0.05, r.x0 + Math.sin(r.t * r.wob + r.ph) * r.sway));
@@ -6238,26 +6296,30 @@
       const r = this.target;
       if (r.boss) { this.crack(r); return; }
       // a fast answer (with no wrong tries) speeds things up and makes the sums harder; a slow one eases the sums
-      if (this.bonus) {}  // the bonus round doesn't speed anything up
+      if (this.bonus || r.mini) {}  // the bonus round and tiny rocks don't speed anything up
       else if (!this.misses && this.clock - this.askedAt <= this.quick) {
         this.boost = Math.min(SP_BOOST_MAX, this.boost + SP_BOOST_STEP);
         this.hot = Math.min(SP_HOT_MAX, this.hot + 1);
       } else this.hot = Math.max(0, this.hot - 1);
+      if (r.shield) { this.unshield(r); return; }
       this.beam = { at: this.rockAt(r), life: 0.4 };
       // the explosion: sparkles, a ring that grows and fades, and a small wobble of the screen
       this.burst(r, [r.colour, '#ffffff', '#ffd75e'], 28, 120);
       this.rings.push({ ...this.rockAt(r), r: this.rockR(), colour: r.colour, t: 0 });
       this.wobble(0.25, 3);
       this.rocks = this.rocks.filter(x => x !== r);
+      if (r.kind === 'split') this.split(r);
       if (!this.bonus) this.zaps++;  // bonus zaps don't count towards the next wave
       this.combo++;
-      const pts = SP_POINTS * spMult(this.combo);
+      const pts = SP_POINTS * spMult(this.combo) * (r.kind === 'zippy' ? 2 : 1);
       this.score += pts;
       if (this.bonus) { this.bonus.got++; this.bonus.pts += pts; }
       const lift = this.combo % SP_COMBO_STEP === 0 && spMult(this.combo) === this.combo / SP_COMBO_STEP + 1;
       // a little pop: a quick burst of noise with a bright blip on top (only when Sound is on)
       playNoise(0.07, 'bandpass', 1600, 0.18); spTone(1046, 'sine', 0.06, 0.06); spTone(1568, 'sine', 0.09, 0.04, 0.05);
       if (r.box) this.prize();
+      else if (r.kind === 'split') this.say('🪨 It split! Zap the tiny ones');
+      else if (r.kind === 'zippy') this.say(`⚡ Double points! +${pts}`);
       else if (lift) { this.comboPop = 1; this.say(`🔥 Combo ×${spMult(this.combo)}!`); spTone(1319, 'triangle', 0.12, 0.05); }
       else this.say(SP_CHEERS[rnd(0, SP_CHEERS.length - 1)]);
       this.waveCheck();
@@ -6308,7 +6370,7 @@
       // rocks still in the sky turn to gold (a mystery box just floats away)
       for (const r of this.rocks) {
         if (r.box) this.burst(r, ['#ffd75e', '#fff3b0'], 12);
-        else Object.assign(r, { gold: true, colour: '#ffd75e', sum: spaceSum(this.mode, this.level, this.wave) });  // normal sums only
+        else Object.assign(r, { gold: true, colour: '#ffd75e', kind: null, shield: false, sum: spaceSum(this.mode, this.level, this.wave) });  // normal sums only
       }
       this.rocks = this.rocks.filter(r => !r.box);
       this.target = null;  // ask the new sum afresh
@@ -6398,9 +6460,10 @@
     },
     nextWave() {
       this.wave++;
-      const sub = `Faster! Speed ×${this.pace().toFixed(1)}`;
+      const fresh = Object.values(SP_KINDS).find(k => k.first[this.level] === this.wave);  // a rock type joins on this wave
+      const sub = fresh ? `${fresh.icon} New: ${fresh.name} rocks!` : `Faster! Speed ×${this.pace().toFixed(1)}`;
       this.banner = { text: `WAVE ${this.wave}`, sub, t: 0 };
-      this.say(`Wave ${this.wave}! ${sub}`);
+      this.say(`Wave ${this.wave}! ${sub}${fresh ? ' ' + fresh.intro : ''}`);
       playTune([523, 659, 784], 'triangle');
       this.drawHud();
     },
@@ -6408,7 +6471,7 @@
     wobble(time, px) { if (!this.calm) this.shake = { t: time, total: time, px }; },
     bonk(r) {
       if (this.over) return;
-      if (r.gold) {  // a gold rock just fades away: no life lost, and the combo keeps going
+      if (r.gold || r.mini) {  // a gold or tiny rock just fades away: no life lost, and the combo keeps going
         this.burst(r, ['#ffd75e', '#fff3b0'], 10);
         this.rocks = this.rocks.filter(x => x !== r);
         this.pickTarget();
@@ -6569,7 +6632,7 @@
       }
       g.globalAlpha = 1;
       const R = this.rockR();
-      for (const r of this.rocks) this.drawRock(r, r.boss ? R * 1.8 : R, time);
+      for (const r of this.rocks) this.drawRock(r, r.boss ? R * 1.8 : r.mini ? R * 0.6 : r.kind === 'zippy' ? R * 0.75 : R, time);
       if (this.beam) {
         g.save();
         g.globalAlpha = Math.min(1, this.beam.life / 0.25);
@@ -6679,6 +6742,12 @@
         g.beginPath(); g.arc(0, 0, R + 9, 0, Math.PI * 2); g.stroke();
         g.restore();
       }
+      if (r.kind === 'zippy') {  // a glowing tail behind a zippy rock
+        const tail = g.createLinearGradient(0, 0, 0, -R * 3);
+        tail.addColorStop(0, 'rgba(255, 230, 120, 0.95)'); tail.addColorStop(1, 'rgba(255, 126, 182, 0)');
+        g.fillStyle = tail;
+        g.beginPath(); g.moveTo(-R * 0.8, 0); g.lineTo(R * 0.8, 0); g.lineTo(0, -R * 3); g.closePath(); g.fill();
+      }
       if (r.box) this.drawBox(R, time);
       else {
       g.save();
@@ -6703,6 +6772,17 @@
       g.strokeStyle = '#2b2140'; g.lineWidth = 2.5; g.lineCap = 'round';
       g.beginPath(); g.arc(0, R * 0.08, R * 0.24, 0.2 * Math.PI, 0.8 * Math.PI); g.stroke();
       if (r.boss) this.drawBoss(r, R);
+      if (r.kind === 'split') {  // a zigzag crack right across: this one will split
+        g.strokeStyle = 'rgba(43, 33, 64, 0.7)'; g.lineWidth = 3; g.lineJoin = 'round';
+        g.beginPath(); g.moveTo(-R * 0.15, -R); g.lineTo(R * 0.12, -R * 0.55); g.lineTo(-R * 0.08, -R * 0.4);
+        g.moveTo(R * 0.1, R * 0.35); g.lineTo(-R * 0.12, R * 0.6); g.lineTo(R * 0.1, R); g.stroke();
+      }
+      if (r.shield) {  // a steel shield ring with rivets
+        g.strokeStyle = '#aab6c8'; g.lineWidth = 7;
+        g.beginPath(); g.arc(0, 0, R + 3, 0, Math.PI * 2); g.stroke();
+        g.fillStyle = '#5c677d';
+        for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.beginPath(); g.arc(Math.cos(a) * (R + 3), Math.sin(a) * (R + 3), 2.5, 0, Math.PI * 2); g.fill(); }
+      }
       }
       if (this.slowed(r)) {  // a blue ring while slow-mo holds it
         g.strokeStyle = 'rgba(190, 235, 255, 0.9)'; g.lineWidth = 4;
