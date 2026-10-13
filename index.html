@@ -5943,6 +5943,15 @@
     try { localStorage.setItem('calc-space-top-' + level, JSON.stringify(list.slice(0, 5))); } catch { toast('⚠️ Could not save on this device'); }
   }
   const spMakesTable = (level, score) => score > 0 && (spTable(level).length < 5 || score > spTable(level)[4].s);
+  // Mystery boxes: now and then a gold gift box floats down instead of a rock. Its sum is
+  // harder than the others (as if it were 3 waves later, and the bigger of 2 tries), but
+  // still inside the level. Solve it for a prize. Missing a box costs no life.
+  const SP_BOX_CHANCE = 0.15;  // chance that a new arrival is a box (after the first few rocks)
+  const SP_FREEZE = 5;         // seconds the freeze prize stops the rocks
+  function spaceBoxSum(level, wave) {
+    const tries = [0, 1].map(() => spaceSum(level, wave + 3));
+    return tries.reduce((a, b) => (+b.ans > +a.ans ? b : a));
+  }
 
   const spaceSums = {
     calm: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -5967,7 +5976,7 @@
     go(level) {
       this.halt();
       const L = SP_LEVELS[level];
-      Object.assign(this, { level, L, score: 0, wave: 1, lives: SP_LIVES, rocks: [], bits: [], rings: [], beam: null, shake: null,
+      Object.assign(this, { level, L, score: 0, wave: 1, lives: SP_LIVES, spawned: 0, freeze: 0, rocks: [], bits: [], rings: [], beam: null, shake: null,
         banner: { text: 'WAVE 1', sub: 'Get ready!', t: 0 },
         hurt: 0, typed: '', misses: 0, target: null, sinceSpawn: L.gap, paused: false, over: false, last: '' });
       this.body.innerHTML = `
@@ -6028,11 +6037,13 @@
         x = 0.1 + Math.random() * 0.8;
         if (this.rocks.every(r => r.p > 0.4 || Math.abs(r.x - x) > 0.25)) break;
       }
+      const box = this.spawned >= 3 && !this.rocks.some(r => r.box) && Math.random() < SP_BOX_CHANCE;
+      this.spawned++;
       let sum;
-      do sum = spaceSum(this.level, this.wave); while (sum.text === this.last);
+      do sum = box ? spaceBoxSum(this.level, this.wave) : spaceSum(this.level, this.wave); while (sum.text === this.last);
       this.last = sum.text;
       // each rock sways gently side to side as it falls, like a leaf
-      this.rocks.push({ x, x0: x, sway: 0.04 + Math.random() * 0.04, wob: 0.6 + Math.random() * 0.5, ph: Math.random() * 6.28, t: 0, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
+      this.rocks.push({ box, x, x0: x, sway: 0.04 + Math.random() * 0.04, wob: 0.6 + Math.random() * 0.5, ph: Math.random() * 6.28, t: 0, p: 0, sum, colour: SP_ROCKS[rnd(0, SP_ROCKS.length - 1)], spin: Math.random() * 6, turn: (Math.random() - 0.5) * 0.6 });
       this.sinceSpawn = 0;
       this.pickTarget();
     },
@@ -6043,19 +6054,22 @@
       this.typed = '';
       this.misses = 0;
       this.showSum();
+      if (this.target?.box) this.say('🎁 Mystery box! Solve it for a prize!');
     },
     update(dt) {
       const L = this.L;
       const k = spClimb(this.wave);
       const fast = 1 + (L.top - 1) * k;  // a little faster every wave
-      const speed = fast / L.fall;
+      this.freeze = Math.max(0, this.freeze - dt);
+      const speed = this.freeze ? 0 : fast / L.fall;  // the freeze prize stops everything
       const most = L.most + Math.floor(L.extra * k + 0.0001);  // the extra rock joins on the top wave
-      this.sinceSpawn += dt;
+      if (!this.freeze) this.sinceSpawn += dt;
       if ((this.rocks.length === 0 && this.sinceSpawn >= 1.2 / fast) ||
           (this.rocks.length < most && this.sinceSpawn >= L.gap / fast)) this.spawn();
       for (const r of [...this.rocks]) {
         if (this.over) break;
         r.p += dt * speed;
+        if (this.freeze) continue;
         r.spin += dt * r.turn;
         r.t += dt;
         if (!this.calm) r.x = Math.min(0.95, Math.max(0.05, r.x0 + Math.sin(r.t * r.wob + r.ph) * r.sway));
@@ -6092,10 +6106,35 @@
       this.score++;
       // a little pop: a quick burst of noise with a bright blip on top (only when Sound is on)
       playNoise(0.07, 'bandpass', 1600, 0.18); spTone(1046, 'sine', 0.06, 0.06); spTone(1568, 'sine', 0.09, 0.04, 0.05);
-      if (this.score % SP_WAVE_ZAPS === 0) this.nextWave();
+      if (r.box) this.prize();
       else this.say(SP_CHEERS[rnd(0, SP_CHEERS.length - 1)]);
+      while (this.score >= this.wave * SP_WAVE_ZAPS) this.nextWave();
       this.drawHud();
       this.pickTarget();
+    },
+    // The mystery box prizes: an extra life (only when one is missing), freeze or blast.
+    prize() {
+      const prizes = ['freeze', 'blast'];
+      if (this.lives < SP_LIVES) prizes.push('life');
+      const pick = prizes[rnd(0, prizes.length - 1)];
+      let text, sub;
+      if (pick === 'life') { this.lives++; text = '❤️ EXTRA LIFE'; sub = 'You got a life back!'; }
+      else if (pick === 'freeze') { this.freeze = SP_FREEZE; text = '❄️ FREEZE'; sub = `Rocks stop for ${SP_FREEZE} seconds!`; }
+      else {
+        const gone = this.rocks.length;
+        for (const r of this.rocks) {
+          this.burst(r, [r.colour, '#ffffff', '#ffd75e'], 20, 120);
+          this.rings.push({ ...this.rockAt(r), r: this.rockR(), colour: r.colour, t: 0 });
+        }
+        this.rocks = [];
+        this.score += gone;
+        this.wobble(0.4, 5);
+        text = '💥 BLAST'; sub = gone ? `Cleared ${gone} rock${gone === 1 ? '' : 's'}!` : 'Clear skies!';
+      }
+      this.banner = { text, sub, t: 0, prize: true };
+      this.say(`${text}! ${sub}`);
+      playTune([784, 988, 1175, 1568], 'triangle');
+      this.drawHud();
     },
     nextWave() {
       const L = this.L, before = L.most + Math.floor(L.extra * spClimb(this.wave) + 0.0001);
@@ -6111,6 +6150,13 @@
     wobble(time, px) { if (!this.calm) this.shake = { t: time, total: time, px }; },
     bonk(r) {
       if (this.over) return;
+      if (r.box) {  // a missed box just floats away: no life lost
+        this.burst(r, ['#ffd75e', '#fff3b0'], 12);
+        this.rocks = this.rocks.filter(x => x !== r);
+        this.say(`The mystery box floated away. It was ${r.sum.text} = ${r.sum.ans}`);
+        this.pickTarget();
+        return;
+      }
       this.burst(r, ['#c9c9d6', '#8d8da3'], 10);
       this.wobble(0.35, 5);
       this.rocks = this.rocks.filter(x => x !== r);
@@ -6283,6 +6329,10 @@
       this.drawShip(18 + this.shipX * (W - 36), this.shipTop(), time);
       g.restore();
       if (this.banner) this.drawBanner(this.banner);
+      if (this.freeze) {
+        g.fillStyle = '#bfe9ff'; g.textAlign = 'left'; g.textBaseline = 'top';
+        g.font = `800 18px ${this.font}`; g.fillText(`❄️ ${Math.ceil(this.freeze)}`, 10, 10);
+      }
       if (this.paused) {
         g.fillStyle = 'rgba(0, 0, 0, 0.45)'; g.fillRect(0, 0, W, H);
         g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
@@ -6301,7 +6351,10 @@
       const bw = Math.min(W - 24, 300), bh = 92;
       g.beginPath(); g.roundRect ? g.roundRect(-bw / 2, -bh / 2, bw, bh, 20) : g.rect(-bw / 2, -bh / 2, bw, bh); g.fill();
       g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.font = `900 ${Math.min(44, W * 0.12)}px ${this.font}`;
+      let size = Math.min(44, W * 0.12);
+      g.font = `900 ${size}px ${this.font}`;
+      const tw = g.measureText(b.text + '!').width;
+      if (tw > bw - 24) { size *= (bw - 24) / tw; g.font = `900 ${size}px ${this.font}`; }  // long prize names shrink to fit
       g.lineWidth = 6; g.strokeStyle = '#ff7eb6'; g.lineJoin = 'round';
       g.strokeText(b.text + '!', 0, -12);
       g.fillStyle = '#ffd75e';
@@ -6323,6 +6376,8 @@
         g.beginPath(); g.arc(0, 0, R + 9, 0, Math.PI * 2); g.stroke();
         g.restore();
       }
+      if (r.box) this.drawBox(R, time);
+      else {
       g.save();
       g.rotate(r.spin);
       g.fillStyle = r.colour;
@@ -6343,6 +6398,11 @@
       g.beginPath(); g.arc(-R * 0.28, -R * 0.12, R * 0.09, 0, Math.PI * 2); g.arc(R * 0.28, -R * 0.12, R * 0.09, 0, Math.PI * 2); g.fill();
       g.strokeStyle = '#2b2140'; g.lineWidth = 2.5; g.lineCap = 'round';
       g.beginPath(); g.arc(0, R * 0.08, R * 0.24, 0.2 * Math.PI, 0.8 * Math.PI); g.stroke();
+      }
+      if (this.freeze) {  // frosty while frozen
+        g.strokeStyle = 'rgba(190, 235, 255, 0.9)'; g.lineWidth = 4;
+        g.beginPath(); g.arc(0, 0, R + 2, 0, Math.PI * 2); g.stroke();
+      }
       if (r === this.target) {  // the sum, on a white label under the rock
         const size = Math.max(16, Math.min(22, R * 0.6));
         g.font = `800 ${size}px ${this.font}`;
@@ -6353,6 +6413,28 @@
         g.fillText(r.sum.text, 0, y + h / 2 + 1);
       }
       g.restore();
+    },
+    // a gold gift box with a pink ribbon, a "?" and a few twinkles around it
+    drawBox(R, time) {
+      const g = this.g, s = R * 0.85;
+      g.save();
+      g.rotate(this.calm ? 0 : Math.sin(time * 1.5) * 0.12);
+      g.fillStyle = '#ffd75e'; g.strokeStyle = '#c98a00'; g.lineWidth = 3;
+      g.beginPath(); g.roundRect ? g.roundRect(-s, -s * 0.8, s * 2, s * 1.8, 8) : g.rect(-s, -s * 0.8, s * 2, s * 1.8); g.fill(); g.stroke();
+      g.fillStyle = '#ff7eb6';
+      g.fillRect(-s * 0.16, -s * 0.8, s * 0.32, s * 1.8);
+      g.fillRect(-s, -s * 0.2, s * 2, s * 0.3);
+      g.beginPath(); g.ellipse(-s * 0.3, -s * 0.95, s * 0.3, s * 0.18, -0.4, 0, Math.PI * 2); g.ellipse(s * 0.3, -s * 0.95, s * 0.3, s * 0.18, 0.4, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#7a4b00'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.font = `900 ${Math.round(s * 0.9)}px ${this.font}`;
+      g.fillText('?', -s * 0.55, s * 0.45);
+      g.restore();
+      g.fillStyle = '#fff3b0';
+      for (let i = 0; i < 4; i++) {
+        const a = i * Math.PI / 2 + time * (this.calm ? 0 : 0.8), d = R * 1.35;
+        const tw = this.calm ? 3 : 2 + 1.5 * Math.sin(time * 4 + i);
+        g.beginPath(); g.arc(Math.cos(a) * d, Math.sin(a) * d, tw, 0, Math.PI * 2); g.fill();
+      }
     },
     drawShip(x, top, time) {
       const g = this.g;
