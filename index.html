@@ -3511,8 +3511,13 @@
   /* ---------- Waves: an animated background, like a classic console's wave menu ----------
      A canvas fixed behind everything. The Sky button in the tools box switches between the skin's
      still background (🖼️) and the animated waves (〰). Still is the default. */
-  .waves-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; display: none; }
-  body.waves { background: var(--waves-sky, #06205a); }
+  /* translateZ and backface-visibility keep the canvas on its own layer, so phones slide the page
+     over it while scrolling instead of repainting it (which flashed black). */
+  .waves-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; display: none; transform: translateZ(0); -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+  /* Behind the canvas: the middle of the sky, not the near-black top, in case it ever peeks through. */
+  body.waves { background: var(--waves-mid, var(--waves-sky, #06205a)); }
+  /* No rubber-band bounce with waves on: pulling past the bottom showed a dark strip under the light sky. */
+  html:has(body.waves) { overscroll-behavior-y: none; }
   body.waves .waves-bg { display: block; }
   /* Small phones: a slimmer Flip button and smaller tool labels so everything fits */
   @media (max-width: 359px) {
@@ -5269,12 +5274,12 @@
   let wavesH = 0;
   // Each ribbon: height on screen, wave size, stretch, speed, thickness, brightness.
   const ribbons = [
-    { y: 0.58, amp: 0.07, k: 1.6, speed: 0.11, thick: 0.10, alpha: 0.13 },
-    { y: 0.62, amp: 0.05, k: 2.3, speed: -0.08, thick: 0.06, alpha: 0.10 },
-    { y: 0.55, amp: 0.09, k: 1.1, speed: 0.06, thick: 0.14, alpha: 0.07 },
+    { y: 0.38, amp: 0.07, k: 1.6, speed: 0.11, thick: 0.10, alpha: 0.13 },
+    { y: 0.42, amp: 0.05, k: 2.3, speed: -0.08, thick: 0.06, alpha: 0.10 },
+    { y: 0.35, amp: 0.09, k: 1.1, speed: 0.06, thick: 0.14, alpha: 0.07 },
   ];
   const sparkles = Array.from({ length: 28 }, () => ({
-    x: Math.random(), y: 0.35 + Math.random() * 0.45, r: 0.6 + Math.random() * 1.6,
+    x: Math.random(), y: 0.15 + Math.random() * 0.45, r: 0.6 + Math.random() * 1.6,
     drift: 0.004 + Math.random() * 0.01, phase: Math.random() * 6.28,
   }));
   // Colour helpers: hex to hue/saturation/lightness and back.
@@ -5383,6 +5388,7 @@
     wavesPal = wavesPalette();
     wavesCtx.fillStyle = wavesPal.top;  // the canvas hands it back as #rrggbb, which phones accept as theme-color
     document.body.style.setProperty('--waves-sky', wavesCtx.fillStyle);
+    document.body.style.setProperty('--waves-mid', wavesPal.mid);
     syncEdges();
     sizeWaves();
     drawWaves(wavesTime());  // paint straight away so there is never a blank frame
