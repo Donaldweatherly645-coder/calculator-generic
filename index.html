@@ -6138,8 +6138,9 @@
     rockAt(r) {
       const x = 18 + r.x * (this.W - 36);
       if (!r.boss) return { x, y: -this.rockR() + r.p * this.shipTop() };
-      const R = this.rockR() * 1.8, top = R + 28;  // the boss starts all on screen, health bar too, and lands on the ship
-      return { x, y: top + r.p * (this.shipTop() - R - top) };
+      const R = this.rockR() * 1.8, end = this.shipTop() - R;
+      const top = Math.min(R + 28, end);  // the boss starts all on screen, health bar too (if there's room), and lands on the ship
+      return { x, y: top + r.p * (end - top) };
     },
     spawn() {
       if (this.bonus) { this.spawnGold(); return; }
@@ -6336,7 +6337,7 @@
     },
     bossSum() {
       let sum;
-      do sum = spaceBoxSum(this.mode, this.level, this.wave); while (sum.text === this.last);
+      do sum = spaceBoxSum(this.mode, this.level, this.wave + this.hot); while (sum.text === this.last);  // fast players get harder ones, like boxes
       this.last = sum.text;
       return sum;
     },
