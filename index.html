@@ -5917,7 +5917,7 @@
   // Each level adds a kind of sum: Easy + −, Medium adds ×, Hard adds ÷.
   const SP_LEVELS = {
     // quick = an answer in this many seconds (or less) counts as fast
-    easy: { icon: '🌱', name: 'Easy', fall: 11, every: 6, quick: 3, ops: ['add', 'sub'] },
+    easy: { icon: '🌱', name: 'Easy', fall: 11, every: 6, quick: 4, ops: ['add', 'sub'] },
     medium: { icon: '🚀', name: 'Medium', fall: 12, every: 6, quick: 4, ops: ['add', 'sub', 'mul'] },
     hard: { icon: '🌟', name: 'Hard', fall: 14, every: 7, quick: 5, ops: ['add', 'sub', 'mul', 'div'] },
   };
@@ -5993,10 +5993,11 @@
   const spaceBoxSum = (mode, level, wave) => spBigger(mode, level, wave + 3);
   // Fast answers push the game on: each one makes the rocks a little faster (never slower),
   // and a run of them makes the sums harder. A slow answer eases the sums back again.
-  // Losing a heart gives a short breather: the rocks slow down, then speed back up.
-  const SP_BOOST_STEP = 0.04;  // each fast answer: rocks 4% faster…
+  // Losing a heart gives a short breather (the rocks slow down, then speed back up) and takes a little boost away.
+  const SP_BOOST_STEP = 0.025; // each fast answer: rocks 2.5% faster (full boost takes about 2 waves)…
   const SP_BOOST_MAX = 1.4;    // …up to 40% faster than the wave's own pace
-  const SP_TOP_SPEED = 3.2;    // the speed cap: never more than 3.2× wave 1, however good you are
+  const SP_BOOST_HIT = 0.1;    // losing a heart takes 10% of the boost away for good
+  const SP_TOP_SPEED = 3.5;    // the speed cap: never more than 3.5× wave 1, however good you are
   const SP_HOT_MAX = 4;        // fast answers in a row (net) that give the hardest sums
   const SP_EASE = 4;           // seconds of breather after losing a heart…
   const SP_EASE_BY = 0.65;     // …at 65% speed, easing back to full speed over the last 1.5 s
@@ -6250,7 +6251,8 @@
       this.rocks = this.rocks.filter(x => x !== r);
       this.lives--;
       this.hurt = 0.8;
-      this.ease = SP_EASE;  // a short breather
+      this.ease = SP_EASE;  // a short breather…
+      this.boost = Math.max(1, this.boost - SP_BOOST_HIT);  // …and a little less boost from now on
       spTone(196, 'sine', 0.25, 0.06);
       this.drawHud();
       if (this.lives <= 0) { this.end(); return; }
