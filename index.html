@@ -5301,14 +5301,24 @@
       glow: (a) => hsl(ah, Math.min(asat, 0.9), 0.82, a),  // a pale tint of the accent
     };
   }
+  // Resizing a canvas wipes it blank, so only do it when the size really changed. Phones send
+  // lots of resize events while you scroll (the address bar slides in and out), and wiping the
+  // canvas on each one made the waves flicker black.
+  let wavesDpr = 0;
   function sizeWaves() {
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);  // keeps it light on phones
-    wavesW = wavesBg.clientWidth;
-    wavesH = wavesBg.clientHeight;
+    const w = wavesBg.clientWidth, h = wavesBg.clientHeight;
+    if (w === wavesW && h === wavesH && dpr === wavesDpr) return false;
+    wavesW = w;
+    wavesH = h;
+    wavesDpr = dpr;
     wavesBg.width = Math.round(wavesW * dpr);
     wavesBg.height = Math.round(wavesH * dpr);
     wavesCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return true;
   }
+  // The moment to draw: the clock when moving, a fixed pretty moment when still.
+  const wavesTime = () => (stillMotion.matches || document.hidden ? 8000 : performance.now());
   function waveY(rb, x, t, shift) {
     const u = x / wavesW;
     return wavesH * (rb.y + rb.amp * Math.sin(u * rb.k * 6.28 + t * rb.speed * 6.28 + shift)
@@ -5375,8 +5385,8 @@
     document.body.style.setProperty('--waves-sky', wavesCtx.fillStyle);
     syncEdges();
     sizeWaves();
-    if (stillMotion.matches || document.hidden) drawWaves(8000);
-    else wavesFrame = requestAnimationFrame(loopWaves);
+    drawWaves(wavesTime());  // paint straight away so there is never a blank frame
+    if (!stillMotion.matches && !document.hidden) wavesFrame = requestAnimationFrame(loopWaves);
   }
   wavesBtn.addEventListener('click', () => {
     wavesOn = !wavesOn;
@@ -5385,7 +5395,8 @@
     toast(wavesOn ? '〰 Animated background' : '🖼️ Still background');
   });
   // Redraw to fit when the window changes size or a phone turns sideways.
-  const refitWaves = () => { if (wavesOn) applyWaves(); };
+  // Only a real size change needs a redraw, and it is repainted at once.
+  const refitWaves = () => { if (wavesOn && sizeWaves()) drawWaves(wavesTime()); };
   window.addEventListener('resize', refitWaves);
   window.addEventListener('orientationchange', refitWaves);
   window.visualViewport?.addEventListener('resize', refitWaves);
