@@ -5277,9 +5277,13 @@
     { y: 0.38, amp: 0.07, k: 1.6, speed: 0.11, thick: 0.10, alpha: 0.13 },
     { y: 0.42, amp: 0.05, k: 2.3, speed: -0.08, thick: 0.06, alpha: 0.10 },
     { y: 0.35, amp: 0.09, k: 1.1, speed: 0.06, thick: 0.14, alpha: 0.07 },
+    // Fainter ribbons near the top and bottom so the whole screen moves, not just the middle.
+    { y: 0.12, amp: 0.05, k: 1.3, speed: -0.05, thick: 0.08, alpha: 0.06 },
+    { y: 0.78, amp: 0.06, k: 1.8, speed: 0.07, thick: 0.10, alpha: 0.08 },
+    { y: 0.90, amp: 0.04, k: 2.6, speed: -0.09, thick: 0.06, alpha: 0.06 },
   ];
-  const sparkles = Array.from({ length: 28 }, () => ({
-    x: Math.random(), y: 0.15 + Math.random() * 0.45, r: 0.6 + Math.random() * 1.6,
+  const sparkles = Array.from({ length: 40 }, () => ({
+    x: Math.random(), y: 0.04 + Math.random() * 0.92, r: 0.6 + Math.random() * 1.6,
     drift: 0.004 + Math.random() * 0.01, phase: Math.random() * 6.28,
   }));
   // Colour helpers: hex to hue/saturation/lightness and back.
