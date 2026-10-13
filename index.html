@@ -6316,6 +6316,7 @@
       this.banner = { text: `WAVE ${this.wave}`, sub, t: 0 };
       this.say(`Wave ${this.wave}! ${sub}`);
       playTune([523, 659, 784], 'triangle');
+      this.drawHud();
     },
     // a gentle screen wobble (none when the device asks for less motion)
     wobble(time, px) { if (!this.calm) this.shake = { t: time, total: time, px }; },
