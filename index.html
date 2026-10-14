@@ -3465,6 +3465,21 @@
     .sp-play { grid-template-columns: 1.25fr 1fr; align-items: center; }
     .sp-sky canvas { height: calc(100dvh - 130px); min-height: 160px; }
   }
+  /* Sky Sums: the bird game. It borrows the Space Sums card, HUD and sum styles. */
+  .sky-play .sp-sky canvas { background: #8fd3ff; cursor: pointer; }
+  .sky-picks { display: grid; gap: 8px; }
+  .game-card .sky-pick { display: grid; grid-template-columns: 40px 1fr 70px; align-items: center; padding: 10px 14px; border-radius: 16px; background: rgba(255, 255, 255, 0.16); font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .game-card .sky-pick:hover { background: rgba(255, 255, 255, 0.26); }
+  .sky-pick .sl { font-size: 22px; }
+  .sky-pick small { font-size: 13px; font-weight: 700; opacity: 0.75; text-align: right; }
+  .game-card .sky-pick.right { background: #7ee787; color: #0b2a10; }
+  .game-card .sky-pick:disabled { opacity: 0.3; cursor: default; text-decoration: line-through; }
+  .game-card .sky-pick.right:disabled { opacity: 1; text-decoration: none; }
+  .sky-row { display: flex; justify-content: center; margin-top: 8px; }
+  .sky-final { font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  @media (max-height: 640px) {
+    .game-card .sky-pick { padding: 6px 12px; font-size: 24px; }
+  }
   @media (prefers-reduced-motion: reduce) { .m24-card.picked { transform: none; } .game-card button:active { transform: none; } }
 
   /* ---------- Waves: an animated background, like a classic console's wave menu ----------
@@ -6534,11 +6549,394 @@
     },
   };
 
+  // Sky Sums: a little bird floats along on its own, and pipes drift towards it. Each pipe
+  // has 3 ways past: over the top, through the middle, or under the bottom. Each way shows a
+  // number, and only one is the answer to the sum. Pick it and the bird flies that way.
+  // A wrong pick just closes that way (try again); after 2 wrong picks only the answer is left.
+  // If the pipe reaches the bird before you pick, it bonks and you lose a heart.
+  // Answer fast and the bird zooms on to the next pipe, so quick players set the pace.
+  // The sums and the speed climb by stage (every SKY_STAGE pipes), the same way Space Sums
+  // climbs by wave, and use the same level ladder: Easy + −, Medium adds ×, Hard adds ÷.
+  const SKY_LIVES = 3;
+  const SKY_STAGE = 8;                                  // pipes in a stage
+  const SKY_TIME = { easy: 8, medium: 9, hard: 10 };   // seconds a pipe takes to reach the bird on stage 1
+  const SKY_DASH = 0.9;                                 // after a right answer the pipe reaches the bird in at most this many seconds
+  const SKY_EASE = 0.7;                                 // the pipe after a bonk comes at 70% speed
+  const SKY_LANES = [{ icon: '⬆️', name: 'over' }, { icon: '➡️', name: 'through' }, { icon: '⬇️', name: 'under' }];
+  const SKY_KEY = 'calc-sky-';
+  const SKY_CHEERS = ['Flap! 🐤', 'Great job!', 'You got it!', 'Whoosh!', 'Nice one!', 'Super!'];
+  // Two wrong answers that look close to the right one (never below 0, never the same)
+  function skyChoices(ans) {
+    const a = Number(ans), set = new Set([a]);
+    for (let i = 0; set.size < 3 && i < 40; i++) {
+      const d = [1, 1, 2, 2, 3, a >= 15 ? 10 : 1][rnd(0, 5)] * (Math.random() < 0.5 ? -1 : 1);
+      if (a + d >= 0) set.add(a + d);
+    }
+    for (let n = a + 1; set.size < 3; n++) set.add(n);
+    const list = [...set];
+    for (let i = list.length - 1; i > 0; i--) { const j = rnd(0, i); [list[i], list[j]] = [list[j], list[i]]; }
+    return list.map(String);
+  }
+
+  const skySums = {
+    calm: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    open(body) {
+      this.body = body;
+      this.card = body.closest('.game-card');
+      this.card.classList.add('sp-card');
+      this.home();
+    },
+    best(level) { return loadNum(SKY_KEY + level); },
+    home(note = '') {
+      this.halt();
+      if (!this.level) {
+        try { this.level = localStorage.getItem(SKY_KEY + 'level'); } catch {}
+        if (!SP_LEVELS[this.level]) this.level = 'easy';
+      }
+      this.body.innerHTML = `
+        ${note}
+        <p class="game-how">Help the little bird fly past the pipes! Each pipe has 3 ways past: ⬆️ over, ➡️ through or ⬇️ under. Pick the way with the right answer to the sum, and the bird flies that way. You have 3 lives ❤️. Every ${SKY_STAGE} pipes the bird goes faster and the sums get bigger. 🐤</p>
+        <div class="sp-step">Pick a level to start</div>
+        <div class="sp-levels">${Object.entries(SP_LEVELS).map(([id, l]) => {
+          const best = this.best(id);
+          return `<button class="sp-pick ${id}" data-level="${id}"><span class="si" aria-hidden="true">${l.icon}</span><span>${l.name}</span>
+            <small>${l.ops.map(op => SP_OPS[op]).join(' ')}</small><span class="sb">${best ? '🏆 ' + best : ''}</span></button>`;
+        }).join('')}</div>`;
+      this.body.querySelectorAll('[data-level]').forEach(b => b.addEventListener('click', () => this.go(b.dataset.level)));
+      this.body.querySelector(`[data-level="${this.level}"]`).focus();
+    },
+    go(level) {
+      this.halt();
+      this.level = level;
+      try { localStorage.setItem(SKY_KEY + 'level', level); } catch {}
+      Object.assign(this, { time: SKY_TIME[level] * spTime('mix', level), score: 0, stage: 1, passed: 0, lives: SKY_LIVES, combo: 0,
+        pipes: [], bits: [], scroll: 0, ease: false, hurt: 0, nudge: 0, shake: 0, last: '', paused: false, over: false,
+        banner: { text: 'STAGE 1', sub: 'Get ready!', t: 0 }, bird: { lane: 1, y: null, flap: 0 } });
+      this.body.innerHTML = `
+        <div class="sp-play sky-play">
+          <div>
+            <div class="sp-hud"><span>⭐ <span data-score>0</span></span><span data-stage></span><span class="sp-lives" data-lives></span></div>
+            <div class="sp-sky"><canvas data-sky aria-hidden="true"></canvas></div>
+          </div>
+          <div>
+            <div class="sp-sum"><span data-sum aria-live="polite"></span><span aria-hidden="true">= ?</span></div>
+            <div class="sp-say" data-say aria-live="polite"></div>
+            <div class="sky-picks">${SKY_LANES.map((l, i) => `<button class="sky-pick" data-lane="${i}"><span class="sl" aria-hidden="true">${l.icon}</span><span data-num></span><small>${l.name}</small></button>`).join('')}</div>
+            <div class="sky-row"><button class="game-btn" data-pause>⏸️ Pause</button></div>
+          </div>
+        </div>`;
+      const $ = s => this.body.querySelector(s);
+      this.body.querySelectorAll('[data-lane]').forEach(b => b.addEventListener('click', () => this.pick(Number(b.dataset.lane))));
+      $('[data-pause]').addEventListener('click', () => this.pause());
+      this.canvas = $('[data-sky]');
+      // tap the sky above, between or below the pipes to fly that way
+      this.canvas.addEventListener('pointerdown', e => {
+        const box = this.canvas.getBoundingClientRect();
+        this.pick(Math.max(0, Math.min(2, Math.floor((e.clientY - box.top) / (this.playH() / 3)))));
+      });
+      this.g = this.canvas.getContext('2d');
+      this.font = getComputedStyle(this.card).fontFamily;
+      this.sizeSky();
+      this.watch = new ResizeObserver(() => this.sizeSky());
+      this.watch.observe(this.canvas);
+      this.clouds = Array.from({ length: 5 }, (_, i) => ({ x: i / 5 + Math.random() * 0.15, y: 0.08 + Math.random() * 0.4, s: 0.7 + Math.random() * 0.6 }));
+      this.spawn();
+      this.drawHud();
+      this.t = performance.now();
+      const run = this.run;
+      const frame = now => {
+        if (run !== this.run) return;
+        const dt = Math.min(0.05, (now - this.t) / 1000);
+        this.t = now;
+        if (!this.paused && !this.over) this.update(dt);
+        this.draw(now / 1000);
+        this.raf = requestAnimationFrame(frame);
+      };
+      this.raf = requestAnimationFrame(frame);
+    },
+    sizeSky() {
+      const box = this.canvas.getBoundingClientRect();
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const oldW = this.W;
+      this.W = box.width || 300;
+      this.H = box.height || 300;
+      this.canvas.width = Math.round(this.W * dpr);
+      this.canvas.height = Math.round(this.H * dpr);
+      this.g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (oldW && this.pipes) this.pipes.forEach(p => { p.x *= this.W / oldW; });  // pipes keep their place across a resize
+      this.bird.y = null;
+    },
+    // Sizes, worked out from the canvas so it fits any screen
+    groundH() { return Math.max(18, Math.min(30, this.H * 0.1)); },
+    playH() { return this.H - this.groundH(); },
+    laneY(i) { return this.playH() * (i * 2 + 1) / 6; },
+    pipeW() { return Math.max(50, Math.min(84, this.W * 0.16)); },
+    pipeT() { return this.playH() * 0.16; },        // how tall each floating pipe is
+    birdX() { return Math.max(40, this.W * 0.22); },
+    birdR() { return Math.max(10, Math.min(20, this.playH() * 0.065)); },
+    pace() { return Math.min(SP_TOP_SPEED, spPace(this.stage)); },
+    // How fast the pipes move: a new pipe takes this.time (÷ the stage's pace) to reach the bird
+    speed() { return (this.W + this.pipeW() - this.birdX()) / (this.time / this.pace()); },
+    current() { return this.pipes.find(p => !p.done); },
+    spawn() {
+      let sum;
+      do sum = spaceSum('mix', this.level, this.stage); while (sum.text === this.last);
+      this.last = sum.text;
+      const nums = skyChoices(sum.ans);
+      this.pipes.push({ x: this.W + this.pipeW() / 2, sum, nums, right: nums.indexOf(sum.ans), shut: [false, false, false], misses: 0, solved: false, hit: false, done: false, slow: this.ease });
+      this.ease = false;
+      this.showSum();
+    },
+    update(dt) {
+      const cur = this.current(), bx = this.birdX(), r = this.birdR(), pw = this.pipeW();
+      let v = this.speed() * (cur && cur.slow ? SKY_EASE : 1);
+      if (cur && cur.solved) v = Math.max(v, (cur.x - bx) / SKY_DASH, v * 1.5);  // zoom to the next pipe
+      this.pipes.forEach(p => { p.x -= v * dt; });
+      this.scroll += v * dt;
+      // the bird glides to its lane
+      const want = this.laneY(this.bird.lane);
+      if (this.bird.y == null) this.bird.y = want;
+      this.bird.y += (want - this.bird.y) * Math.min(1, dt * 7);
+      this.bird.flap += dt * (cur && cur.solved ? 16 : 9);
+      this.nudge *= Math.max(0, 1 - dt * 6);
+      this.hurt = Math.max(0, this.hurt - dt);
+      this.shake = Math.max(0, this.shake - dt);
+      if (this.banner) { this.banner.t += dt; if (this.banner.t > 2) this.banner = null; }
+      if (cur && !cur.solved && !cur.hit && cur.x - pw / 2 <= bx + r * 0.8) this.bonk(cur);
+      if (this.over) return;
+      if (cur && cur.x + pw / 2 < bx - r) {  // past the bird: on to the next pipe
+        cur.done = true;
+        this.passed++;
+        if (this.passed % SKY_STAGE === 0) {
+          this.stage++;
+          this.banner = { text: `STAGE ${this.stage}`, sub: 'Faster! 🐤', t: 0 };
+          spTone(988, 'triangle', 0.12, 0.05); spTone(1319, 'triangle', 0.14, 0.05, 0.1);
+        }
+        this.drawHud();
+        this.spawn();
+      }
+      this.pipes = this.pipes.filter(p => p.x > -pw);
+      this.bits.forEach(b => { b.t += dt; b.x += b.vx * dt - v * dt; b.y += b.vy * dt; b.vy += 300 * dt; });
+      this.bits = this.bits.filter(b => b.t < b.life);
+    },
+    pick(lane) {
+      const p = this.current();
+      if (!p || this.paused || this.over || p.solved || p.hit || p.shut[lane]) return;
+      if (lane === p.right) {
+        p.solved = true;
+        this.bird.lane = lane;
+        this.combo++;
+        this.score += SP_POINTS * spMult(this.combo);
+        playNoise(0.06, 'bandpass', 2400, 0.12); spTone(880, 'sine', 0.06, 0.05); spTone(1175, 'sine', 0.08, 0.04, 0.05);
+        this.puff(this.birdX(), this.bird.y ?? this.laneY(1), ['#ffd75e', '#ffffff', '#7ee787'], 10);
+        const lift = this.combo % SP_COMBO_STEP === 0 && spMult(this.combo) > spMult(this.combo - 1);
+        this.say(lift ? `🔥 Combo ×${spMult(this.combo)}!` : SKY_CHEERS[rnd(0, SKY_CHEERS.length - 1)]);
+        this.drawHud();
+      } else {
+        p.shut[lane] = true;
+        p.misses++;
+        this.combo = 0;
+        this.nudge = lane < this.bird.lane ? -1 : lane > this.bird.lane ? 1 : 0.5;  // a little flinch towards the wrong way
+        spTone(330, 'sine', 0.12, 0.04);
+        this.say(p.misses >= 2 ? `Psst… it's ${p.sum.ans}` : 'Oops! Try another way 🙂');
+      }
+      this.showSum();
+    },
+    bonk(p) {
+      p.hit = true;
+      this.lives--;
+      this.combo = 0;
+      this.hurt = 0.8;
+      this.ease = true;              // the next pipe comes a bit slower, as a breather
+      if (!this.calm) this.shake = 0.3;
+      this.bird.lane = p.right;      // the bird bumps through anyway, so the game keeps flowing
+      this.puff(this.birdX(), this.bird.y ?? this.laneY(1), ['#ffe8a3', '#c9c9d6'], 12);
+      spTone(196, 'sine', 0.25, 0.06);
+      this.drawHud();
+      this.showSum();
+      if (this.lives <= 0) { this.end(); return; }
+      this.say(`Bonk! ${p.sum.text} = ${p.sum.ans}`);
+    },
+    puff(x, y, colours, n) {
+      if (this.calm) return;
+      for (let i = 0; i < n; i++) {
+        const a = Math.random() * Math.PI * 2, s = 60 + Math.random() * 120;
+        this.bits.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 60, t: 0, life: 0.6 + Math.random() * 0.3, c: colours[i % colours.length], r: 2 + Math.random() * 3 });
+      }
+    },
+    end() {
+      this.over = true;
+      this.say('');
+      const newBest = this.score > this.best(this.level);
+      if (newBest) { saveNum(SKY_KEY + this.level, this.score); playTune([523, 659, 784, 1047], 'triangle'); }
+      const run = this.run;
+      setTimeout(() => {
+        if (run !== this.run || currentGame !== this) return;
+        this.home(`<div class="game-msg good">${newBest ? '🏆 New best! ' : ''}${this.score ? 'Great flying! 🐤' : 'Good try! Have another go. 🙂'}</div>
+          <div class="sky-final">⭐ ${this.score} <small class="sp-reached">· stage ${this.stage}</small></div>`);
+      }, 1400);
+    },
+    drawHud() {
+      const $ = s => this.body.querySelector(s);
+      $('[data-score]').textContent = this.score;
+      $('[data-stage]').textContent = `Stage ${this.stage}`;
+      const lives = Math.max(0, this.lives), el = $('[data-lives]');
+      el.textContent = '❤️'.repeat(lives) + '🤍'.repeat(SKY_LIVES - lives);
+      el.setAttribute('aria-label', `${lives} ${lives === 1 ? 'life' : 'lives'} left`);
+    },
+    showSum() {
+      const p = this.current();
+      this.body.querySelector('[data-sum]').textContent = p ? p.sum.text : '…';
+      this.body.querySelectorAll('[data-lane]').forEach((b, i) => {
+        b.querySelector('[data-num]').textContent = p ? p.nums[i] : '';
+        const right = p && (p.solved || p.hit) && i === p.right;
+        b.classList.toggle('right', !!right);
+        b.disabled = !p || p.shut[i] || p.solved || p.hit;
+        b.setAttribute('aria-label', p ? `${SKY_LANES[i].name}: ${p.nums[i]}` : SKY_LANES[i].name);
+      });
+    },
+    say(text) {
+      const el = this.body.querySelector('[data-say]');
+      if (!el) return;
+      el.textContent = text;
+      clearTimeout(this.sayTimer);
+      this.sayTimer = setTimeout(() => { if (el.textContent === text) el.textContent = ''; }, 2500);
+    },
+    pause() {
+      if (this.over) return;
+      this.paused = !this.paused;
+      this.body.querySelector('[data-pause]').textContent = this.paused ? '▶️ Play' : '⏸️ Pause';
+      this.say(this.paused ? 'Paused' : '');
+    },
+    draw(time) {
+      const g = this.g, W = this.W, H = this.H, P = this.playH(), pw = this.pipeW(), T = this.pipeT();
+      g.save();
+      if (this.shake) g.translate(Math.sin(time * 70) * 4 * (this.shake / 0.3), 0);
+      // sky, sun and clouds
+      const sky = g.createLinearGradient(0, 0, 0, P);
+      sky.addColorStop(0, '#6ec6ff'); sky.addColorStop(1, '#c8f0ff');
+      g.fillStyle = sky; g.fillRect(-10, 0, W + 20, P);
+      g.fillStyle = 'rgba(255, 236, 140, 0.9)';
+      g.beginPath(); g.arc(W - 34, 30, 16, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      for (const c of this.clouds) {
+        const span = W + 120, x = ((c.x * span - this.scroll * 0.15 * c.s) % span + span) % span - 60, y = c.y * P, s = 14 * c.s;
+        g.beginPath(); g.arc(x, y, s, 0, Math.PI * 2); g.arc(x + s, y - s * 0.5, s * 1.1, 0, Math.PI * 2); g.arc(x + s * 2, y, s * 0.9, 0, Math.PI * 2); g.fill();
+      }
+      // far hills, moving slowly
+      g.fillStyle = '#9be38f';
+      g.beginPath(); g.moveTo(-10, P);
+      for (let x = -10; x <= W + 10; x += 8) g.lineTo(x, P - 18 - Math.sin((x + this.scroll * 0.35) / 60) * 10 - Math.sin((x + this.scroll * 0.35) / 23) * 4);
+      g.lineTo(W + 10, P); g.fill();
+      // pipes, with a number sign in each way past
+      for (const p of this.pipes) {
+        for (const yc of [P / 3, P * 2 / 3]) this.drawPipe(p.x, yc, pw, T);
+        if (p.done) continue;
+        p.nums.forEach((n, i) => this.drawSign(p, i, n));
+      }
+      // ground
+      const gh = this.groundH();
+      g.fillStyle = '#e0b46a'; g.fillRect(-10, P, W + 20, gh);
+      g.fillStyle = '#6cc04a'; g.fillRect(-10, P, W + 20, 6);
+      g.fillStyle = 'rgba(0, 0, 0, 0.08)';
+      for (let x = -(this.scroll % 24); x < W; x += 24) { g.beginPath(); g.moveTo(x, P + 6); g.lineTo(x + 12, P + 6); g.lineTo(x + 4, H); g.lineTo(x - 8, H); g.fill(); }
+      // the bird
+      this.drawBird(time);
+      for (const b of this.bits) { g.globalAlpha = Math.max(0, 1 - b.t / b.life); g.fillStyle = b.c; g.beginPath(); g.arc(b.x, b.y, b.r, 0, Math.PI * 2); g.fill(); }
+      g.globalAlpha = 1;
+      if (this.hurt) { g.fillStyle = `rgba(255, 80, 80, ${this.hurt * 0.25})`; g.fillRect(-10, 0, W + 20, H); }
+      if (this.banner) {
+        const a = Math.min(1, this.banner.t * 4, (2 - this.banner.t) * 3);
+        g.globalAlpha = Math.max(0, a);
+        g.fillStyle = 'rgba(20, 40, 80, 0.55)';
+        g.fillRect(0, P / 2 - 34, W, 68);
+        g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = `900 26px ${this.font}`; g.fillText(this.banner.text, W / 2, P / 2 - 8);
+        g.font = `700 15px ${this.font}`; g.fillText(this.banner.sub, W / 2, P / 2 + 18);
+        g.globalAlpha = 1;
+      }
+      if (this.paused) {
+        g.fillStyle = 'rgba(20, 40, 80, 0.45)'; g.fillRect(-10, 0, W + 20, H);
+        g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = `900 28px ${this.font}`; g.fillText('PAUSED', W / 2, H / 2);
+      }
+      g.restore();
+    },
+    drawPipe(x, yc, w, t) {
+      const g = this.g, cap = Math.min(10, t * 0.3), left = x - w / 2;
+      g.fillStyle = '#4caf50'; g.fillRect(left + 4, yc - t / 2, w - 8, t);
+      g.fillStyle = 'rgba(255, 255, 255, 0.25)'; g.fillRect(left + 9, yc - t / 2, 6, t);
+      for (const y of [yc - t / 2, yc + t / 2 - cap]) {  // a rim at each end, like a real pipe
+        g.fillStyle = '#5cc85f'; g.fillRect(left, y, w, cap);
+        g.strokeStyle = '#2e7d32'; g.lineWidth = 2; g.strokeRect(left + 1, y + 1, w - 2, cap - 2);
+      }
+      g.strokeStyle = '#2e7d32'; g.lineWidth = 2; g.strokeRect(left + 5, yc - t / 2 + cap, w - 10, t - cap * 2);
+    },
+    drawSign(p, i, n) {
+      const g = this.g, y = this.laneY(i), shut = p.shut[i], right = (p.solved || p.hit) && i === p.right;
+      if ((p.solved || p.hit) && !right) return;  // once it's answered, only the right way stays lit
+      const fs = Math.max(13, Math.min(22, this.playH() * 0.085));
+      g.font = `900 ${fs}px ${this.font}`;
+      const w = Math.max(fs * 1.8, g.measureText(n).width + 16), h = fs * 1.5;
+      g.fillStyle = shut ? '#ff9b8a' : right ? '#7ee787' : '#fffdf5';
+      g.strokeStyle = shut ? '#b3261e' : right ? '#1e7b34' : '#2e7d32';
+      g.lineWidth = 2.5;
+      g.beginPath(); g.roundRect ? g.roundRect(p.x - w / 2, y - h / 2, w, h, 10) : g.rect(p.x - w / 2, y - h / 2, w, h); g.fill(); g.stroke();
+      g.fillStyle = shut ? '#5c0b06' : '#1a2b1a'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(shut ? '✖' : n, p.x, y + 1);
+    },
+    drawBird(time) {
+      const g = this.g, r = this.birdR(), x = this.birdX();
+      const bob = this.calm || this.paused ? 0 : Math.sin(time * 3) * 3;
+      const y = (this.bird.y ?? this.laneY(this.bird.lane)) + bob + this.nudge * r * 0.8;
+      const tilt = this.calm ? 0 : Math.max(-0.5, Math.min(0.5, (this.laneY(this.bird.lane) - (this.bird.y ?? y)) / (this.playH() * 0.6)));
+      g.save();
+      g.translate(x, y); g.rotate(tilt);
+      if (this.hurt && Math.floor(time * 12) % 2) g.globalAlpha = 0.5;  // blink after a bonk
+      g.fillStyle = '#ffd43b'; g.strokeStyle = '#b8860b'; g.lineWidth = 2;
+      g.beginPath(); g.ellipse(0, 0, r * 1.15, r, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.fillStyle = '#fff3bf';  // tummy
+      g.beginPath(); g.ellipse(-r * 0.1, r * 0.4, r * 0.65, r * 0.45, 0, 0, Math.PI * 2); g.fill();
+      const flap = this.calm || this.paused ? 0 : Math.sin(this.bird.flap) * 0.6;  // wing
+      g.save(); g.translate(-r * 0.35, r * 0.05); g.rotate(flap);
+      g.fillStyle = '#fab005'; g.beginPath(); g.ellipse(-r * 0.25, 0, r * 0.55, r * 0.32, -0.3, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.restore();
+      g.fillStyle = '#ffffff';  // eye
+      g.beginPath(); g.arc(r * 0.45, -r * 0.3, r * 0.32, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#1a1a2e'; g.beginPath(); g.arc(r * 0.55, -r * 0.3, r * 0.15, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#ffa8a8'; g.beginPath(); g.arc(r * 0.3, r * 0.15, r * 0.14, 0, Math.PI * 2); g.fill();  // rosy cheek
+      g.fillStyle = '#ff8c1a';  // beak
+      g.beginPath(); g.moveTo(r * 0.95, -r * 0.1); g.lineTo(r * 1.5, r * 0.08); g.lineTo(r * 0.95, r * 0.28); g.closePath(); g.fill();
+      g.restore();
+    },
+    halt() {
+      cancelAnimationFrame(this.raf);
+      this.watch?.disconnect();
+      this.watch = null;
+      clearTimeout(this.sayTimer);
+      this.run = (this.run || 0) + 1;
+      this.over = true;
+    },
+    stop() { this.halt(); this.card?.classList.remove('sp-card'); },
+    key(e) {
+      if (!this.canvas || !this.body.contains(this.canvas)) return false;
+      const k = e.key.toLowerCase();
+      if (k === 'arrowup' || k === 'w' || k === '1') this.pick(0);
+      else if (k === 'arrowright' || k === 'd' || k === '2' || k === ' ') this.pick(1);
+      else if (k === 'arrowdown' || k === 's' || k === '3') this.pick(2);
+      else if (k === 'p') this.pause();
+      else return false;
+      return true;
+    },
+  };
+
   const GAMES = [
     { id: 'make24', icon: '🃏', name: 'Make 24', blurb: 'Use four numbers to make 24.',
       score: () => { const n = loadNum('calc-24'); return n ? `${n} solved` : ''; }, game: make24 },
     { id: 'space', icon: '🚀', name: 'Space Sums', blurb: 'Zap space rocks with right answers.',
       score: () => { const n = Math.max(...Object.keys(SP_LEVELS).flatMap(l => spModesFor(l).map(m => loadNum(`${SP_KEY}${m}-${l}`)))); return n ? `Best ${n}` : ''; }, game: spaceSums },
+    { id: 'sky', icon: '🐤', name: 'Sky Sums', blurb: 'Fly over, through or under the pipes.',
+      score: () => { const n = Math.max(...Object.keys(SP_LEVELS).map(l => loadNum(SKY_KEY + l))); return n ? `Best ${n}` : ''; }, game: skySums },
   ];
 
   function drawGameList() {
