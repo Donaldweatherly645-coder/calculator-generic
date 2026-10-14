@@ -3453,7 +3453,6 @@
   .sp-answer { min-width: 76px; min-height: 46px; padding: 2px 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.12); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25); }
   .sp-answer.good { background: rgba(126, 231, 135, 0.35); }
   .sp-answer.bad { background: rgba(255, 155, 138, 0.35); }
-  .sp-dots { min-height: 22px; font-size: 18px; letter-spacing: 2px; color: #ffd75e; }
   .sp-say { min-height: 1.3em; font-size: 16px; font-weight: 700; color: #ffd75e; }
   .sp-reached { font-size: 16px; font-weight: 700; opacity: 0.7; }
   .sp-name { display: grid; justify-items: center; gap: 10px; margin: 10px 0 4px; font-size: 15px; font-weight: 700; }
@@ -3486,8 +3485,13 @@
   /* ---------- Waves: an animated background, like a classic console's wave menu ----------
      A canvas fixed behind everything. The Sky button in the tools box switches between the skin's
      still background (🖼️) and the animated waves (〰). Still is the default. */
-  .waves-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; display: none; }
-  body.waves { background: var(--waves-sky, #06205a); }
+  /* translateZ and backface-visibility keep the canvas on its own layer, so phones slide the page
+     over it while scrolling instead of repainting it (which flashed black). */
+  .waves-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; display: none; transform: translateZ(0); -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+  /* Behind the canvas: the middle of the sky, not the near-black top, in case it ever peeks through. */
+  body.waves { background: var(--waves-mid, var(--waves-sky, #06205a)); }
+  /* No rubber-band bounce with waves on: pulling past the bottom showed a dark strip under the light sky. */
+  html:has(body.waves) { overscroll-behavior-y: none; }
   body.waves .waves-bg { display: block; }
   /* Small phones: a slimmer Flip button and smaller tool labels so everything fits */
   @media (max-width: 359px) {
@@ -5150,12 +5154,16 @@
   let wavesH = 0;
   // Each ribbon: height on screen, wave size, stretch, speed, thickness, brightness.
   const ribbons = [
-    { y: 0.58, amp: 0.07, k: 1.6, speed: 0.11, thick: 0.10, alpha: 0.13 },
-    { y: 0.62, amp: 0.05, k: 2.3, speed: -0.08, thick: 0.06, alpha: 0.10 },
-    { y: 0.55, amp: 0.09, k: 1.1, speed: 0.06, thick: 0.14, alpha: 0.07 },
+    { y: 0.38, amp: 0.07, k: 1.6, speed: 0.11, thick: 0.10, alpha: 0.13 },
+    { y: 0.42, amp: 0.05, k: 2.3, speed: -0.08, thick: 0.06, alpha: 0.10 },
+    { y: 0.35, amp: 0.09, k: 1.1, speed: 0.06, thick: 0.14, alpha: 0.07 },
+    // Fainter ribbons near the top and bottom so the whole screen moves, not just the middle.
+    { y: 0.12, amp: 0.05, k: 1.3, speed: -0.05, thick: 0.08, alpha: 0.06 },
+    { y: 0.78, amp: 0.06, k: 1.8, speed: 0.07, thick: 0.10, alpha: 0.08 },
+    { y: 0.90, amp: 0.04, k: 2.6, speed: -0.09, thick: 0.06, alpha: 0.06 },
   ];
-  const sparkles = Array.from({ length: 28 }, () => ({
-    x: Math.random(), y: 0.35 + Math.random() * 0.45, r: 0.6 + Math.random() * 1.6,
+  const sparkles = Array.from({ length: 40 }, () => ({
+    x: Math.random(), y: 0.04 + Math.random() * 0.92, r: 0.6 + Math.random() * 1.6,
     drift: 0.004 + Math.random() * 0.01, phase: Math.random() * 6.28,
   }));
   // Colour helpers: hex to hue/saturation/lightness and back.
@@ -5182,14 +5190,24 @@
       glow: (a) => hsl(ah, Math.min(asat, 0.9), 0.82, a),  // a pale tint of the accent
     };
   }
+  // Resizing a canvas wipes it blank, so only do it when the size really changed. Phones send
+  // lots of resize events while you scroll (the address bar slides in and out), and wiping the
+  // canvas on each one made the waves flicker black.
+  let wavesDpr = 0;
   function sizeWaves() {
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);  // keeps it light on phones
-    wavesW = wavesBg.clientWidth;
-    wavesH = wavesBg.clientHeight;
+    const w = wavesBg.clientWidth, h = wavesBg.clientHeight;
+    if (w === wavesW && h === wavesH && dpr === wavesDpr) return false;
+    wavesW = w;
+    wavesH = h;
+    wavesDpr = dpr;
     wavesBg.width = Math.round(wavesW * dpr);
     wavesBg.height = Math.round(wavesH * dpr);
     wavesCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return true;
   }
+  // The moment to draw: the clock when moving, a fixed pretty moment when still.
+  const wavesTime = () => (stillMotion.matches || document.hidden ? 8000 : performance.now());
   function waveY(rb, x, t, shift) {
     const u = x / wavesW;
     return wavesH * (rb.y + rb.amp * Math.sin(u * rb.k * 6.28 + t * rb.speed * 6.28 + shift)
@@ -5254,10 +5272,11 @@
     wavesPal = wavesPalette();
     wavesCtx.fillStyle = wavesPal.top;  // the canvas hands it back as #rrggbb, which phones accept as theme-color
     document.body.style.setProperty('--waves-sky', wavesCtx.fillStyle);
+    document.body.style.setProperty('--waves-mid', wavesPal.mid);
     syncEdges();
     sizeWaves();
-    if (stillMotion.matches || document.hidden) drawWaves(8000);
-    else wavesFrame = requestAnimationFrame(loopWaves);
+    drawWaves(wavesTime());  // paint straight away so there is never a blank frame
+    if (!stillMotion.matches && !document.hidden) wavesFrame = requestAnimationFrame(loopWaves);
   }
   wavesBtn.addEventListener('click', () => {
     wavesOn = !wavesOn;
@@ -5266,7 +5285,8 @@
     toast(wavesOn ? '〰 Animated background' : '🖼️ Still background');
   });
   // Redraw to fit when the window changes size or a phone turns sideways.
-  const refitWaves = () => { if (wavesOn) applyWaves(); };
+  // Only a real size change needs a redraw, and it is repainted at once.
+  const refitWaves = () => { if (wavesOn && sizeWaves()) drawWaves(wavesTime()); };
   window.addEventListener('resize', refitWaves);
   window.addEventListener('orientationchange', refitWaves);
   window.visualViewport?.addEventListener('resize', refitWaves);
@@ -5972,7 +5992,6 @@
           </div>
           <div>
             <div class="sp-sum"><span data-sum aria-live="polite"></span><span aria-hidden="true">=</span><span class="sp-answer" data-answer aria-label="Your answer"></span></div>
-            <div class="sp-dots" data-dots aria-hidden="true"></div>
             <div class="sp-say" data-say aria-live="polite"></div>
             <div class="sp-pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button data-n="${n}">${n}</button>`).join('')}<button data-back aria-label="Delete">⌫</button><button data-n="0">0</button><button data-pause aria-label="Pause">⏸️</button></div>
           </div>
@@ -6425,8 +6444,6 @@
     showSum() {
       const t = this.target;
       this.body.querySelector('[data-sum]').textContent = t ? t.sum.text : '…';
-      // Easy shows dots to count on: 2 + 3 is ●● + ●●●
-      this.body.querySelector('[data-dots]').textContent = t && this.level === 'easy' && '+−'.includes(t.sum.op) && t.sum.a <= 12 ? `${'●'.repeat(t.sum.a)}  ${t.sum.op}  ${'●'.repeat(t.sum.b)}` : '';
       this.showTyped();
     },
     showTyped(kind = '') {
