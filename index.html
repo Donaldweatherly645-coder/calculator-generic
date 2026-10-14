@@ -5216,12 +5216,17 @@
     sky.addColorStop(1, wavesPal.bottom);
     c.fillStyle = sky;
     c.fillRect(0, 0, wavesW, wavesH);
-    const step = Math.max(8, wavesW / 90);
+    // Points along each wave, counted by whole steps so the top and bottom edges line up
+    // exactly, starting one step off the left edge and ending one past the right. (Counting
+    // with x += step could stop just short of the left edge and cut the ribbon off at a slant.)
+    const n = Math.ceil(wavesW / Math.max(8, wavesW / 90));
+    const step = wavesW / n;
+    const xs = Array.from({ length: n + 3 }, (_, i) => (i - 1) * step);
     for (const rb of ribbons) {
       // The ribbon: a soft band between two waves.
       c.beginPath();
-      for (let x = 0; x <= wavesW + step; x += step) c.lineTo(x, waveY(rb, x, t, 0));
-      for (let x = wavesW + step; x >= 0; x -= step) {
+      for (const x of xs) c.lineTo(x, waveY(rb, x, t, 0));
+      for (const x of [...xs].reverse()) {
         const thick = rb.thick * wavesH * (0.6 + 0.4 * Math.sin(x / wavesW * 5 + t * 0.3));
         c.lineTo(x, waveY(rb, x, t, 0.35) + thick);
       }
@@ -5230,7 +5235,7 @@
       c.fill();
       // The glowing top edge: a wide faint line under a thin bright one.
       c.beginPath();
-      for (let x = 0; x <= wavesW + step; x += step) c.lineTo(x, waveY(rb, x, t, 0));
+      for (const x of xs) c.lineTo(x, waveY(rb, x, t, 0));
       c.strokeStyle = wavesPal.glow(rb.alpha * 1.6);
       c.lineWidth = 6;
       c.stroke();
