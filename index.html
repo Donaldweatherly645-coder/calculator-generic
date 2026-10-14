@@ -2500,6 +2500,11 @@
     gap: 10px;
     padding: 3px 12px 3px 4px;
   }
+  /* The skin picker must not shrink when pressed: on phones a tap near its edge would
+     then land outside it and do nothing. Only what is inside it shrinks. */
+  .toolbar .current:active { transform: none; }
+  .current > * { transition: transform 0.12s cubic-bezier(0.3, 1.6, 0.5, 1); }
+  .current:active > * { transform: scale(0.92); }
   .current-name {
     flex: 1;
     min-width: 0;
