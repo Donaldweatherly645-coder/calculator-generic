@@ -3478,7 +3478,6 @@
   .sp-answer { min-width: 76px; min-height: 46px; padding: 2px 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.12); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25); }
   .sp-answer.good { background: rgba(126, 231, 135, 0.35); }
   .sp-answer.bad { background: rgba(255, 155, 138, 0.35); }
-  .sp-dots { min-height: 22px; font-size: 18px; letter-spacing: 2px; color: #ffd75e; }
   .sp-say { min-height: 1.3em; font-size: 16px; font-weight: 700; color: #ffd75e; }
   .sp-reached { font-size: 16px; font-weight: 700; opacity: 0.7; }
   .sp-name { display: grid; justify-items: center; gap: 10px; margin: 10px 0 4px; font-size: 15px; font-weight: 700; }
@@ -6130,7 +6129,6 @@
           </div>
           <div>
             <div class="sp-sum"><span data-sum aria-live="polite"></span><span aria-hidden="true">=</span><span class="sp-answer" data-answer aria-label="Your answer"></span></div>
-            <div class="sp-dots" data-dots aria-hidden="true"></div>
             <div class="sp-say" data-say aria-live="polite"></div>
             <div class="sp-pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button data-n="${n}">${n}</button>`).join('')}<button data-back aria-label="Delete">⌫</button><button data-n="0">0</button><button data-pause aria-label="Pause">⏸️</button></div>
           </div>
@@ -6583,8 +6581,6 @@
     showSum() {
       const t = this.target;
       this.body.querySelector('[data-sum]').textContent = t ? t.sum.text : '…';
-      // Easy shows dots to count on: 2 + 3 is ●● + ●●●
-      this.body.querySelector('[data-dots]').textContent = t && this.level === 'easy' && '+−'.includes(t.sum.op) && t.sum.a <= 12 ? `${'●'.repeat(t.sum.a)}  ${t.sum.op}  ${'●'.repeat(t.sum.b)}` : '';
       this.showTyped();
     },
     showTyped(kind = '') {
