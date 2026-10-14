@@ -18,7 +18,7 @@ Click **▶ Play now** above. Nothing to install.
 - 🎨 Pick a skin from the menu at the top, or press `[` and `]` to flip through them. The 🎲 Shuffle button under the calculator picks one at random.
 - 🧰 The tools box under the calculator has Sound, Keys, Shuffle, Paint and Sky.
 - ⌨️ Type numbers on your keyboard or click the buttons.
-- 🎮 Open **Games** to play **Make 24** (use four numbers to make 24), **Speed Streak** (quick sums that get harder), **Race** or the **Daily number**. Your best scores are saved.
+- 🎮 Open **Games** to play **Make 24** (use four numbers to make 24) and **Space Sums** (zap space rocks with right answers). Your best scores are saved.
 - 🥚 Open **Egg hunt** to see every easter egg, with a hint for each. Found eggs turn gold.
 - 🖥️ On a big screen, Games sits on the left of the calculator and Egg hunt on the right. On a phone they stack underneath.
 - 📱 Put it on your phone: open the site, then tap **Share → Add to Home Screen** (iPhone) or **⋮ → Install app** (Android). It works offline too.
