@@ -6559,8 +6559,14 @@
   // climbs by wave, and use the same level ladder: Easy + −, Medium adds ×, Hard adds ÷.
   const SKY_LIVES = 3;
   const SKY_STAGE = 8;                                  // pipes in a stage
-  const SKY_TIME = { easy: 8, medium: 9, hard: 10 };   // seconds a pipe takes to reach the bird on stage 1
-  const SKY_DASH = 0.9;                                 // after a right answer the pipe reaches the bird in at most this many seconds
+  // A new pipe glides in quickly to the "ready line" (SKY_READY across the sky), then slows to the
+  // normal pace, so there's no waiting on empty sky. From the ready line it takes SKY_TIME seconds
+  // (÷ the stage's pace) to reach the bird. The speed always eases up and down, never jumps.
+  const SKY_TIME = { easy: 6, medium: 6.5, hard: 7.5 };  // seconds from the ready line to the bird on stage 1
+  const SKY_READY = 0.8;                                 // the ready line, as a share of the sky's width
+  const SKY_DASH = 0.9;                                  // after a right answer the pipe reaches the bird in about this many seconds
+  const SKY_GLIDE = 3;                                   // gliding in (and zooming on) is at least 3× the normal pace
+  const SKY_SMOOTH = 5;                                  // how quickly the speed eases to where it's going (bigger = snappier)
   const SKY_EASE = 0.7;                                 // the pipe after a bonk comes at 70% speed
   const SKY_LANES = [{ icon: '⬆️', name: 'over' }, { icon: '➡️', name: 'through' }, { icon: '⬇️', name: 'under' }];
   const SKY_KEY = 'calc-sky-';
@@ -6610,7 +6616,7 @@
       this.level = level;
       try { localStorage.setItem(SKY_KEY + 'level', level); } catch {}
       Object.assign(this, { time: SKY_TIME[level] * spTime('mix', level), score: 0, stage: 1, passed: 0, lives: SKY_LIVES, combo: 0,
-        pipes: [], bits: [], scroll: 0, ease: false, hurt: 0, nudge: 0, shake: 0, last: '', paused: false, over: false,
+        pipes: [], bits: [], scroll: 0, v: 0, ease: false, hurt: 0, nudge: 0, shake: 0, last: '', paused: false, over: false,
         banner: { text: 'STAGE 1', sub: 'Get ready!', t: 0 }, bird: { lane: 1, y: null, flap: 0 } });
       this.body.innerHTML = `
         <div class="sp-play sky-play">
@@ -6676,7 +6682,7 @@
     birdR() { return Math.max(10, Math.min(20, this.playH() * 0.065)); },
     pace() { return Math.min(SP_TOP_SPEED, spPace(this.stage)); },
     // How fast the pipes move: a new pipe takes this.time (÷ the stage's pace) to reach the bird
-    speed() { return (this.W + this.pipeW() - this.birdX()) / (this.time / this.pace()); },
+    speed() { return (this.W * SKY_READY - this.birdX()) / (this.time / this.pace()); },
     current() { return this.pipes.find(p => !p.done); },
     spawn() {
       let sum;
@@ -6689,8 +6695,13 @@
     },
     update(dt) {
       const cur = this.current(), bx = this.birdX(), r = this.birdR(), pw = this.pipeW();
-      let v = this.speed() * (cur && cur.slow ? SKY_EASE : 1);
-      if (cur && cur.solved) v = Math.max(v, (cur.x - bx) / SKY_DASH, v * 1.5);  // zoom to the next pipe
+      const normal = this.speed() * (cur && cur.slow ? SKY_EASE : 1);
+      let aim = normal;
+      if (cur && (cur.solved || cur.hit)) aim = Math.max(normal * SKY_GLIDE, (cur.x + pw / 2 + r - bx) / SKY_DASH);  // zoom on past the pipe
+      else if (cur && cur.x > this.W * SKY_READY) aim = normal * SKY_GLIDE;  // a new pipe glides in to the ready line
+      if (!this.v) this.v = aim;
+      this.v += (aim - this.v) * Math.min(1, dt * SKY_SMOOTH);  // ease, so the speed never jumps
+      const v = this.v;
       this.pipes.forEach(p => { p.x -= v * dt; });
       this.scroll += v * dt;
       // the bird glides to its lane
