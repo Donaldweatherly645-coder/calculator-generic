@@ -3400,18 +3400,8 @@
   .m24-op { padding: 10px 0; border-radius: 14px; background: rgba(255, 255, 255, 0.14); font-size: 24px; font-weight: 700; }
   .m24-op.picked { background: #ff9f0a !important; color: #1a1000 !important; }
 
-  /* Speed Streak */
-  .ss-bar { height: 8px; margin: 0 0 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
-  .ss-bar i { display: block; height: 100%; width: 100%; border-radius: inherit; background: #7ee787; }
-  .ss-bar i.low { background: #ff9b8a; }
+  /* Big sum text, also used by Space Sums */
   .ss-sum { font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .ss-answer { min-height: 46px; margin: 6px auto 10px; max-width: 160px; padding: 6px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .ss-answer.good { background: rgba(126, 231, 135, 0.3); }
-  .ss-answer.bad { background: rgba(255, 155, 138, 0.3); }
-  .ss-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .ss-pad button { padding: 12px 0; border-radius: 14px; background: rgba(255, 255, 255, 0.14); font-size: 22px; font-weight: 700; }
-  .ss-pad button:hover { background: rgba(255, 255, 255, 0.22); }
-  .ss-level { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); }
   /* Space Sums: a bigger game window, a space picture on top and a number pad below.
      Phones turned sideways put the picture and the pad side by side. */
   .game-card.sp-card { max-width: 520px; padding: 14px; }
@@ -3921,12 +3911,6 @@
       <button id="paintBtn" aria-expanded="false" title="Change this skin's colours"><span aria-hidden="true">🎨</span>Paint</button>
       <button id="wavesBtn" aria-pressed="false" aria-label="Sky: animated background" title="Background: still or animated"><span aria-hidden="true" id="wavesIcon">🖼️</span>Sky</button>
     </div>
-    <!-- Race and Daily are started from the Games list; these hidden buttons keep their switches. -->
-    <div hidden>
-      <button id="dailyBtn" tabindex="-1">Daily</button>
-      <button id="raceBtn" aria-pressed="false" tabindex="-1">Race</button>
-    </div>
-
     <section class="games" id="games" aria-label="Games">
       <button class="games-toggle" id="gamesToggle" aria-expanded="false" aria-controls="gamesPanel">
         <span aria-hidden="true">🎮</span>
@@ -4230,9 +4214,7 @@
     render();
     // Show the finished sum above the answer, e.g. "12 × 3 ="
     historyEl.textContent = `${withCommas(format(a))} ${SYMBOLS[op]} ${withCommas(format(b))} =`;
-    checkDaily(Number(state.current));
     sumEggs(state.current);
-    checkRace(Number(state.current));
   }
 
   // Eggs that fire only when = gives the number (not while typing).
@@ -5380,37 +5362,6 @@
     });
   });
 
-  // Race: make the target number as fast as you can. Best time is saved on this device.
-  const raceBtn = document.getElementById('raceBtn');
-  let race = null;
-  let raceBest = null;
-  try { raceBest = JSON.parse(localStorage.getItem('calc-race')); } catch {}
-  raceBtn.addEventListener('click', () => {
-    if (race) {
-      race = null;
-      raceBtn.setAttribute('aria-pressed', false);
-      toast('Race off');
-      refreshGames();
-      return;
-    }
-    race = { target: 10 + Math.floor(Math.random() * 90), start: Date.now() };
-    raceBtn.setAttribute('aria-pressed', true);
-    toast(`🏁 Make ${race.target} on the screen. Go!`);
-    refreshGames();
-  });
-  function checkRace(value) {
-    if (!race || value !== race.target) return;
-    const secs = (Date.now() - race.start) / 1000;
-    if (raceBest === null || secs < raceBest) {
-      raceBest = secs;
-      try { localStorage.setItem('calc-race', JSON.stringify(raceBest)); } catch {}
-    }
-    toast(`🏁 Done in ${secs.toFixed(1)}s. Best: ${raceBest.toFixed(1)}s`);
-    race = null;
-    raceBtn.setAttribute('aria-pressed', false);
-    refreshGames();
-  }
-
   // Sticker book: show the egg hunt as stickers.
   const stickerBtn = document.getElementById('stickerBtn');
   let stickers = false;
@@ -5426,41 +5377,6 @@
     applyStickers();
   });
   applyStickers();
-
-  // Daily number: one target per day. Reach it on the screen with a sum, then press =.
-  let daily = {};
-  try { daily = JSON.parse(localStorage.getItem('calc-daily')) || {}; } catch {}
-  function saveDaily() {
-    try { localStorage.setItem('calc-daily', JSON.stringify(daily)); }
-    catch { toast('⚠️ Could not save on this device'); }
-  }
-  function dayKey(offset = 0) {
-    const d = new Date();
-    d.setDate(d.getDate() - offset);  // calendar maths, so daylight saving can't shift the day
-    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-  }
-  function dailyTarget(key) {
-    let h = 0;
-    for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-    return 10 + (h % 90);  // a number from 10 to 99
-  }
-  function dailyInfo() {
-    const today = dayKey();
-    const streak = daily.last === today || daily.last === dayKey(1) ? daily.streak || 0 : 0;
-    if (daily.last === today) return `✅ Done today! Streak: ${streak} day${streak === 1 ? '' : 's'}`;
-    return `📅 Today's number is ${dailyTarget(today)}. Reach it with a sum, then press =. Streak: ${streak}`;
-  }
-  function checkDaily(value) {
-    const today = dayKey();
-    // Another tab may have solved a puzzle since this one loaded, so read the latest record first.
-    try { const stored = JSON.parse(localStorage.getItem('calc-daily')); if (stored && stored.last) daily = stored; } catch {}
-    if (daily.last === today || value !== dailyTarget(today)) return;
-    daily.streak = daily.last === dayKey(1) ? (daily.streak || 0) + 1 : 1;
-    daily.last = today;
-    saveDaily();
-    toast(`🎉 Daily solved! Streak: ${daily.streak} day${daily.streak === 1 ? '' : 's'}`);
-  }
-  document.getElementById('dailyBtn').addEventListener('click', () => toast(dailyInfo()));
 
   // ---------- Games menu ----------
   // To add a game: add a row to GAMES. A game that opens in the game window has
@@ -5639,133 +5555,7 @@
     },
   };
 
-  // Speed Streak: quick sums that get harder every 5 right answers. One miss ends the run.
-  const SS_LEVELS = ['Warm up', 'Easy', 'Medium', 'Hard', 'Super hard'];
-  const SS_TIME = [10, 10, 9, 9, 8];  // seconds for each sum, per level
   function rnd(lo, hi) { return lo + Math.floor(Math.random() * (hi - lo + 1)); }
-  function speedSum(level) {
-    let a, b, op;
-    if (level === 0) { a = rnd(1, 5); b = rnd(1, 5); op = '+'; }
-    else if (level === 1) { op = Math.random() < 0.5 ? '+' : '−'; a = rnd(2, 12); b = rnd(1, 9); }
-    else if (level === 2) {
-      op = ['+', '−', '×'][rnd(0, 2)];
-      if (op === '×') { a = rnd(2, 5); b = rnd(2, 10); } else { a = rnd(10, 50); b = rnd(5, 30); }
-    } else {
-      const top = level === 3 ? 10 : 12;
-      op = ['+', '−', '×', '÷'][rnd(0, 3)];
-      if (op === '+' || op === '−') { a = rnd(15, level === 3 ? 60 : 99); b = rnd(8, level === 3 ? 40 : 99); }
-      else { a = rnd(2, top); b = rnd(2, top); }
-      if (op === '÷') a = a * b;
-    }
-    if (op === '−' && b > a) [a, b] = [b, a];
-    const ans = op === '+' ? a + b : op === '−' ? a - b : op === '×' ? a * b : a / b;
-    return { text: `${a} ${op} ${b}`, ans: String(ans) };
-  }
-
-  const speedStreak = {
-    open(body) {
-      this.body = body;
-      this.best = loadNum('calc-streak');
-      this.home();
-    },
-    home(note = '') {
-      this.stop();
-      this.body.innerHTML = `
-        ${note}
-        <p class="game-how">Answer each sum before the bar runs out. Every 5 right answers, the sums get harder. One miss and the run ends.</p>
-        <div class="game-stats"><span>Best streak: ${this.best}</span></div>
-        <div class="game-row"><button class="game-btn big" data-go>${note ? 'Play again' : 'Start'}</button></div>`;
-      const go = this.body.querySelector('[data-go]');
-      go.addEventListener('click', () => this.go());
-      go.focus();
-    },
-    go() {
-      this.run = (this.run || 0) + 1;  // delayed steps from an older run check this and stop
-      this.streak = 0;
-      this.body.innerHTML = `
-        <div class="game-stats"><span>Streak: <span data-streak>0</span></span><span>Best: ${this.best}</span></div>
-        <div class="ss-level" data-level></div>
-        <div class="ss-bar" aria-hidden="true"><i data-bar></i></div>
-        <div class="ss-sum" data-sum aria-live="polite"></div>
-        <div class="ss-answer" data-answer aria-label="Your answer"></div>
-        <div class="ss-pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button data-n="${n}">${n}</button>`).join('')}<button data-back aria-label="Delete">⌫</button><button data-n="0">0</button><button data-skip aria-label="Give up">🏳️</button></div>`;
-      this.body.querySelectorAll('[data-n]').forEach(b => b.addEventListener('click', () => this.type(b.dataset.n)));
-      this.body.querySelector('[data-back]').addEventListener('click', () => this.back());
-      this.body.querySelector('[data-skip]').addEventListener('click', () => this.end('You gave up on that one.'));
-      this.next();
-    },
-    next() {
-      const level = Math.min(SS_LEVELS.length - 1, Math.floor(this.streak / 5));
-      this.q = speedSum(level);
-      this.typed = '';
-      this.limit = SS_TIME[level] * 1000;
-      this.t0 = performance.now();
-      this.body.querySelector('[data-streak]').textContent = this.streak;
-      this.body.querySelector('[data-level]').textContent = `Level ${level + 1}: ${SS_LEVELS[level]}`;
-      this.body.querySelector('[data-sum]').textContent = `${this.q.text} = ?`;
-      this.showTyped();
-      cancelAnimationFrame(this.raf);
-      const tick = now => {
-        const left = 1 - (now - this.t0) / this.limit;
-        const bar = this.body.querySelector('[data-bar]');
-        if (!bar) return;
-        bar.style.width = Math.max(0, left * 100) + '%';
-        bar.classList.toggle('low', left < 0.3);
-        if (left <= 0) this.end("Time's up!");
-        else this.raf = requestAnimationFrame(tick);
-      };
-      this.raf = requestAnimationFrame(tick);
-    },
-    showTyped(kind = '') {
-      const el = this.body.querySelector('[data-answer]');
-      el.textContent = this.typed;
-      el.className = 'ss-answer' + (kind ? ' ' + kind : '');
-    },
-    type(d) {
-      if (!this.q || this.typed.length >= 4) return;
-      if (performance.now() - this.t0 >= this.limit) { this.end("Time's up!"); return; }
-      this.typed += d;
-      if (this.typed === this.q.ans) {
-        this.streak++;
-        this.showTyped('good');
-        this.q = null;
-        cancelAnimationFrame(this.raf);
-        const run = this.run;
-        setTimeout(() => { if (run === this.run && currentGame === this) this.next(); }, 250);
-      } else if (this.typed.length >= this.q.ans.length) {
-        this.showTyped('bad');
-        this.end(`Not quite. ${this.q.text} = ${this.q.ans}`);
-      } else this.showTyped();
-    },
-    back() {
-      if (!this.q) return;
-      this.typed = this.typed.slice(0, -1);
-      this.showTyped();
-    },
-    end(why) {
-      const q = this.q;
-      this.q = null;
-      cancelAnimationFrame(this.raf);
-      this.best = Math.max(this.best, loadNum('calc-streak'));  // another tab may have beaten it
-      const newBest = this.streak > this.best;
-      if (newBest) { this.best = this.streak; saveNum('calc-streak', this.best); playTune([523, 659, 784, 1047], 'triangle'); }
-      const answer = why.startsWith('Not') || !q ? '' : ` ${q.text} = ${q.ans}`;
-      const run = this.run;
-      setTimeout(() => {
-        if (run !== this.run || currentGame !== this) return;
-        this.home(`<div class="game-msg bad">${why}${answer}</div>
-          <div class="ss-sum">Streak: ${this.streak}</div>
-          ${newBest && this.streak ? '<div class="game-msg good">🏆 New best!</div>' : ''}`);
-      }, 600);
-    },
-    stop() { cancelAnimationFrame(this.raf); this.q = null; this.run = (this.run || 0) + 1; },
-    key(e) {
-      if (e.key >= '0' && e.key <= '9') this.type(e.key);
-      else if (e.key === 'Backspace') this.back();
-      else return false;
-      return true;
-    },
-  };
 
   // Space Sums: friendly space rocks float down towards your ship. Answer the sum on the
   // rock with the yellow ring and the ship zaps it. Made for young players: slow rocks,
@@ -6737,15 +6527,8 @@
   const GAMES = [
     { id: 'make24', icon: '🃏', name: 'Make 24', blurb: 'Use four numbers to make 24.',
       score: () => { const n = loadNum('calc-24'); return n ? `${n} solved` : ''; }, game: make24 },
-    { id: 'streak', icon: '⚡', name: 'Speed Streak', blurb: 'Quick sums that get harder.',
-      score: () => { const n = loadNum('calc-streak'); return n ? `Best ${n}` : ''; }, game: speedStreak },
     { id: 'space', icon: '🚀', name: 'Space Sums', blurb: 'Zap space rocks with right answers.',
       score: () => { const n = Math.max(...Object.keys(SP_LEVELS).flatMap(l => spModesFor(l).map(m => loadNum(`${SP_KEY}${m}-${l}`)))); return n ? `Best ${n}` : ''; }, game: spaceSums },
-    { id: 'race', icon: '🏁', name: 'Race', blurb: 'Make a number on the calculator, fast.',
-      score: () => race ? 'Running · tap to stop' : (raceBest ? `Best ${raceBest.toFixed(1)}s` : ''),
-      play: () => raceBtn.click() },
-    { id: 'daily', icon: '📅', name: 'Daily number', blurb: 'A new number to reach every day.',
-      play: () => document.getElementById('dailyBtn').click() },
   ];
 
   function drawGameList() {
@@ -6760,8 +6543,6 @@
     if (g.game) openGame(g);
     else { g.play(); setGamesOpen(false); gamesToggle.focus(); }
   });
-  // Keep the Race row ("Running" or best time) up to date while the list is showing.
-  function refreshGames() { if (!gamesPanel.hidden) drawGameList(); }
   function setGamesOpen(open) {
     gamesPanel.hidden = !open;
     gamesToggle.setAttribute('aria-expanded', open);
@@ -6773,7 +6554,6 @@
   function openGame(g) {
     currentGame = g.game;
     document.querySelector('.wrap').inert = true;  // the calculator can't be tabbed to or pressed
-    if (race) race.pausedAt = Date.now();         // a running Race waits while you play
     document.getElementById('gameTitle').textContent = `${g.icon} ${g.name}`;
     gameEl.hidden = false;
     g.game.open(gameBody);
@@ -6785,7 +6565,6 @@
     currentGame = null;
     gameEl.hidden = true;
     document.querySelector('.wrap').inert = false;
-    if (race && race.pausedAt) { race.start += Date.now() - race.pausedAt; delete race.pausedAt; }
     gameBody.innerHTML = '';
     drawGameList();
     gamesToggle.focus();
