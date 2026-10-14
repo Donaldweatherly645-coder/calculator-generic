@@ -6559,8 +6559,23 @@
   // climbs by wave, and use the same level ladder: Easy + −, Medium adds ×, Hard adds ÷.
   const SKY_LIVES = 3;
   const SKY_STAGE = 8;                                  // pipes in a stage
-  const SKY_TIME = { easy: 8, medium: 9, hard: 10 };   // seconds a pipe takes to reach the bird on stage 1
-  const SKY_DASH = 0.9;                                 // after a right answer the pipe reaches the bird in at most this many seconds
+  // A new pipe glides in quickly to the "ready line" (SKY_READY across the sky), then slows to the
+  // normal pace, so there's no waiting on empty sky. From the ready line it takes SKY_TIME seconds
+  // (÷ the stage's pace) to reach the bird. The speed always eases up and down, never jumps.
+  const SKY_TIME = { easy: 5, medium: 5.5, hard: 6.5 };  // seconds from the ready line to the bird on stage 1
+  const SKY_READY = 0.8;                                 // the ready line, as a share of the sky's width
+  const SKY_DASH = 0.9;                                  // after a right answer the pipe reaches the bird in about this many seconds
+  const SKY_GLIDE = 3;                                   // gliding in (and zooming on) is at least 3× the normal pace
+  const SKY_SMOOTH = 5;                                  // how quickly the speed eases to where it's going (bigger = snappier)
+  // Too quick for the gap: a right answer before the pipe is SKY_LATE (3/4) of the way from the
+  // ready line to the bird earns one extra sum on the same pipe (only one, and only if there are
+  // still SKY_EXTRA_MIN seconds left at the normal pace). From 3/4 on, a right answer lets you through.
+  // How you get through sets the next pipes' sums, inside your level (like Space Sums' "hot"):
+  // solving the extra sum with no wrong picks makes them harder (+1, up to SP_HOT_MAX, which also
+  // means the bigger of 2 sums); a bonk, a wrong pick or a last-moment answer makes them easier (−1).
+  const SKY_LATE = 0.75;
+  const SKY_EXTRA_MIN = 2;
+  const SKY_CLOSE = 0.9;                                 // an answer this far along counts as last-moment
   const SKY_EASE = 0.7;                                 // the pipe after a bonk comes at 70% speed
   const SKY_LANES = [{ icon: '⬆️', name: 'over' }, { icon: '➡️', name: 'through' }, { icon: '⬇️', name: 'under' }];
   const SKY_KEY = 'calc-sky-';
@@ -6595,7 +6610,7 @@
       }
       this.body.innerHTML = `
         ${note}
-        <p class="game-how">Help the little bird fly past the pipes! Each pipe has 3 ways past: ⬆️ over, ➡️ through or ⬇️ under. Pick the way with the right answer to the sum, and the bird flies that way. You have 3 lives ❤️. Every ${SKY_STAGE} pipes the bird goes faster and the sums get bigger. 🐤</p>
+        <p class="game-how">Help the little bird fly past the pipes! Each pipe has 3 ways past: ⬆️ over, ➡️ through or ⬇️ under. Pick the way with the right answer to the sum, and the bird flies that way. Answer while the pipe is still far away and you get one more sum first! You have 3 lives ❤️. Fast flying makes the sums harder 🔥. Every ${SKY_STAGE} pipes the bird goes faster and the sums get bigger. 🐤</p>
         <div class="sp-step">Pick a level to start</div>
         <div class="sp-levels">${Object.entries(SP_LEVELS).map(([id, l]) => {
           const best = this.best(id);
@@ -6609,8 +6624,8 @@
       this.halt();
       this.level = level;
       try { localStorage.setItem(SKY_KEY + 'level', level); } catch {}
-      Object.assign(this, { time: SKY_TIME[level] * spTime('mix', level), score: 0, stage: 1, passed: 0, lives: SKY_LIVES, combo: 0,
-        pipes: [], bits: [], scroll: 0, ease: false, hurt: 0, nudge: 0, shake: 0, last: '', paused: false, over: false,
+      Object.assign(this, { time: SKY_TIME[level] * spTime('mix', level), score: 0, stage: 1, passed: 0, lives: SKY_LIVES, combo: 0, hot: 0,
+        pipes: [], bits: [], scroll: 0, v: 0, ease: false, hurt: 0, nudge: 0, shake: 0, last: '', paused: false, over: false,
         banner: { text: 'STAGE 1', sub: 'Get ready!', t: 0 }, bird: { lane: 1, y: null, flap: 0 } });
       this.body.innerHTML = `
         <div class="sp-play sky-play">
@@ -6676,21 +6691,47 @@
     birdR() { return Math.max(10, Math.min(20, this.playH() * 0.065)); },
     pace() { return Math.min(SP_TOP_SPEED, spPace(this.stage)); },
     // How fast the pipes move: a new pipe takes this.time (÷ the stage's pace) to reach the bird
-    speed() { return (this.W + this.pipeW() - this.birdX()) / (this.time / this.pace()); },
+    speed() { return (this.W * SKY_READY - this.meetX()) / (this.time / this.pace()); },
+    // Where a pipe's centre is when its front edge reaches the bird
+    meetX() { return this.birdX() + this.birdR() * 0.8 + this.pipeW() / 2; },
     current() { return this.pipes.find(p => !p.done); },
-    spawn() {
+    // How far a pipe has come from the ready line to the bird: 0 at the line, 1 at the bird (below 0 while gliding in)
+    progress(p) { const from = this.W * SKY_READY; return (from - p.x) / (from - this.meetX()); },
+    // Seconds before a pipe reaches the bird at the normal pace
+    timeLeft(p) { return (p.x - this.meetX()) / this.speed(); },
+    // A sum as hard as the stage and the player's run say: fast players get a later stage's sums
+    newSum() {
+      const w = this.stage + this.hot;
+      const harder = this.hot >= SP_HOT_MAX || (this.hot > 0 && w > SP_TOP_WAVE);  // sums stop growing after SP_TOP_WAVE
       let sum;
-      do sum = spaceSum('mix', this.level, this.stage); while (sum.text === this.last);
+      do sum = harder ? spBigger('mix', this.level, w) : spaceSum('mix', this.level, w); while (sum.text === this.last);
       this.last = sum.text;
-      const nums = skyChoices(sum.ans);
-      this.pipes.push({ x: this.W + this.pipeW() / 2, sum, nums, right: nums.indexOf(sum.ans), shut: [false, false, false], misses: 0, solved: false, hit: false, done: false, slow: this.ease });
+      return sum;
+    },
+    // Put a new sum (and its 3 numbers) on a pipe
+    ask(p) {
+      p.sum = this.newSum();
+      p.nums = skyChoices(p.sum.ans);
+      p.right = p.nums.indexOf(p.sum.ans);
+      p.shut = [false, false, false];
+      p.misses = 0;
+    },
+    spawn() {
+      const p = { x: this.W + this.pipeW() / 2, solved: false, hit: false, done: false, extra: false, wrong: false, close: false, slow: this.ease };
+      this.ask(p);
+      this.pipes.push(p);
       this.ease = false;
       this.showSum();
     },
     update(dt) {
       const cur = this.current(), bx = this.birdX(), r = this.birdR(), pw = this.pipeW();
-      let v = this.speed() * (cur && cur.slow ? SKY_EASE : 1);
-      if (cur && cur.solved) v = Math.max(v, (cur.x - bx) / SKY_DASH, v * 1.5);  // zoom to the next pipe
+      const normal = this.speed() * (cur && cur.slow ? SKY_EASE : 1);
+      let aim = normal;
+      if (cur && (cur.solved || cur.hit)) aim = Math.max(normal * SKY_GLIDE, (cur.x + pw / 2 + r - bx) / SKY_DASH);  // zoom on past the pipe
+      else if (cur && cur.x > this.W * SKY_READY) aim = normal * SKY_GLIDE;  // a new pipe glides in to the ready line
+      if (!this.v) this.v = aim;
+      this.v += (aim - this.v) * Math.min(1, dt * SKY_SMOOTH);  // ease, so the speed never jumps
+      const v = this.v;
       this.pipes.forEach(p => { p.x -= v * dt; });
       this.scroll += v * dt;
       // the bird glides to its lane
@@ -6702,11 +6743,13 @@
       this.hurt = Math.max(0, this.hurt - dt);
       this.shake = Math.max(0, this.shake - dt);
       if (this.banner) { this.banner.t += dt; if (this.banner.t > 2) this.banner = null; }
-      if (cur && !cur.solved && !cur.hit && cur.x - pw / 2 <= bx + r * 0.8) this.bonk(cur);
+      if (cur && !cur.solved && !cur.hit && cur.x <= this.meetX()) this.bonk(cur);
       if (this.over) return;
       if (cur && cur.x + pw / 2 < bx - r) {  // past the bird: on to the next pipe
         cur.done = true;
         this.passed++;
+        if (cur.extra && cur.solved && !cur.wrong) this.hot = Math.min(SP_HOT_MAX, this.hot + 1);
+        else if (cur.hit || cur.wrong || cur.close) this.hot = Math.max(0, this.hot - 1);
         if (this.passed % SKY_STAGE === 0) {
           this.stage++;
           this.banner = { text: `STAGE ${this.stage}`, sub: 'Faster! 🐤', t: 0 };
@@ -6723,16 +6766,28 @@
       const p = this.current();
       if (!p || this.paused || this.over || p.solved || p.hit || p.shut[lane]) return;
       if (lane === p.right) {
-        p.solved = true;
-        this.bird.lane = lane;
         this.combo++;
         this.score += SP_POINTS * spMult(this.combo);
+        const lift = this.combo % SP_COMBO_STEP === 0 && spMult(this.combo) > spMult(this.combo - 1);
+        const prog = this.progress(p);
+        if (!p.extra && prog < SKY_LATE && this.timeLeft(p) >= SKY_EXTRA_MIN) {  // too quick: one more sum on this pipe
+          p.extra = true;
+          this.ask(p);
+          spTone(988, 'sine', 0.07, 0.05); spTone(1319, 'sine', 0.09, 0.04, 0.06);
+          this.say(lift ? `🔥 Combo ×${spMult(this.combo)}! One more!` : 'Speedy! One more sum 🌟');
+          this.drawHud();
+          this.showSum();
+          return;
+        }
+        p.solved = true;
+        p.close = prog >= SKY_CLOSE;
+        this.bird.lane = lane;
         playNoise(0.06, 'bandpass', 2400, 0.12); spTone(880, 'sine', 0.06, 0.05); spTone(1175, 'sine', 0.08, 0.04, 0.05);
         this.puff(this.birdX(), this.bird.y ?? this.laneY(1), ['#ffd75e', '#ffffff', '#7ee787'], 10);
-        const lift = this.combo % SP_COMBO_STEP === 0 && spMult(this.combo) > spMult(this.combo - 1);
         this.say(lift ? `🔥 Combo ×${spMult(this.combo)}!` : SKY_CHEERS[rnd(0, SKY_CHEERS.length - 1)]);
         this.drawHud();
       } else {
+        p.wrong = true;
         p.shut[lane] = true;
         p.misses++;
         this.combo = 0;
@@ -6779,7 +6834,7 @@
     drawHud() {
       const $ = s => this.body.querySelector(s);
       $('[data-score]').textContent = this.score;
-      $('[data-stage]').textContent = `Stage ${this.stage}`;
+      $('[data-stage]').textContent = `Stage ${this.stage}${this.hot ? ' ' + '🔥'.repeat(this.hot) : ''}`;  // 🔥 = sums made harder by your fast run
       const lives = Math.max(0, this.lives), el = $('[data-lives]');
       el.textContent = '❤️'.repeat(lives) + '🤍'.repeat(SKY_LIVES - lives);
       el.setAttribute('aria-label', `${lives} ${lives === 1 ? 'life' : 'lives'} left`);
